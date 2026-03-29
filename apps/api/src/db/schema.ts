@@ -1,5 +1,6 @@
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core"
+import { pgTable, text, timestamp, boolean, index, integer } from "drizzle-orm/pg-core"
 
+// User table (Better Auth)
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
   email: text("email").notNull().unique(),
@@ -54,3 +55,25 @@ export const verification = pgTable("verification", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [index("verification_identifier_idx").on(table.identifier)])
+
+// Designs table
+export const design = pgTable("design", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  description: text("description"),
+  category: text("category").notNull(),
+  content: text("content").notNull(), // The skill/prompt content
+  demoUrl: text("demo_url"),
+  thumbnailUrl: text("thumbnail_url"),
+  isPublic: boolean("is_public").notNull().default(true),
+  viewCount: integer("view_count").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("design_userId_idx").on(table.userId),
+  index("design_category_idx").on(table.category),
+  index("design_public_idx").on(table.isPublic),
+])

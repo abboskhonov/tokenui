@@ -101,6 +101,9 @@ export const auth = betterAuth({
       secure: false, // Set to true in production with HTTPS
       path: "/",
     },
+    crossSubDomainCookies: {
+      enabled: true,
+    },
   },
 })
 
