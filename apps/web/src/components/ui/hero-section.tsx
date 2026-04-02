@@ -278,7 +278,7 @@ export function HeroSection() {
               {/* Headline */}
               <TimelineContent animationNum={1}>
                 <h1 className="text-6xl sm:text-7xl md:text-8xl font-semibold text-center tracking-tighter">
-                  TasteUI
+                  TokenUI
                 </h1>
                 <p className="text-sm font-mono tracking-[0.3em] uppercase text-muted-foreground mt-4 text-center">
                   Design components for AI agents
