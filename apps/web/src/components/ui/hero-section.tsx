@@ -51,11 +51,11 @@ function TimelineContent({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+      initial={{ opacity: 0, y: 15, filter: "blur(8px)" }}
       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
       transition={{
-        delay: animationNum * 0.15,
-        duration: 0.5,
+        delay: animationNum * 0.08,
+        duration: 0.35,
       }}
       className={cn(className)}
     >
