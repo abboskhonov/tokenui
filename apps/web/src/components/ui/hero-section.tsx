@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
-import { Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProgressiveBlur } from "@/components/ui/progressive-blur";
 import { motion } from "framer-motion";
@@ -26,6 +25,8 @@ import {
   Logout01Icon,
   Settings01Icon,
   UserIcon,
+  Sun01Icon,
+  Moon01Icon,
 } from "@hugeicons/core-free-icons";
 
 function TimelineContent({
@@ -69,11 +70,10 @@ function ThemeToggle() {
       className="h-8 w-8"
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
     >
-      {theme === "dark" ? (
-        <Sun className="size-4" />
-      ) : (
-        <Moon className="size-4" />
-      )}
+      <HugeiconsIcon
+        icon={theme === "dark" ? Sun01Icon : Moon01Icon}
+        className="size-4"
+      />
       <span className="sr-only">Toggle theme</span>
     </Button>
   )
