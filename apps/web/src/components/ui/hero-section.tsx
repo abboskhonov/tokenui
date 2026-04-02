@@ -277,11 +277,28 @@ export function HeroSection() {
             <div className="max-w-3xl mx-auto">
               {/* Headline */}
               <TimelineContent animationNum={1}>
-                <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-center mb-6 leading-[1.1] tracking-tight">
-                  UI components,
-                  <br />
-                  <span className="text-muted-foreground">instantly installed</span>
-                </h1>
+                <div className="relative inline-block">
+                  {/* Shadow layers */}
+                  <span 
+                    className='absolute top-[2px] left-[2px] font-["Press_Start_2P",monospace] text-4xl sm:text-5xl md:text-6xl text-muted-foreground/20 select-none'
+                    aria-hidden="true"
+                  >
+                    TASTEUI
+                  </span>
+                  <span 
+                    className='absolute top-[4px] left-[4px] font-["Press_Start_2P",monospace] text-4xl sm:text-5xl md:text-6xl text-muted-foreground/10 select-none'
+                    aria-hidden="true"
+                  >
+                    TASTEUI
+                  </span>
+                  {/* Main title */}
+                  <h1 className='relative font-["Press_Start_2P",monospace] text-4xl sm:text-5xl md:text-6xl font-normal text-center leading-[1.5] tracking-tight'>
+                    TASTEUI
+                  </h1>
+                </div>
+                <p className="text-sm font-mono tracking-[0.2em] uppercase text-muted-foreground mt-4 text-center">
+                  Design Components for AI
+                </p>
               </TimelineContent>
 
               {/* Description */}
