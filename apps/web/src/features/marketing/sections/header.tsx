@@ -55,9 +55,7 @@ function UserMenu() {
 
   if (isPending) {
     return (
-      <Button variant="ghost" className="h-8 px-2" disabled>
-        <span className="text-xs text-muted-foreground">Loading...</span>
-      </Button>
+      <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
     )
   }
 

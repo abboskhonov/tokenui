@@ -48,6 +48,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     if (user) {
       setFormData({
         name: user.name || "",
+        username: user.username || "",
         bio: user.bio || "",
         website: user.website || "",
         github: user.github || "",
@@ -104,7 +105,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   }
 
   const userName = formData.name || "User"
-  const userHandle = user?.email?.split("@")[0] || "username"
+  const userHandle = formData.username || user?.username || user?.email?.split("@")[0] || "username"
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -200,6 +201,27 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                     onChange={(e) => handleChange("name", e.target.value)}
                     placeholder="Your name"
                   />
+                </div>
+
+                {/* Username */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Username
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                      @
+                    </span>
+                    <Input
+                      value={formData.username || ""}
+                      onChange={(e) => handleChange("username", e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))}
+                      placeholder="username"
+                      className="pl-7"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Your public URL: tokenui.dev/@{formData.username || "username"}
+                  </p>
                 </div>
 
                 <Separator />

@@ -42,29 +42,26 @@ interface DesignCardProps {
 
 function DesignCard({ design }: DesignCardProps) {
   return (
-    <Link to="/$username/$designSlug" params={{ 
+    <Link to="/s/$username/$designSlug" params={{ 
       username: design.author?.username || "unknown", 
       designSlug: design.slug 
     }}>
       <article className="group relative cursor-pointer">
         {/* Thumbnail Container */}
-        <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-muted ring-1 ring-border/50 transition-all duration-500 ease-out group-hover:scale-[1.02] group-hover:shadow-2xl group-hover:shadow-foreground/5 group-hover:ring-border">
+        <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-muted ring-1 ring-border/50 transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:shadow-lg group-hover:shadow-foreground/5 group-hover:ring-border/80">
           {design.thumbnailUrl ? (
             <img 
               src={design.thumbnailUrl} 
               alt={design.name}
-              className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              className="h-full w-full object-cover"
             />
           ) : (
             <SkillCard variant="pattern" />
           )}
-          
-          {/* Subtle vignette overlay on hover */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
         </div>
         
         {/* Metadata - appears below card on hover */}
-        <div className="absolute -bottom-10 left-0 right-0 flex items-center justify-between px-1 pt-3 opacity-0 transition-all duration-500 ease-out group-hover:opacity-100 group-hover:-translate-y-1">
+        <div className="absolute -bottom-10 left-0 right-0 flex items-center justify-between px-1 pt-3 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100">
           <div className="flex items-center gap-2">
             <div className="relative h-5 w-5">
               {design.author?.image ? (

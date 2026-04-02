@@ -21,7 +21,7 @@ import { useState, useCallback } from "react"
 import { cn } from "@/lib/utils"
 
 // Route parameter validation
-export const Route = createFileRoute("/$username/$designSlug")({
+export const Route = createFileRoute("/s/$username/$designSlug")({
   component: SkillDetailPage,
   head: ({ params }) => ({
     meta: [
@@ -160,7 +160,6 @@ function SkillDetailPage() {
           </div>
         </div>
       </header>
-
       {/* Main Content */}
       <div className="flex">
         {/* Left Sidebar */}
@@ -210,48 +209,6 @@ function SkillDetailPage() {
                     className={cn("size-3.5", isCopied === "install" && "text-green-500")}
                   />
                 </div>
-              </div>
-            </div>
-
-            {/* How to use / Code */}
-            <div className="space-y-3">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Usage
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="gap-2 text-xs h-8"
-                  onClick={handleCopyPrompt}
-                >
-                  <HugeiconsIcon 
-                    icon={isCopied === "prompt" ? Tick02Icon : Copy01Icon} 
-                    className={cn("size-3.5", isCopied === "prompt" && "text-green-500")}
-                  />
-                  Copy prompt
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="gap-2 text-xs h-8"
-                  onClick={handleCopyCode}
-                >
-                  <HugeiconsIcon 
-                    icon={isCopied === "code" ? Tick02Icon : File01Icon} 
-                    className={cn("size-3.5", isCopied === "code" && "text-green-500")}
-                  />
-                  Copy code
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="gap-2 text-xs h-8"
-                  onClick={() => setActiveTab("code")}
-                >
-                  <HugeiconsIcon icon={CodeIcon} className="size-3.5" />
-                  View code
-                </Button>
               </div>
             </div>
 
@@ -398,7 +355,7 @@ function SkillDetailPage() {
             </div>
           ) : (
             /* Code View */
-            <div className="h-full flex flex-col">
+            (<div className="h-full flex flex-col">
               <div className="h-12 border-b border-border flex items-center justify-between px-4 bg-background/50">
                 <div className="flex items-center gap-2">
                   <Button 
@@ -431,7 +388,7 @@ function SkillDetailPage() {
                   </pre>
                 </div>
               </div>
-            </div>
+            </div>)
           )}
         </main>
       </div>

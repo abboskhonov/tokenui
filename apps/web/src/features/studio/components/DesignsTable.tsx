@@ -17,17 +17,31 @@ export function DesignsTable({
   onDelete,
 }: DesignsTableProps) {
   return (
-    <div className="rounded-xl bg-card/50 ring-1 ring-border">
+    <div className="rounded-xl bg-card/50 ring-1 ring-border overflow-hidden">
       <table className="w-full">
         <thead>
-          <tr className="border-b border-border text-left text-sm text-muted-foreground">
-            <th className="py-3 font-medium">Component</th>
-            <th className="py-3 font-medium">Status</th>
-            <th className="py-3 font-medium">Visibility</th>
-            <th className="py-3 font-medium">Created</th>
-            <th className="py-3 font-medium">Views</th>
-            <th className="py-3 font-medium">Likes</th>
-            <th className="py-3 font-medium"></th>
+          <tr className="border-b border-border bg-muted/30">
+            <th className="py-3 px-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Component
+            </th>
+            <th className="py-3 px-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider w-[100px]">
+              Status
+            </th>
+            <th className="py-3 px-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider w-[100px]">
+              Visibility
+            </th>
+            <th className="py-3 px-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider w-[120px]">
+              Created
+            </th>
+            <th className="py-3 px-4 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider w-[80px]">
+              Views
+            </th>
+            <th className="py-3 px-4 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider w-[80px]">
+              Copies
+            </th>
+            <th className="py-3 px-4 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider w-[60px]">
+              
+            </th>
           </tr>
         </thead>
         <tbody>

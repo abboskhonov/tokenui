@@ -160,19 +160,33 @@ export function PublishPage() {
     }
   }
 
-  const isPending = createDesign.isPending || updateDesign.isPending || isUploading || isLoadingDesign
+  const isPending = createDesign.isPending || updateDesign.isPending || isUploading
+  const isLoading = isLoadingDesign
   const error = uploadError || (Object.keys(errors).length > 0 ? errors : null) || createDesign.error || updateDesign.error
+
+  // Show loading state when editing and data is still loading
+  if (isEditing && isLoading) {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+        <p className="mt-4 text-sm text-muted-foreground">Loading design...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}
       <header className="h-14 border-b flex items-center justify-between px-4 shrink-0">
         <div className="flex items-center gap-4">
-          <a href={isEditing ? "/studio" : "/"}>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-            </Button>
-          </a>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8"
+            onClick={() => navigate({ to: isEditing ? "/studio" : "/" })}
+          >
+            <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+          </Button>
           <span className="text-sm font-medium text-muted-foreground">
             {isEditing ? "Edit Design" : "New Design"}
           </span>

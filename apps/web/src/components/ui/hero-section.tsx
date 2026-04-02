@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, memo } from "react";
+import { useState, useCallback, memo, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -40,13 +40,24 @@ interface FadeInProps {
 }
 
 const FadeIn = memo(function FadeIn({ children, delay = 0, className }: FadeInProps) {
-  // Use CSS custom property for delay to avoid inline style object recreation
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    // Small delay to ensure animation plays after mount
+    const timer = setTimeout(() => setMounted(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
+  
   return (
     <div
-      className={cn("animate-fade-in opacity-0", className)}
+      className={cn(
+        "transition-opacity duration-500",
+        mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
+        className
+      )}
       style={{ 
-        animationDelay: `${delay}s`,
-        willChange: "opacity, transform" 
+        transitionDelay: `${delay}s`,
+        willChange: "opacity, transform"
       }}
     >
       {children}
@@ -81,9 +92,11 @@ const UserMenu = memo(function UserMenu() {
   }, []);
 
   if (isPending) {
+    // Show neutral state - looks like login button but inactive
     return (
-      <Button variant="ghost" className="h-8 px-2" disabled>
-        <span className="text-xs text-muted-foreground">Loading...</span>
+      <Button variant="ghost" className="h-8 px-3 gap-2 text-xs font-medium" disabled>
+        <HugeiconsIcon icon={UserIcon} className="size-4" />
+        <span className="hidden sm:inline">Login</span>
       </Button>
     );
   }
@@ -200,7 +213,7 @@ const DesignCard = memo(function DesignCard({ design, index }: DesignCardProps) 
 
   return (
     <FadeIn delay={delay}>
-      <Link to="/$username/$designSlug" params={{ 
+      <Link to="/s/$username/$designSlug" params={{ 
         username: design.author?.username || "unknown", 
         designSlug: design.slug 
       }}>
@@ -358,37 +371,43 @@ export function HeroSection() {
         {/* Design Grid */}
         <div className="mt-16 md:mt-20">
           {/* Section Title */}
-          <div className="mb-6 flex items-center gap-2">
-            <span className="text-sm font-medium text-muted-foreground">Skills Leaderboard</span>
-          </div>
+          <FadeIn delay={0.35}>
+            <div className="mb-6 flex items-center gap-2">
+              <span className="text-sm font-medium text-muted-foreground">Skills Leaderboard</span>
+            </div>
+          </FadeIn>
 
           {/* Search Bar */}
-          <div className="mb-6 flex items-center gap-4 border-b border-border pb-4">
-            <div className="flex flex-1 items-center gap-3">
-              <HugeiconsIcon icon={Search01Icon} className="size-5 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search skills..."
-                className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-              />
+          <FadeIn delay={0.4}>
+            <div className="mb-6 flex items-center gap-4 border-b border-border pb-4">
+              <div className="flex flex-1 items-center gap-3">
+                <HugeiconsIcon icon={Search01Icon} className="size-5 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search skills..."
+                  className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                />
+              </div>
+              <div className="flex h-8 w-8 items-center justify-center rounded border border-border text-sm text-muted-foreground">
+                /
+              </div>
             </div>
-            <div className="flex h-8 w-8 items-center justify-center rounded border border-border text-sm text-muted-foreground">
-              /
-            </div>
-          </div>
+          </FadeIn>
 
           {/* Filter Tabs */}
-          <div className="mb-6 flex items-center gap-6 text-sm">
-            <button className="border-b-2 border-foreground pb-2 font-medium text-foreground">
-              All Time <span className="ml-1 text-muted-foreground">({designs?.length || 0})</span>
-            </button>
-            <button className="pb-2 text-muted-foreground transition-colors hover:text-foreground">
-              Trending (24h)
-            </button>
-            <button className="pb-2 text-muted-foreground transition-colors hover:text-foreground">
-              Hot
-            </button>
-          </div>
+          <FadeIn delay={0.45}>
+            <div className="mb-6 flex items-center gap-6 text-sm">
+              <button className="border-b-2 border-foreground pb-2 font-medium text-foreground">
+                All Time <span className="ml-1 text-muted-foreground">({designs?.length || 0})</span>
+              </button>
+              <button className="pb-2 text-muted-foreground transition-colors hover:text-foreground">
+                Trending (24h)
+              </button>
+              <button className="pb-2 text-muted-foreground transition-colors hover:text-foreground">
+                Hot
+              </button>
+            </div>
+          </FadeIn>
 
           {isLoading ? (
             <LoadingState />

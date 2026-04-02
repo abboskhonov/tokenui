@@ -4,7 +4,7 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { CommandLineIcon } from "@hugeicons/core-free-icons"
 
 export function StudioHeader() {
-  const { data: session } = useSession()
+  const { data: session, isPending } = useSession()
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -41,13 +41,15 @@ export function StudioHeader() {
           </nav>
         </div>
         <div className="flex items-center gap-4">
-          {session?.user?.image && (
+          {isPending ? (
+            <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+          ) : session?.user?.image ? (
             <img
               src={session.user.image}
               alt={session.user.name || "User"}
               className="h-8 w-8 rounded-full"
             />
-          )}
+          ) : null}
         </div>
       </div>
     </header>

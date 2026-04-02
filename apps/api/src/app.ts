@@ -117,7 +117,7 @@ app.put("/api/user/profile", async (c) => {
   const body = await c.req.json()
   
   // Validate input - only allow certain fields
-  const allowedFields = ["name", "bio", "website", "github", "x", "telegram", "image"]
+  const allowedFields = ["name", "username", "bio", "website", "github", "x", "telegram", "image"]
   const updateData: Record<string, string | null> = {}
   
   for (const field of allowedFields) {
@@ -301,7 +301,61 @@ app.get("/api/designs", async (c) => {
   }
 })
 
-// Get single design by username and slug
+// Get single design by ID (for editing)
+app.get("/api/designs/:id", async (c) => {
+  const id = c.req.param("id")
+  
+  // Check auth for editing
+  const session = await auth.api.getSession({
+    headers: c.req.raw.headers,
+  })
+  
+  if (!session) {
+    return c.json({ error: "Unauthorized" }, 401)
+  }
+  
+  try {
+    const [designRecord] = await db
+      .select({
+        id: design.id,
+        name: design.name,
+        slug: design.slug,
+        description: design.description,
+        category: design.category,
+        content: design.content,
+        demoUrl: design.demoUrl,
+        thumbnailUrl: design.thumbnailUrl,
+        isPublic: design.isPublic,
+        viewCount: design.viewCount,
+        createdAt: design.createdAt,
+        updatedAt: design.updatedAt,
+        userId: design.userId,
+        author: {
+          name: user.name,
+          username: user.username,
+          image: user.image,
+        }
+      })
+      .from(design)
+      .leftJoin(user, eq(design.userId, user.id))
+      .where(and(
+        eq(design.id, id),
+        eq(design.userId, session.user.id)
+      ))
+      .limit(1)
+    
+    if (!designRecord) {
+      return c.json({ error: "Design not found" }, 404)
+    }
+    
+    return c.json({ design: designRecord })
+  } catch (error) {
+    console.error("Error fetching design:", error)
+    return c.json({ error: "Failed to fetch design" }, 500)
+  }
+})
+
+// Get single design by username and slug (for public viewing)
 app.get("/api/designs/:username/:slug", async (c) => {
   const username = c.req.param("username")
   const slug = c.req.param("slug")

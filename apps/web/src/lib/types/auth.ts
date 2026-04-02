@@ -2,6 +2,7 @@ export interface User {
   id: string
   email: string
   name: string | null
+  username: string | null
   image: string | null
   bio: string | null
   website: string | null
@@ -26,6 +27,7 @@ export interface Session {
 
 export interface ProfileUpdateData {
   name?: string
+  username?: string
   bio?: string
   website?: string
   github?: string
