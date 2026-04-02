@@ -1,0 +1,156 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Link } from "@tanstack/react-router"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { useSession, signOut } from "@/lib/auth-client"
+import { SettingsDialog } from "@/components/settings/settings-dialog"
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  CommandLineIcon,
+  Logout01Icon,
+  Settings01Icon,
+  UserIcon,
+  Sun01Icon,
+  Moon01Icon,
+} from "@hugeicons/core-free-icons"
+
+// Theme Toggle Component
+function ThemeToggle() {
+  const [theme, setTheme] = useState<"light" | "dark">("dark")
+
+  useEffect(() => {
+    const root = window.document.documentElement
+    root.classList.remove("light", "dark")
+    root.classList.add(theme)
+  }, [theme])
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-8 w-8"
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+    >
+      <HugeiconsIcon
+        icon={theme === "dark" ? Sun01Icon : Moon01Icon}
+        className="size-4"
+      />
+      <span className="sr-only">Toggle theme</span>
+    </Button>
+  )
+}
+
+function UserMenu() {
+  const { data: session, isPending } = useSession()
+  const [settingsOpen, setSettingsOpen] = useState(false)
+
+  if (isPending) {
+    return (
+      <Button variant="ghost" className="h-8 px-2" disabled>
+        <span className="text-xs text-muted-foreground">Loading...</span>
+      </Button>
+    )
+  }
+
+  if (!session?.user) {
+    return (
+      <Link to="/login">
+        <Button
+          variant="ghost"
+          className="h-8 px-3 gap-2 text-xs font-medium hover:bg-muted/20"
+        >
+          <HugeiconsIcon icon={UserIcon} className="size-4" />
+          <span className="hidden sm:inline">Login</span>
+        </Button>
+      </Link>
+    )
+  }
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="ghost"
+              className="h-8 px-2 gap-2 justify-start hover:bg-muted/20"
+            >
+              <Avatar className="h-7 w-7 rounded-full">
+                <AvatarImage
+                  src={session.user.image || ""}
+                  alt={session.user.name || "User"}
+                />
+                <AvatarFallback className="bg-primary/20 text-primary text-xs rounded-full">
+                  {session.user.name?.charAt(0).toUpperCase() || "U"}
+                </AvatarFallback>
+              </Avatar>
+            </Button>
+          }
+        />
+        <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuItem className="gap-2 text-sm">
+            <HugeiconsIcon icon={UserIcon} className="size-4" />
+            Profile
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="gap-2 text-sm"
+            onClick={() => setSettingsOpen(true)}
+          >
+            <HugeiconsIcon icon={Settings01Icon} className="size-4" />
+            Settings
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="gap-2 text-sm text-destructive"
+            onClick={async () => {
+              await signOut()
+              window.location.reload()
+            }}
+          >
+            <HugeiconsIcon icon={Logout01Icon} className="size-4" />
+            Log out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+    </>
+  )
+}
+
+export function Header() {
+  return (
+    <header className="flex items-center justify-between py-3 px-4 sm:px-6 lg:px-8 border-b border-border w-full">
+      {/* Left: Logo */}
+      <Link to="/" className="flex items-center gap-2">
+        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-foreground text-background">
+          <HugeiconsIcon icon={CommandLineIcon} className="size-4" />
+        </div>
+        <span className="text-base font-semibold text-foreground tracking-tight">
+          tasteui
+        </span>
+      </Link>
+
+      {/* Right: Actions */}
+      <div className="flex items-center gap-1">
+        <Link 
+          to="/docs" 
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors mr-2"
+        >
+          Docs
+        </Link>
+        <ThemeToggle />
+        <UserMenu />
+      </div>
+    </header>
+  )
+}

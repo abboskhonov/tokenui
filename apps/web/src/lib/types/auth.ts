@@ -1,0 +1,47 @@
+export interface User {
+  id: string
+  email: string
+  name: string | null
+  image: string | null
+  bio: string | null
+  website: string | null
+  github: string | null
+  x: string | null
+  telegram: string | null
+  emailVerified: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Session {
+  user: User
+  session: {
+    id: string
+    userId: string
+    expiresAt: string
+    ipAddress: string | null
+    userAgent: string | null
+  }
+}
+
+export interface ProfileUpdateData {
+  name?: string
+  bio?: string
+  website?: string
+  github?: string
+  x?: string
+  telegram?: string
+  image?: string
+}
+
+export interface LoginCredentials {
+  email: string
+  password: string
+  rememberMe?: boolean
+}
+
+export interface SignUpCredentials {
+  email: string
+  password: string
+  name: string
+}
