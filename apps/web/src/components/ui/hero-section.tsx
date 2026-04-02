@@ -225,21 +225,22 @@ export function HeroSection() {
               </TimelineContent>
               
               <TimelineContent animationNum={2}>
-                <h1 className="text-5xl sm:text-6xl md:text-7xl leading-[100%] font-bold">
-                  Build with{" "}
-                  <span className="text-muted-foreground">
-                    Beautiful
-                  </span>{" "}
-                  <span className="text-foreground">
-                    Designs
-                  </span>
+                <h1 className='text-3xl sm:text-4xl md:text-5xl leading-[120%] font-bold font-["Press_Start_2P",monospace] tracking-tight'>
+                  TasteUI
                 </h1>
               </TimelineContent>
               
               <TimelineContent animationNum={3}>
                 <p className="text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto">
-                  Install stunning UI components with one command. Built for developers who ship fast.
+                  Design components for AI agents. Install with one command.
                 </p>
+              </TimelineContent>
+
+              <TimelineContent animationNum={4}>
+                <div className="flex items-center justify-center gap-3 px-4 py-3 bg-muted rounded-lg font-mono text-sm">
+                  <span className="text-muted-foreground">$</span>
+                  <span className="text-foreground">npx tokenui</span>
+                </div>
               </TimelineContent>
             </article>
 
@@ -255,7 +256,7 @@ export function HeroSection() {
             ) : designs && designs.length > 0 ? (
               <div className="grid md:grid-cols-3 grid-cols-2 gap-4">
                 {designs.slice(0, 6).map((design, index) => (
-                  <TimelineContent key={design.id} animationNum={index + 4}>
+                  <TimelineContent key={design.id} animationNum={index + 5}>
                     <div
                       onClick={() => handleDesignClick(design.id)}
                       className="transition-all aspect-video rounded-lg overflow-hidden relative block group cursor-pointer"
