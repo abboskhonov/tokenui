@@ -11,6 +11,10 @@ export interface Design {
   viewCount: number
   createdAt: string
   updatedAt: string
+  author?: {
+    name: string | null
+    image: string | null
+  }
 }
 
 export interface CreateDesignData {

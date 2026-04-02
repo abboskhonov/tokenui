@@ -223,16 +223,46 @@ app.get("/api/designs", async (c) => {
   try {
     if (category) {
       const designs = await db
-        .select()
+        .select({
+          id: design.id,
+          name: design.name,
+          description: design.description,
+          category: design.category,
+          thumbnailUrl: design.thumbnailUrl,
+          isPublic: design.isPublic,
+          viewCount: design.viewCount,
+          createdAt: design.createdAt,
+          userId: design.userId,
+          author: {
+            name: user.name,
+            image: user.image,
+          }
+        })
         .from(design)
+        .leftJoin(user, eq(design.userId, user.id))
         .where(eq(design.isPublic, true) && eq(design.category, category))
         .orderBy(desc(design.createdAt))
       
       return c.json({ designs })
     } else {
       const designs = await db
-        .select()
+        .select({
+          id: design.id,
+          name: design.name,
+          description: design.description,
+          category: design.category,
+          thumbnailUrl: design.thumbnailUrl,
+          isPublic: design.isPublic,
+          viewCount: design.viewCount,
+          createdAt: design.createdAt,
+          userId: design.userId,
+          author: {
+            name: user.name,
+            image: user.image,
+          }
+        })
         .from(design)
+        .leftJoin(user, eq(design.userId, user.id))
         .where(eq(design.isPublic, true))
         .orderBy(desc(design.createdAt))
       

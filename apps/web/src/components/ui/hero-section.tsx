@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
-import { ProgressiveBlur } from "@/components/ui/progressive-blur";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,31 +19,36 @@ import { usePublicDesigns } from "@/lib/queries/designs";
 import { useSession, signOut } from "@/lib/auth-client";
 import { SettingsDialog } from "@/components/settings/settings-dialog";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { useTheme } from "@/components/theme-provider";
 import {
   CommandLineIcon,
+  Copy01Icon,
   Logout01Icon,
-  Settings01Icon,
-  UserIcon,
-  Sun01Icon,
   Moon01Icon,
+  Search01Icon,
+  Settings01Icon,
+  Sun01Icon,
+  Tick02Icon,
+  UserIcon,
 } from "@hugeicons/core-free-icons";
 
-function TimelineContent({
+function FadeIn({
   children,
-  animationNum = 0,
+  delay = 0,
   className,
 }: {
   children: React.ReactNode;
-  animationNum?: number;
+  delay?: number;
   className?: string;
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15, filter: "blur(8px)" }}
-      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{
-        delay: animationNum * 0.08,
-        duration: 0.35,
+        delay,
+        duration: 0.5,
+        ease: [0.23, 1, 0.32, 1],
       }}
       className={cn(className)}
     >
@@ -55,40 +59,29 @@ function TimelineContent({
 
 // Theme Toggle Component
 function ThemeToggle() {
-  const [theme, setTheme] = useState<"light" | "dark">("dark")
-
-  useEffect(() => {
-    const root = window.document.documentElement
-    root.classList.remove("light", "dark")
-    root.classList.add(theme)
-  }, [theme])
+  const { theme, toggleTheme } = useTheme();
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className="h-8 w-8"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-    >
+    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggleTheme}>
       <HugeiconsIcon
         icon={theme === "dark" ? Sun01Icon : Moon01Icon}
         className="size-4"
       />
       <span className="sr-only">Toggle theme</span>
     </Button>
-  )
+  );
 }
 
 function UserMenu() {
-  const { data: session, isPending } = useSession()
-  const [settingsOpen, setSettingsOpen] = useState(false)
+  const { data: session, isPending } = useSession();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   if (isPending) {
     return (
       <Button variant="ghost" className="h-8 px-2" disabled>
         <span className="text-xs text-muted-foreground">Loading...</span>
       </Button>
-    )
+    );
   }
 
   if (!session?.user) {
@@ -96,13 +89,13 @@ function UserMenu() {
       <Link to="/login">
         <Button
           variant="ghost"
-          className="h-8 px-3 gap-2 text-xs font-medium hover:bg-muted/20"
+          className="h-8 px-3 gap-2 text-xs font-medium hover:bg-muted/50"
         >
           <HugeiconsIcon icon={UserIcon} className="size-4" />
           <span className="hidden sm:inline">Login</span>
         </Button>
       </Link>
-    )
+    );
   }
 
   return (
@@ -112,14 +105,14 @@ function UserMenu() {
           render={
             <Button
               variant="ghost"
-              className="h-8 px-2 gap-2 justify-start hover:bg-muted/20"
+              className="h-8 w-8 rounded-full p-0 hover:bg-muted/50"
             >
-              <Avatar className="h-7 w-7 rounded-full">
+              <Avatar className="h-7 w-7">
                 <AvatarImage
                   src={session.user.image || ""}
                   alt={session.user.name || "User"}
                 />
-                <AvatarFallback className="bg-primary/20 text-primary text-xs rounded-full">
+                <AvatarFallback className="bg-primary/10 text-primary text-xs">
                   {session.user.name?.charAt(0).toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
@@ -142,8 +135,8 @@ function UserMenu() {
           <DropdownMenuItem
             className="gap-2 text-sm text-destructive"
             onClick={async () => {
-              await signOut()
-              window.location.reload()
+              await signOut();
+              window.location.reload();
             }}
           >
             <HugeiconsIcon icon={Logout01Icon} className="size-4" />
@@ -154,7 +147,38 @@ function UserMenu() {
 
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </>
-  )
+  );
+}
+
+// CLI Copy Component
+function CLICopy() {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText("npx tokenui add <design>");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="group flex items-center gap-3 rounded-lg bg-muted/50 px-4 py-2.5 font-mono text-sm text-foreground ring-1 ring-border transition-all hover:bg-muted hover:ring-foreground/20"
+    >
+      <span className="text-muted-foreground">$</span>
+      <span>npx tokenui </span>
+      <span className="ml-2 flex items-center gap-1.5 text-xs text-muted-foreground transition-colors group-hover:text-foreground">
+        <HugeiconsIcon
+          icon={copied ? Tick02Icon : Copy01Icon}
+          className={cn("size-3.5", copied && "text-green-500")}
+        />
+      </span>
+    </button>
+  );
 }
 
 export function HeroSection() {
@@ -169,146 +193,142 @@ export function HeroSection() {
   };
 
   return (
-    <main ref={containerRef} className="relative">
-      {/* Content with bordered container */}
-      <div className="relative mx-auto max-w-7xl min-h-screen">
-        {/* Main bordered wrapper */}
-        <div className="relative border-x border-border min-h-screen">
-          {/* Vertical dashed center line */}
-          <div className="absolute top-0 bottom-0 left-1/2 border-l border-dashed border-border/50 -translate-x-1/2" />
-          
-          {/* Header - Bordered style matching hero */}
-          <motion.header
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="relative flex items-center justify-between py-4 px-4 sm:px-6 lg:px-8 border-b border-border"
-          >
-            {/* Left: Logo */}
-            <Link to="/" className="flex items-center gap-2">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-foreground text-background">
-                <HugeiconsIcon icon={CommandLineIcon} className="size-4" />
-              </div>
-              <span className="text-base font-semibold text-foreground tracking-tight">
-                tasteui
-              </span>
+    <main ref={containerRef} className="relative min-h-screen bg-background">
+      {/* Background gradient */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-1/2 top-0 h-[800px] w-[1000px] -translate-x-1/2 bg-[radial-gradient(circle_at_center,var(--brand)/8%,transparent_70%)] blur-3xl" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      </div>
+
+      {/* Navigation */}
+      <FadeIn>
+        <nav className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground text-background">
+              <HugeiconsIcon icon={CommandLineIcon} className="size-4" />
+            </div>
+            <span className="text-lg font-semibold tracking-tight text-foreground">
+              tokenui
+            </span>
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              to="/docs"
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Docs
             </Link>
-
-            {/* Right: Actions */}
-            <div className="flex items-center gap-1">
-              <Link 
-                to="/docs" 
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors mr-2"
-              >
-                Docs
-              </Link>
-              <ThemeToggle />
-              <UserMenu />
-            </div>
-          </motion.header>
-
-           {/* Hero Content - Nozomio Style */}
-          <div className="px-4 sm:px-6 lg:px-8 py-20">
-            <div className="max-w-3xl mx-auto">
-              {/* Headline */}
-              <TimelineContent animationNum={1}>
-                <h1 className="text-7xl sm:text-8xl md:text-9xl font-bold text-center tracking-tighter">
-                  TokenUI
-                </h1>
-              </TimelineContent>
-
-              {/* Search Bar */}
-              <TimelineContent animationNum={2}>
-                <div className="max-w-md mx-auto mt-8">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Search designs..."
-                      className="w-full px-4 py-3 bg-card border border-border rounded-lg font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/50 transition-colors"
-                    />
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      <kbd className="hidden sm:inline-flex items-center justify-center px-2 py-1 rounded bg-muted font-mono text-xs text-muted-foreground">
-                        /
-                      </kbd>
-                    </div>
-                  </div>
-                </div>
-              </TimelineContent>
-
-              {/* CLI Only */}
-              <TimelineContent animationNum={3}>
-                <div className="max-w-md mx-auto mt-8">
-                  <div className="relative bg-card border border-border rounded-lg p-4">
-                    <div className="flex items-center gap-2 font-mono text-sm">
-                      <span className="text-muted-foreground">&gt;</span>
-                      <span className="text-foreground">npx tokenui add &lt;design&gt;</span>
-                    </div>
-                  </div>
-                </div>
-              </TimelineContent>
-            </div>
-
-            {/* Design Grid */}
-            <div className="mt-20">
-              {isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                </div>
-              ) : error ? (
-                <div className="py-12 text-center">
-                  <p className="text-sm text-destructive">Failed to load designs</p>
-                </div>
-              ) : designs && designs.length > 0 ? (
-                <div className="grid md:grid-cols-3 grid-cols-2 gap-4">
-                  {designs.slice(0, 6).map((design, index) => (
-                    <TimelineContent key={design.id} animationNum={index + 5}>
-                      <div
-                        onClick={() => handleDesignClick(design.id)}
-                        className="transition-all aspect-video rounded-lg overflow-hidden relative block group cursor-pointer"
-                      >
-                        <figure className="relative h-full w-full">
-                          {design.thumbnailUrl ? (
-                            <img
-                              src={design.thumbnailUrl}
-                              alt={design.name}
-                              className="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-500"
-                            />
-                          ) : (
-                            <SkillCard variant="pattern" />
-                          )}
-                        </figure>
-                        <ProgressiveBlur
-                          className="pointer-events-none absolute bottom-0 left-0 h-[40%] w-full"
-                          blurIntensity={0.5}
-                        />
-                        <div className="absolute bottom-3 left-3 right-3">
-                          <h3 className="text-lg font-medium text-white truncate">
-                            {design.name}
-                          </h3>
-                          <p className="text-xs text-white/70 truncate">
-                            {design.description || design.category}
-                          </p>
-                        </div>
-                      </div>
-                    </TimelineContent>
-                  ))}
-                </div>
-              ) : (
-                <div className="py-12 text-center">
-                  <p className="text-sm text-muted-foreground">No designs published yet</p>
-                </div>
-              )}
-            </div>
+            <Link
+              to="/publish"
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Publish
+            </Link>
+            <ThemeToggle />
+            <UserMenu />
           </div>
+        </nav>
+      </FadeIn>
 
-          {/* Design Detail Dialog */}
-          <DesignDetailDialog
-            designId={selectedDesignId}
-            open={dialogOpen}
-            onOpenChange={setDialogOpen}
-          />
+      {/* Hero Content */}
+      <div className="relative z-10 mx-auto max-w-6xl px-6 pt-12 md:pt-16">
+        {/* Header */}
+        <div className="max-w-2xl">
+          <FadeIn delay={0.1}>
+            <h1 className="text-4xl font-medium leading-tight tracking-tight text-foreground md:text-5xl">
+              Browse & install components
+            </h1>
+          </FadeIn>
+          <FadeIn delay={0.2}>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Discover beautiful, production-ready designs for your next project.
+            </p>
+          </FadeIn>
+        </div>
+
+        {/* Search + CLI */}
+        <FadeIn delay={0.3}>
+          <div className="mt-8 flex flex-wrap items-center gap-4">
+            <div className="relative w-full max-w-md">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <HugeiconsIcon icon={Search01Icon} className="size-4" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search designs..."
+                className="w-full rounded-lg bg-muted/50 py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground ring-1 ring-border outline-none transition-all focus:bg-muted focus:ring-foreground/20"
+              />
+            </div>
+            <CLICopy />
+          </div>
+        </FadeIn>
+
+        {/* Design Grid */}
+        <div className="mt-12 md:mt-16">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+            </div>
+          ) : error ? (
+            <div className="py-12 text-center">
+              <p className="text-sm text-destructive">Failed to load designs</p>
+            </div>
+          ) : designs && designs.length > 0 ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {designs.map((design, index) => (
+                <FadeIn key={design.id} delay={0.1 + index * 0.05}>
+                  <div
+                    onClick={() => handleDesignClick(design.id)}
+                    className="group cursor-pointer"
+                  >
+                    {/* Thumbnail */}
+                    <div className="relative aspect-video overflow-hidden rounded-xl bg-card/50 ring-1 ring-border transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg group-hover:shadow-foreground/10">
+                      {design.thumbnailUrl ? (
+                        <img
+                          src={design.thumbnailUrl}
+                          alt={design.name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <SkillCard variant="pattern" />
+                      )}
+                    </div>
+                    
+                    {/* Info below image - hidden by default, shows on hover */}
+                    <div className="mt-3 flex items-center gap-2 opacity-0 transition-all duration-300 group-hover:opacity-100">
+                      {design.author?.image ? (
+                        <img
+                          src={design.author.image}
+                          alt={design.author.name || "Author"}
+                          className="h-5 w-5 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
+                          {(design.author?.name || design.name).charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <h3 className="text-sm font-medium text-foreground">
+                        {design.name}
+                      </h3>
+                    </div>
+                  </div>
+                </FadeIn>
+              ))}
+            </div>
+          ) : (
+            <div className="py-12 text-center">
+              <p className="text-sm text-muted-foreground">No designs published yet</p>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Design Detail Dialog */}
+      <DesignDetailDialog
+        designId={selectedDesignId}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      />
     </main>
   );
 }
