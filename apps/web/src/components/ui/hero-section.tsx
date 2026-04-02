@@ -225,19 +225,19 @@ export function HeroSection() {
               </TimelineContent>
               
               <TimelineContent animationNum={2}>
-                <h1 className='text-3xl sm:text-4xl md:text-5xl leading-[120%] font-bold font-["Press_Start_2P",monospace] tracking-tight'>
+                <h1 className="text-6xl sm:text-7xl md:text-8xl leading-[110%] font-light tracking-tight">
                   TasteUI
                 </h1>
               </TimelineContent>
               
               <TimelineContent animationNum={3}>
-                <p className="text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto">
-                  Design components for AI agents. Install with one command.
+                <p className="text-lg text-muted-foreground max-w-md mx-auto">
+                  Beautiful components for AI agents
                 </p>
               </TimelineContent>
 
               <TimelineContent animationNum={4}>
-                <div className="flex items-center justify-center gap-3 px-4 py-3 bg-muted rounded-lg font-mono text-sm">
+                <div className="flex items-center justify-center gap-3 px-5 py-3 bg-muted rounded-full font-mono text-sm border border-border/50">
                   <span className="text-muted-foreground">$</span>
                   <span className="text-foreground">npx tokenui</span>
                 </div>
