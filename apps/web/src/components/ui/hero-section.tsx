@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useCallback, memo } from "react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -20,6 +19,7 @@ import { useSession, signOut } from "@/lib/auth-client";
 import { SettingsDialog } from "@/components/settings/settings-dialog";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useTheme } from "@/components/theme-provider";
+import type { Design } from "@/lib/types/design";
 import {
   CommandLineIcon,
   Copy01Icon,
@@ -32,33 +32,30 @@ import {
   UserIcon,
 } from "@hugeicons/core-free-icons";
 
-function FadeIn({
-  children,
-  delay = 0,
-  className,
-}: {
+// FadeIn - memoized to prevent unnecessary re-renders
+interface FadeInProps {
   children: React.ReactNode;
   delay?: number;
   className?: string;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        delay,
-        duration: 0.5,
-        ease: [0.23, 1, 0.32, 1],
-      }}
-      className={cn(className)}
-    >
-      {children}
-    </motion.div>
-  );
 }
 
-// Theme Toggle Component
-function ThemeToggle() {
+const FadeIn = memo(function FadeIn({ children, delay = 0, className }: FadeInProps) {
+  // Use CSS custom property for delay to avoid inline style object recreation
+  return (
+    <div
+      className={cn("animate-fade-in opacity-0", className)}
+      style={{ 
+        animationDelay: `${delay}s`,
+        willChange: "opacity, transform" 
+      }}
+    >
+      {children}
+    </div>
+  );
+});
+
+// Theme Toggle Component - memoized
+const ThemeToggle = memo(function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
 
   return (
@@ -70,11 +67,18 @@ function ThemeToggle() {
       <span className="sr-only">Toggle theme</span>
     </Button>
   );
-}
+});
 
-function UserMenu() {
+// User Menu Component - memoized
+const UserMenu = memo(function UserMenu() {
   const { data: session, isPending } = useSession();
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // Handle sign out with useCallback to prevent recreating function
+  const handleSignOut = useCallback(async () => {
+    await signOut();
+    window.location.reload();
+  }, []);
 
   if (isPending) {
     return (
@@ -134,10 +138,7 @@ function UserMenu() {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="gap-2 text-sm text-destructive"
-            onClick={async () => {
-              await signOut();
-              window.location.reload();
-            }}
+            onClick={handleSignOut}
           >
             <HugeiconsIcon icon={Logout01Icon} className="size-4" />
             Log out
@@ -148,21 +149,24 @@ function UserMenu() {
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </>
   );
-}
+});
 
-// CLI Copy Component
-function CLICopy() {
+// CLI Copy Component - memoized
+const CLICopy = memo(function CLICopy() {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = async () => {
+  // Memoize handler to prevent recreating on each render
+  const handleCopy = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText("npx tokenui add <design>");
+      await navigator.clipboard.writeText("npx tokenui add <skill>");
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      // Use setTimeout with cleanup pattern
+      const timer = setTimeout(() => setCopied(false), 2000);
+      return () => clearTimeout(timer);
     } catch (err) {
       console.error("Failed to copy:", err);
     }
-  };
+  }, []);
 
   return (
     <button
@@ -170,7 +174,7 @@ function CLICopy() {
       className="group flex items-center gap-3 rounded-lg bg-muted/50 px-4 py-2.5 font-mono text-sm text-foreground ring-1 ring-border transition-all hover:bg-muted hover:ring-foreground/20"
     >
       <span className="text-muted-foreground">$</span>
-      <span>npx tokenui </span>
+      <span>npx tokenui add &lt;skill&gt;</span>
       <span className="ml-2 flex items-center gap-1.5 text-xs text-muted-foreground transition-colors group-hover:text-foreground">
         <HugeiconsIcon
           icon={copied ? Tick02Icon : Copy01Icon}
@@ -179,56 +183,160 @@ function CLICopy() {
       </span>
     </button>
   );
+});
+
+// Design Card Component - extracted and memoized for performance
+interface DesignCardProps {
+  design: Design;
+  index: number;
+  onClick: (designId: string) => void;
 }
 
+const DesignCard = memo(function DesignCard({ design, index, onClick }: DesignCardProps) {
+  // Memoize click handler to prevent recreating on each render
+  const handleClick = useCallback(() => {
+    onClick(design.id);
+  }, [design.id, onClick]);
+
+  // Calculate delay once per card
+  const delay = Math.min(0.1 + index * 0.05, 0.5);
+
+  return (
+    <FadeIn delay={delay}>
+      <div onClick={handleClick} className="group cursor-pointer">
+        {/* Thumbnail - hardware accelerated */}
+        <div 
+          className="relative aspect-video overflow-hidden rounded-xl bg-card/50 ring-1 ring-border transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg group-hover:shadow-foreground/10"
+          style={{ willChange: "transform" }}
+        >
+          {design.thumbnailUrl ? (
+            <img
+              src={design.thumbnailUrl}
+              alt={design.name}
+              className="h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <SkillCard variant="pattern" />
+          )}
+        </div>
+        
+        {/* Info below image - hidden by default, shows on hover */}
+        <div className="mt-3 flex items-center gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+          {design.author?.image ? (
+            <img
+              src={design.author.image}
+              alt={design.author.name || "Author"}
+              className="h-5 w-5 rounded-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
+              {(design.author?.name || design.name).charAt(0).toUpperCase()}
+            </div>
+          )}
+          <h3 className="text-sm font-medium text-foreground">
+            {design.name}
+          </h3>
+        </div>
+      </div>
+    </FadeIn>
+  );
+});
+
+// Navigation Component - extracted and memoized
+const Navigation = memo(function Navigation() {
+  return (
+    <FadeIn>
+      <nav className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+        <Link to="/" className="flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground text-background">
+            <HugeiconsIcon icon={CommandLineIcon} className="size-4" />
+          </div>
+          <span className="text-lg font-semibold tracking-tight text-foreground">
+            tokenui
+          </span>
+        </Link>
+        <div className="flex items-center gap-4">
+          <Link
+            to="/docs"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Docs
+          </Link>
+          <Link
+            to="/publish"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Publish
+          </Link>
+          <ThemeToggle />
+          <UserMenu />
+        </div>
+      </nav>
+    </FadeIn>
+  );
+});
+
+// Empty State Component
+const EmptyState = memo(function EmptyState() {
+  return (
+    <div className="py-12 text-center">
+      <p className="text-sm text-muted-foreground">No skills published yet</p>
+    </div>
+  );
+});
+
+// Loading State Component
+const LoadingState = memo(function LoadingState() {
+  return (
+    <div className="flex items-center justify-center py-12">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+    </div>
+  );
+});
+
+// Error State Component
+const ErrorState = memo(function ErrorState() {
+  return (
+    <div className="py-12 text-center">
+      <p className="text-sm text-destructive">Failed to load skills</p>
+    </div>
+  );
+});
+
+// Main Hero Section
 export function HeroSection() {
-  const containerRef = useRef<HTMLDivElement>(null);
   const { data: designs, isLoading, error } = usePublicDesigns();
   const [selectedDesignId, setSelectedDesignId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const handleDesignClick = (designId: string) => {
+  // Memoize event handler to prevent recreating on each render
+  const handleDesignClick = useCallback((designId: string) => {
     setSelectedDesignId(designId);
     setDialogOpen(true);
-  };
+  }, []);
+
+  // Memoize dialog close handler
+  const handleDialogClose = useCallback((open: boolean) => {
+    setDialogOpen(open);
+  }, []);
 
   return (
-    <main ref={containerRef} className="relative min-h-screen bg-background">
-      {/* Background gradient */}
+    <main className="relative min-h-screen bg-background">
+      {/* Optimized background - using CSS instead of heavy blur */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/2 top-0 h-[800px] w-[1000px] -translate-x-1/2 bg-[radial-gradient(circle_at_center,var(--brand)/8%,transparent_70%)] blur-3xl" />
+        <div 
+          className="absolute left-1/2 top-0 h-[600px] w-[800px] -translate-x-1/2 bg-[radial-gradient(circle_at_center,var(--brand)/6%,transparent_70%)]"
+          style={{ willChange: "transform" }}
+        />
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
       </div>
 
       {/* Navigation */}
-      <FadeIn>
-        <nav className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground text-background">
-              <HugeiconsIcon icon={CommandLineIcon} className="size-4" />
-            </div>
-            <span className="text-lg font-semibold tracking-tight text-foreground">
-              tokenui
-            </span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link
-              to="/docs"
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Docs
-            </Link>
-            <Link
-              to="/publish"
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Publish
-            </Link>
-            <ThemeToggle />
-            <UserMenu />
-          </div>
-        </nav>
-      </FadeIn>
+      <Navigation />
 
       {/* Hero Content */}
       <div className="relative z-10 mx-auto max-w-6xl px-6 pt-12 md:pt-16">
@@ -236,12 +344,14 @@ export function HeroSection() {
         <div className="max-w-2xl">
           <FadeIn delay={0.1}>
             <h1 className="text-4xl font-medium leading-tight tracking-tight text-foreground md:text-5xl">
-              Browse & install components
+              The design layer
+              <br />
+              <span className="text-muted-foreground">for your coding agent</span>
             </h1>
           </FadeIn>
           <FadeIn delay={0.2}>
             <p className="mt-4 text-lg text-muted-foreground">
-              Discover beautiful, production-ready designs for your next project.
+              A CLI tool that applies a consistent, beautiful design layer on top of AI-generated code.
             </p>
           </FadeIn>
         </div>
@@ -255,7 +365,7 @@ export function HeroSection() {
               </div>
               <input
                 type="text"
-                placeholder="Search designs..."
+                placeholder="Search skills..."
                 className="w-full rounded-lg bg-muted/50 py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground ring-1 ring-border outline-none transition-all focus:bg-muted focus:ring-foreground/20"
               />
             </div>
@@ -266,59 +376,22 @@ export function HeroSection() {
         {/* Design Grid */}
         <div className="mt-12 md:mt-16">
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
-            </div>
+            <LoadingState />
           ) : error ? (
-            <div className="py-12 text-center">
-              <p className="text-sm text-destructive">Failed to load designs</p>
-            </div>
+            <ErrorState />
           ) : designs && designs.length > 0 ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {designs.map((design, index) => (
-                <FadeIn key={design.id} delay={0.1 + index * 0.05}>
-                  <div
-                    onClick={() => handleDesignClick(design.id)}
-                    className="group cursor-pointer"
-                  >
-                    {/* Thumbnail */}
-                    <div className="relative aspect-video overflow-hidden rounded-xl bg-card/50 ring-1 ring-border transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg group-hover:shadow-foreground/10">
-                      {design.thumbnailUrl ? (
-                        <img
-                          src={design.thumbnailUrl}
-                          alt={design.name}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <SkillCard variant="pattern" />
-                      )}
-                    </div>
-                    
-                    {/* Info below image - hidden by default, shows on hover */}
-                    <div className="mt-3 flex items-center gap-2 opacity-0 transition-all duration-300 group-hover:opacity-100">
-                      {design.author?.image ? (
-                        <img
-                          src={design.author.image}
-                          alt={design.author.name || "Author"}
-                          className="h-5 w-5 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
-                          {(design.author?.name || design.name).charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                      <h3 className="text-sm font-medium text-foreground">
-                        {design.name}
-                      </h3>
-                    </div>
-                  </div>
-                </FadeIn>
+                <DesignCard
+                  key={design.id}
+                  design={design}
+                  index={index}
+                  onClick={handleDesignClick}
+                />
               ))}
             </div>
           ) : (
-            <div className="py-12 text-center">
-              <p className="text-sm text-muted-foreground">No designs published yet</p>
-            </div>
+            <EmptyState />
           )}
         </div>
       </div>
@@ -327,7 +400,7 @@ export function HeroSection() {
       <DesignDetailDialog
         designId={selectedDesignId}
         open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        onOpenChange={handleDialogClose}
       />
     </main>
   );

@@ -51,6 +51,8 @@ export function usePublicDesigns(category?: string) {
       const response = await api.get<{ designs: Design[] }>(url)
       return response.designs
     },
+    staleTime: 1000 * 60 * 5, // Data stays fresh for 5 minutes
+    gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes even when not in use
   })
 }
 
