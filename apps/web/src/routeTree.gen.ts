@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as StudioRouteImport } from './routes/studio'
 import { Route as PublishRouteImport } from './routes/publish'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DocsRouteImport } from './routes/docs'
@@ -16,6 +17,11 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DocsFaqRouteImport } from './routes/docs.faq'
 import { Route as DocsCliRouteImport } from './routes/docs.cli'
 
+const StudioRoute = StudioRouteImport.update({
+  id: '/studio',
+  path: '/studio',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PublishRoute = PublishRouteImport.update({
   id: '/publish',
   path: '/publish',
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/docs': typeof DocsRouteWithChildren
   '/login': typeof LoginRoute
   '/publish': typeof PublishRoute
+  '/studio': typeof StudioRoute
   '/docs/cli': typeof DocsCliRoute
   '/docs/faq': typeof DocsFaqRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/docs': typeof DocsRouteWithChildren
   '/login': typeof LoginRoute
   '/publish': typeof PublishRoute
+  '/studio': typeof StudioRoute
   '/docs/cli': typeof DocsCliRoute
   '/docs/faq': typeof DocsFaqRoute
 }
@@ -69,20 +77,36 @@ export interface FileRoutesById {
   '/docs': typeof DocsRouteWithChildren
   '/login': typeof LoginRoute
   '/publish': typeof PublishRoute
+  '/studio': typeof StudioRoute
   '/docs/cli': typeof DocsCliRoute
   '/docs/faq': typeof DocsFaqRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/docs' | '/login' | '/publish' | '/docs/cli' | '/docs/faq'
+  fullPaths:
+    | '/'
+    | '/docs'
+    | '/login'
+    | '/publish'
+    | '/studio'
+    | '/docs/cli'
+    | '/docs/faq'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/docs' | '/login' | '/publish' | '/docs/cli' | '/docs/faq'
+  to:
+    | '/'
+    | '/docs'
+    | '/login'
+    | '/publish'
+    | '/studio'
+    | '/docs/cli'
+    | '/docs/faq'
   id:
     | '__root__'
     | '/'
     | '/docs'
     | '/login'
     | '/publish'
+    | '/studio'
     | '/docs/cli'
     | '/docs/faq'
   fileRoutesById: FileRoutesById
@@ -92,10 +116,18 @@ export interface RootRouteChildren {
   DocsRoute: typeof DocsRouteWithChildren
   LoginRoute: typeof LoginRoute
   PublishRoute: typeof PublishRoute
+  StudioRoute: typeof StudioRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/studio': {
+      id: '/studio'
+      path: '/studio'
+      fullPath: '/studio'
+      preLoaderRoute: typeof StudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/publish': {
       id: '/publish'
       path: '/publish'
@@ -158,6 +190,7 @@ const rootRouteChildren: RootRouteChildren = {
   DocsRoute: DocsRouteWithChildren,
   LoginRoute: LoginRoute,
   PublishRoute: PublishRoute,
+  StudioRoute: StudioRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

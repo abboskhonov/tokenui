@@ -37,6 +37,8 @@ export function useMyDesigns() {
       const response = await api.get<{ designs: Design[] }>("/api/designs/my")
       return response.designs
     },
+    staleTime: 1000 * 60 * 2, // Data stays fresh for 2 minutes
+    gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
   })
 }
 

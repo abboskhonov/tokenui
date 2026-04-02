@@ -305,6 +305,151 @@ app.get("/api/designs/:id", async (c) => {
   }
 })
 
+// Update design
+app.put("/api/designs/:id", async (c) => {
+  const id = c.req.param("id")
+  
+  // Check auth
+  const session = await auth.api.getSession({
+    headers: c.req.raw.headers,
+  })
+  
+  if (!session) {
+    return c.json({ error: "Unauthorized" }, 401)
+  }
+  
+  try {
+    const body = await c.req.json()
+    const { name, description, category, content, demoUrl, thumbnailUrl, isPublic } = body
+    
+    // Check if design exists and user owns it
+    const [existingDesign] = await db
+      .select()
+      .from(design)
+      .where(eq(design.id, id))
+      .limit(1)
+    
+    if (!existingDesign) {
+      return c.json({ error: "Design not found" }, 404)
+    }
+    
+    if (existingDesign.userId !== session.user.id) {
+      return c.json({ error: "Unauthorized" }, 403)
+    }
+    
+    // Update design
+    const [updatedDesign] = await db
+      .update(design)
+      .set({
+        name: name || existingDesign.name,
+        description: description !== undefined ? description : existingDesign.description,
+        category: category || existingDesign.category,
+        content: content || existingDesign.content,
+        demoUrl: demoUrl !== undefined ? demoUrl : existingDesign.demoUrl,
+        thumbnailUrl: thumbnailUrl !== undefined ? thumbnailUrl : existingDesign.thumbnailUrl,
+        isPublic: isPublic !== undefined ? isPublic : existingDesign.isPublic,
+        updatedAt: new Date(),
+      })
+      .where(eq(design.id, id))
+      .returning()
+    
+    return c.json({ design: updatedDesign })
+  } catch (error) {
+    console.error("Error updating design:", error)
+    return c.json({ error: "Failed to update design" }, 500)
+  }
+})
+
+// Toggle design visibility
+app.patch("/api/designs/:id/visibility", async (c) => {
+  const id = c.req.param("id")
+  
+  // Check auth
+  const session = await auth.api.getSession({
+    headers: c.req.raw.headers,
+  })
+  
+  if (!session) {
+    return c.json({ error: "Unauthorized" }, 401)
+  }
+  
+  try {
+    const body = await c.req.json()
+    const { isPublic } = body
+    
+    // Check if design exists and user owns it
+    const [existingDesign] = await db
+      .select()
+      .from(design)
+      .where(eq(design.id, id))
+      .limit(1)
+    
+    if (!existingDesign) {
+      return c.json({ error: "Design not found" }, 404)
+    }
+    
+    if (existingDesign.userId !== session.user.id) {
+      return c.json({ error: "Unauthorized" }, 403)
+    }
+    
+    // Update visibility
+    const [updatedDesign] = await db
+      .update(design)
+      .set({
+        isPublic,
+        updatedAt: new Date(),
+      })
+      .where(eq(design.id, id))
+      .returning()
+    
+    return c.json({ design: updatedDesign })
+  } catch (error) {
+    console.error("Error updating design visibility:", error)
+    return c.json({ error: "Failed to update visibility" }, 500)
+  }
+})
+
+// Delete design
+app.delete("/api/designs/:id", async (c) => {
+  const id = c.req.param("id")
+  
+  // Check auth
+  const session = await auth.api.getSession({
+    headers: c.req.raw.headers,
+  })
+  
+  if (!session) {
+    return c.json({ error: "Unauthorized" }, 401)
+  }
+  
+  try {
+    // Check if design exists and user owns it
+    const [existingDesign] = await db
+      .select()
+      .from(design)
+      .where(eq(design.id, id))
+      .limit(1)
+    
+    if (!existingDesign) {
+      return c.json({ error: "Design not found" }, 404)
+    }
+    
+    if (existingDesign.userId !== session.user.id) {
+      return c.json({ error: "Unauthorized" }, 403)
+    }
+    
+    // Delete design
+    await db
+      .delete(design)
+      .where(eq(design.id, id))
+    
+    return c.json({ success: true })
+  } catch (error) {
+    console.error("Error deleting design:", error)
+    return c.json({ error: "Failed to delete design" }, 500)
+  }
+})
+
 // Upload image to R2
 app.post("/api/upload/image", async (c) => {
   const session = await auth.api.getSession({

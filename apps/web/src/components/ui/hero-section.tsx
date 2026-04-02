@@ -23,6 +23,7 @@ import type { Design } from "@/lib/types/design";
 import {
   CommandLineIcon,
   Copy01Icon,
+  Layers01Icon,
   Logout01Icon,
   Moon01Icon,
   Search01Icon,
@@ -128,6 +129,12 @@ const UserMenu = memo(function UserMenu() {
             <HugeiconsIcon icon={UserIcon} className="size-4" />
             Profile
           </DropdownMenuItem>
+          <Link to="/studio">
+            <DropdownMenuItem className="gap-2 text-sm cursor-pointer">
+              <HugeiconsIcon icon={Layers01Icon} className="size-4" />
+              Studio
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuItem
             className="gap-2 text-sm"
             onClick={() => setSettingsOpen(true)}
@@ -171,16 +178,14 @@ const CLICopy = memo(function CLICopy() {
   return (
     <button
       onClick={handleCopy}
-      className="group flex items-center gap-3 rounded-lg bg-muted/50 px-4 py-2.5 font-mono text-sm text-foreground ring-1 ring-border transition-all hover:bg-muted hover:ring-foreground/20"
+      className="group inline-flex items-center gap-2.5 rounded-lg border border-border bg-muted/50 px-4 py-2.5 font-mono text-sm text-muted-foreground transition-all hover:border-foreground/30 hover:bg-muted hover:text-foreground"
     >
-      <span className="text-muted-foreground">$</span>
+      <span className="text-muted-foreground/60">$</span>
       <span>npx tokenui add &lt;skill&gt;</span>
-      <span className="ml-2 flex items-center gap-1.5 text-xs text-muted-foreground transition-colors group-hover:text-foreground">
-        <HugeiconsIcon
-          icon={copied ? Tick02Icon : Copy01Icon}
-          className={cn("size-3.5", copied && "text-green-500")}
-        />
-      </span>
+      <HugeiconsIcon
+        icon={copied ? Tick02Icon : Copy01Icon}
+        className={cn("ml-1 size-4", copied && "text-green-500")}
+      />
     </button>
   );
 });
@@ -356,25 +361,29 @@ export function HeroSection() {
           </FadeIn>
         </div>
 
-        {/* Search + CLI */}
+        {/* CLI - Subtle bottom command */}
         <FadeIn delay={0.3}>
-          <div className="mt-8 flex flex-wrap items-center gap-4">
-            <div className="relative w-full max-w-md">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                <HugeiconsIcon icon={Search01Icon} className="size-4" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search skills..."
-                className="w-full rounded-lg bg-muted/50 py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground ring-1 ring-border outline-none transition-all focus:bg-muted focus:ring-foreground/20"
-              />
-            </div>
+          <div className="mt-8">
             <CLICopy />
           </div>
         </FadeIn>
 
         {/* Design Grid */}
         <div className="mt-12 md:mt-16">
+          {/* Search */}
+          <div className="mb-4 flex items-center justify-between">
+            <div className="relative w-64">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <HugeiconsIcon icon={Search01Icon} className="size-4" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search skills..."
+                className="h-9 w-full rounded-lg bg-muted/50 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground ring-1 ring-border outline-none transition-all focus:bg-muted focus:ring-foreground/20"
+              />
+            </div>
+          </div>
+
           {isLoading ? (
             <LoadingState />
           ) : error ? (

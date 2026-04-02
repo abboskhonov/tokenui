@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useRef } from "react"
-import { useNavigate } from "@tanstack/react-router"
+import { useState, useRef, useEffect } from "react"
+import { useNavigate, useSearch } from "@tanstack/react-router"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -20,9 +20,11 @@ import {
   Globe02Icon,
   AlertCircleIcon,
   Loading02Icon,
+  Tick02Icon,
 } from "@hugeicons/core-free-icons"
 import { categories } from "@/features/marketing/data"
 import { useCreateDesign, uploadImage } from "@/lib/queries/designs"
+import { useStudioDesign, useUpdateStudioDesign } from "@/features/studio"
 import type { CreateDesignData } from "@/lib/types/design"
 
 // Toggle switch component
@@ -48,7 +50,13 @@ function Toggle({ checked, onCheckedChange }: { checked: boolean; onCheckedChang
 
 export function PublishPage() {
   const navigate = useNavigate()
+  const search = useSearch({ from: "/publish" }) as { edit?: string }
+  const editId = search.edit
+  
+  const isEditing = !!editId
+  const { data: existingDesign, isLoading: isLoadingDesign } = useStudioDesign(editId || "")
   const createDesign = useCreateDesign()
+  const updateDesign = useUpdateStudioDesign()
   
   const [designName, setDesignName] = useState("")
   const [description, setDescription] = useState("")
@@ -63,18 +71,29 @@ export function PublishPage() {
   
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Load existing design data when editing
+  useEffect(() => {
+    if (isEditing && existingDesign) {
+      setDesignName(existingDesign.name)
+      setDescription(existingDesign.description || "")
+      setCategory(existingDesign.category)
+      setSkillContent(existingDesign.content)
+      setDemoUrl(existingDesign.demoUrl || "")
+      setIsPublic(existingDesign.isPublic)
+      setThumbnailUrl(existingDesign.thumbnailUrl || "")
+    }
+  }, [isEditing, existingDesign])
+
   const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     
-    // Check file type
     const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"]
     if (!allowedTypes.includes(file.type)) {
       setUploadError("Invalid file type. Please upload an image (JPEG, PNG, WebP, GIF, or AVIF).")
       return
     }
     
-    // Check file size (5MB max)
     const maxSize = 5 * 1024 * 1024
     if (file.size > maxSize) {
       setUploadError("File too large. Maximum size is 5MB.")
@@ -89,7 +108,6 @@ export function PublishPage() {
       setThumbnailUrl(result.url)
     } catch (error) {
       setUploadError(error instanceof Error ? error.message : "Failed to upload image")
-      // Fallback to blob URL for preview if upload fails
       const url = URL.createObjectURL(file)
       setThumbnailUrl(url)
     } finally {
@@ -130,34 +148,49 @@ export function PublishPage() {
     }
     
     try {
-      await createDesign.mutateAsync(data)
-      // Navigate to home or the newly created design
-      navigate({ to: "/" })
+      if (isEditing && editId) {
+        await updateDesign.mutateAsync({ id: editId, data })
+        navigate({ to: "/studio" })
+      } else {
+        await createDesign.mutateAsync(data)
+        navigate({ to: "/studio" })
+      }
     } catch (error) {
-      // Error is handled by the mutation
-      console.error("Failed to publish:", error)
+      console.error("Failed to save:", error)
     }
   }
+
+  const isPending = createDesign.isPending || updateDesign.isPending || isUploading || isLoadingDesign
+  const error = uploadError || (Object.keys(errors).length > 0 ? errors : null) || createDesign.error || updateDesign.error
 
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}
       <header className="h-14 border-b flex items-center justify-between px-4 shrink-0">
         <div className="flex items-center gap-4">
-          <a href="/">
+          <a href={isEditing ? "/studio" : "/"}>
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
             </Button>
           </a>
+          <span className="text-sm font-medium text-muted-foreground">
+            {isEditing ? "Edit Design" : "New Design"}
+          </span>
         </div>
 
         <Button 
           className="gap-2" 
           onClick={handleSubmit}
-          disabled={createDesign.isPending || isUploading}
+          disabled={isPending}
         >
-          <HugeiconsIcon icon={Add01Icon} className="size-4" />
-          {createDesign.isPending ? "Publishing..." : "Publish"}
+          <HugeiconsIcon 
+            icon={isEditing ? Tick02Icon : Add01Icon} 
+            className="size-4" 
+          />
+          {isPending 
+            ? (isEditing ? "Saving..." : "Publishing...") 
+            : (isEditing ? "Save Changes" : "Publish")
+          }
         </Button>
       </header>
 
@@ -167,7 +200,7 @@ export function PublishPage() {
         <div className="w-[45%] min-w-[400px] border-r overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted-foreground/20 [&::-webkit-scrollbar-thumb]:rounded-full]">
           <div className="p-6 space-y-6">
             {/* Error Alert */}
-            {(Object.keys(errors).length > 0 || createDesign.error || uploadError) && (
+            {error && (
               <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 flex items-start gap-2">
                 <HugeiconsIcon icon={AlertCircleIcon} className="size-4 text-destructive shrink-0 mt-0.5" />
                 <div className="text-sm text-destructive">
@@ -180,9 +213,7 @@ export function PublishPage() {
                       ))}
                     </ul>
                   ) : (
-                    createDesign.error instanceof Error 
-                      ? createDesign.error.message 
-                      : "Failed to publish design. Please try again."
+                    error instanceof Error ? error.message : "Failed to save design. Please try again."
                   )}
                 </div>
               </div>
@@ -279,7 +310,7 @@ export function PublishPage() {
               </div>
             </div>
 
-            {/* Category with proper dropdown */}
+            {/* Category */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Category</label>
               <Select value={category} onValueChange={(value) => setCategory(value || "")}>
