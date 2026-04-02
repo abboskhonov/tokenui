@@ -27,18 +27,7 @@ import {
   UserIcon,
   Sun01Icon,
   Moon01Icon,
-  Copy01Icon,
-  Tick02Icon,
 } from "@hugeicons/core-free-icons";
-
-type PackageManager = "npx" | "yarn" | "pnpm" | "bun";
-
-const commands: Record<PackageManager, string> = {
-  npx: "npx tokenui add <design>",
-  yarn: "yarn tokenui add <design>",
-  pnpm: "pnpm tokenui add <design>",
-  bun: "bun tokenui add <design>",
-};
 
 function TimelineContent({
   children,
@@ -87,60 +76,6 @@ function ThemeToggle() {
       />
       <span className="sr-only">Toggle theme</span>
     </Button>
-  )
-}
-
-// Install Command Component
-function InstallCommand() {
-  const [activeTab, setActiveTab] = useState<PackageManager>("npx")
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(commands[activeTab])
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error("Failed to copy:", err)
-    }
-  }
-
-  return (
-    <div className="space-y-2">
-      {/* Tabs */}
-      <div className="flex items-center gap-1">
-        {(Object.keys(commands) as PackageManager[]).map((pm) => (
-          <button
-            key={pm}
-            onClick={() => setActiveTab(pm)}
-            className={`px-3 py-1.5 font-mono text-xs rounded transition-colors ${
-              activeTab === pm
-                ? "bg-muted text-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {pm}
-          </button>
-        ))}
-      </div>
-
-      {/* Terminal Block */}
-      <div className="relative bg-card border border-border rounded-lg p-4">
-        <div className="flex items-center gap-2 font-mono text-sm">
-          <span className="text-muted-foreground">&gt;</span>
-          <span className="text-foreground">{commands[activeTab]}</span>
-        </div>
-        <button
-          onClick={handleCopy}
-          className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <HugeiconsIcon
-            icon={copied ? Tick02Icon : Copy01Icon}
-            className={`size-4 ${copied ? "text-green-500" : ""}`}
-          />
-        </button>
-      </div>
-    </div>
   )
 }
 
@@ -277,25 +212,22 @@ export function HeroSection() {
             <div className="max-w-3xl mx-auto">
               {/* Headline */}
               <TimelineContent animationNum={1}>
-                <h1 className="text-6xl sm:text-7xl md:text-8xl font-semibold text-center tracking-tighter">
+                <h1 className="text-7xl sm:text-8xl md:text-9xl font-bold text-center tracking-tighter">
                   TokenUI
                 </h1>
-                <p className="text-sm font-mono tracking-[0.3em] uppercase text-muted-foreground mt-4 text-center">
-                  Design components for AI agents
-                </p>
               </TimelineContent>
 
               {/* Search Bar */}
               <TimelineContent animationNum={2}>
-                <div className="max-w-lg mx-auto mt-8 mb-8">
+                <div className="max-w-md mx-auto mt-8">
                   <div className="relative">
                     <input
                       type="text"
                       placeholder="Search designs..."
-                      className="w-full px-4 py-3 bg-muted border border-border rounded-lg font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/50 transition-colors"
+                      className="w-full px-4 py-3 bg-card border border-border rounded-lg font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/50 transition-colors"
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      <kbd className="hidden sm:inline-flex items-center justify-center px-2 py-1 rounded bg-card border border-border font-mono text-xs text-muted-foreground">
+                      <kbd className="hidden sm:inline-flex items-center justify-center px-2 py-1 rounded bg-muted font-mono text-xs text-muted-foreground">
                         /
                       </kbd>
                     </div>
@@ -303,47 +235,14 @@ export function HeroSection() {
                 </div>
               </TimelineContent>
 
-              {/* Description */}
+              {/* CLI Only */}
               <TimelineContent animationNum={3}>
-                <p className="font-mono text-sm sm:text-base text-muted-foreground text-center mb-12 leading-relaxed max-w-2xl mx-auto">
-                  Point your AI agent at any design. We package it and give your agent
-                  access to beautiful UI components. Type-safe, customizable, and production-ready.
-                </p>
-              </TimelineContent>
-
-              {/* Install Section */}
-              <TimelineContent animationNum={4}>
-                <div className="space-y-4">
-                  {/* Label */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
-                      Install TokenUI
-                    </span>
-                    <div className="flex items-center gap-4 text-xs font-mono">
-                      <span className="flex items-center gap-1.5 text-muted-foreground">
-                        <HugeiconsIcon icon={CommandLineIcon} className="size-3.5" />
-                        CLI
-                      </span>
+                <div className="max-w-md mx-auto mt-8">
+                  <div className="relative bg-card border border-border rounded-lg p-4">
+                    <div className="flex items-center gap-2 font-mono text-sm">
+                      <span className="text-muted-foreground">&gt;</span>
+                      <span className="text-foreground">npx tokenui add &lt;design&gt;</span>
                     </div>
-                  </div>
-
-                  {/* Package Manager Tabs */}
-                  <InstallCommand />
-
-                  {/* CTA Buttons */}
-                  <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
-                    <a
-                      href="/docs"
-                      className="inline-flex items-center px-6 py-3 bg-foreground text-background font-mono text-sm rounded hover:bg-foreground/90 transition-colors"
-                    >
-                      get started free
-                    </a>
-                    <a
-                      href="/docs"
-                      className="inline-flex items-center px-6 py-3 border border-border font-mono text-sm rounded text-muted-foreground hover:text-foreground hover:border-foreground/50 transition-colors"
-                    >
-                      read the docs
-                    </a>
                   </div>
                 </div>
               </TimelineContent>
