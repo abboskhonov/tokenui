@@ -55,47 +55,44 @@ function DesignCard({ design }: DesignCardProps) {
       designSlug: design.slug 
     }}>
       <article className="group relative cursor-pointer z-0 hover:z-50">
-        {/* Card Container */}
-        <div className="relative overflow-visible rounded-xl bg-muted ring-1 ring-border/50 transition-all duration-300 ease-out group-hover:-translate-y-4 group-hover:shadow-2xl group-hover:shadow-foreground/20 group-hover:ring-border group-hover:scale-[1.02]">
-          {/* Thumbnail */}
-          <div className="aspect-[4/3] overflow-hidden rounded-t-xl">
-            <ViewTransition name={thumbnailName} share="morph-forward" default="none">
-              {design.thumbnailUrl ? (
-                <img 
-                  src={design.thumbnailUrl} 
-                  alt={design.name}
-                  className="h-full w-full object-cover"
+        {/* Thumbnail Container - moves up on hover */}
+        <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-muted ring-1 ring-border/50 transition-all duration-300 ease-out group-hover:-translate-y-3 group-hover:shadow-lg group-hover:shadow-foreground/5 group-hover:ring-border group-hover:scale-[1.02]">
+          <ViewTransition name={thumbnailName} share="morph-forward" default="none">
+            {design.thumbnailUrl ? (
+              <img 
+                src={design.thumbnailUrl} 
+                alt={design.name}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <SkillCard variant="pattern" />
+            )}
+          </ViewTransition>
+        </div>
+        
+        {/* Metadata - appears below the card on hover */}
+        <div className="absolute -bottom-3 left-0 right-0 flex items-center justify-between px-1 pt-3 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100">
+          <Link to="/u/$username" params={{ username }} className="flex items-center gap-2 min-w-0">
+            <div className="relative h-6 w-6 shrink-0">
+              {design.author?.image ? (
+                <img
+                  src={design.author.image}
+                  alt=""
+                  className="h-full w-full rounded-full object-cover ring-1 ring-border/50"
                 />
               ) : (
-                <SkillCard variant="pattern" />
+                <div className="flex h-full w-full items-center justify-center rounded-full bg-muted text-[10px] font-medium text-muted-foreground ring-1 ring-border/50">
+                  {(design.author?.name || design.name).charAt(0).toUpperCase()}
+                </div>
               )}
-            </ViewTransition>
-          </div>
-          
-          {/* Footer - Always visible at bottom of card */}
-          <div className="flex items-center justify-between px-3 py-3 bg-background border-t border-border/50 rounded-b-xl">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="relative h-6 w-6 shrink-0">
-                {design.author?.image ? (
-                  <img
-                    src={design.author.image}
-                    alt=""
-                    className="h-full w-full rounded-full object-cover ring-1 ring-border/50"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center rounded-full bg-muted text-[10px] font-medium text-muted-foreground ring-1 ring-border/50">
-                    {(design.author?.name || design.name).charAt(0).toUpperCase()}
-                  </div>
-                )}
-              </div>
-              <h3 className="text-sm font-medium text-foreground tracking-tight truncate">
-                {design.name}
-              </h3>
             </div>
-            <span className="text-xs font-medium text-muted-foreground/70 tabular-nums shrink-0">
-              {design.viewCount.toLocaleString()} views
-            </span>
-          </div>
+            <h3 className="text-sm font-medium text-foreground tracking-tight truncate hover:text-primary transition-colors">
+              {design.name}
+            </h3>
+          </Link>
+          <span className="text-xs font-medium text-muted-foreground/70 tabular-nums shrink-0">
+            {design.viewCount.toLocaleString()}
+          </span>
         </div>
       </article>
     </Link>

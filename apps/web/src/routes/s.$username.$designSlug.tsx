@@ -183,12 +183,12 @@ function SkillDetailPage() {
             </div>
 
             {/* Created by */}
-            <div className="flex items-center gap-3">
+            <Link to="/u/$username" params={{ username }} className="flex items-center gap-3 group cursor-pointer">
               {design.author?.image ? (
                 <img
                   src={design.author.image}
                   alt={design.author.name || "Author"}
-                  className="h-10 w-10 rounded-full object-cover ring-2 ring-border"
+                  className="h-10 w-10 rounded-full object-cover ring-2 ring-border group-hover:ring-primary/50 transition-all"
                 />
               ) : (
                 <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand to-brand/70 flex items-center justify-center text-primary-foreground font-medium">
@@ -196,10 +196,10 @@ function SkillDetailPage() {
                 </div>
               )}
               <div>
-                <p className="font-medium">{design.author?.name || username}</p>
+                <p className="font-medium group-hover:text-primary transition-colors">{design.author?.name || username}</p>
                 <p className="text-xs text-muted-foreground">@{username}</p>
               </div>
-            </div>
+            </Link>
 
             {/* Installation */}
             <div className="space-y-2">

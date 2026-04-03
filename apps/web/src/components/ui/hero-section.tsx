@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, memo } from "react";
-import { Link } from "@tanstack/react-router";
+import { useState, useCallback, memo, useRef, useEffect } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -53,12 +53,18 @@ const UserMenu = memo(function UserMenu() {
   // Use SSR user data from context instead of client-side hook
   const { user } = useUser();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const navigate = useNavigate();
 
   // Handle sign out with useCallback to prevent recreating function
   const handleSignOut = useCallback(async () => {
     await signOut();
     window.location.reload();
   }, []);
+
+  const handleProfileClick = useCallback(() => {
+    const username = user?.username || user?.email?.split("@")[0] || "user";
+    navigate({ to: "/u/$username", params: { username } });
+  }, [user, navigate]);
 
   if (!user) {
     return (
@@ -96,7 +102,10 @@ const UserMenu = memo(function UserMenu() {
           }
         />
         <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuItem className="gap-2 text-sm">
+          <DropdownMenuItem 
+            className="gap-2 text-sm cursor-pointer"
+            onClick={handleProfileClick}
+          >
             <HugeiconsIcon icon={UserIcon} className="size-4" />
             Profile
           </DropdownMenuItem>
@@ -173,8 +182,8 @@ const DesignCard = memo(function DesignCard({ design }: DesignCardProps) {
       designSlug: design.slug 
     }}>
       <article className="group relative cursor-pointer">
-        {/* Thumbnail Container */}
-        <div className="relative aspect-video overflow-hidden rounded-xl bg-muted ring-1 ring-border/50 transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:shadow-lg group-hover:shadow-foreground/5 group-hover:ring-border/80">
+        {/* Thumbnail Container - moves up on hover */}
+        <div className="relative aspect-video overflow-hidden rounded-xl bg-muted ring-1 ring-border/50 transition-all duration-300 ease-out group-hover:-translate-y-3 group-hover:ring-border/80">
           {design.thumbnailUrl ? (
             <img
               src={design.thumbnailUrl}
@@ -188,10 +197,10 @@ const DesignCard = memo(function DesignCard({ design }: DesignCardProps) {
           )}
         </div>
         
-        {/* Metadata - appears below card on hover */}
-        <div className="absolute -bottom-10 left-0 right-0 flex items-center justify-between px-1 pt-3 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100">
-          <div className="flex items-center gap-2">
-            <div className="relative h-5 w-5">
+        {/* Metadata - appears below the card on hover */}
+        <div className="absolute -bottom-3 left-0 right-0 flex items-center justify-between px-1 pt-2 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:translate-y-0">
+          <Link to="/u/$username" params={{ username: design.author?.username || "unknown" }} className="flex items-center gap-2 min-w-0">
+            <div className="relative h-5 w-5 shrink-0">
               {design.author?.image ? (
                 <img
                   src={design.author.image}
@@ -205,12 +214,12 @@ const DesignCard = memo(function DesignCard({ design }: DesignCardProps) {
                 </div>
               )}
             </div>
-            <h3 className="text-sm font-medium text-foreground tracking-tight">
+            <h3 className="text-xs font-medium text-foreground tracking-tight truncate hover:text-primary transition-colors">
               {design.name}
             </h3>
-          </div>
-          <span className="text-xs font-medium text-muted-foreground/70 tabular-nums">
-            {design.viewCount.toLocaleString()} views
+          </Link>
+          <span className="text-[10px] font-medium text-muted-foreground/70 tabular-nums shrink-0">
+            {design.viewCount.toLocaleString()}
           </span>
         </div>
       </article>
@@ -289,6 +298,23 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
   // Use SSR data if available, otherwise fall back to client-fetched data
   const displayDesigns = initialDesigns || designs;
   const isLoadingDesigns = !initialDesigns && isLoading;
+  
+  // Search input ref for keyboard shortcut
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Handle "/" key to focus search input
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Focus search when "/" is pressed, but not when typing in an input
+      if (e.key === "/" && !["INPUT", "TEXTAREA"].includes((e.target as HTMLElement).tagName)) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <main className="relative min-h-screen bg-background">
@@ -335,6 +361,7 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
             <div className="flex flex-1 items-center gap-3">
               <HugeiconsIcon icon={Search01Icon} className="size-5 text-muted-foreground" />
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder="Search skills..."
                 className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"

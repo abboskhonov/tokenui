@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Link } from "@tanstack/react-router"
+import { Link, useNavigate } from "@tanstack/react-router"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -54,6 +54,7 @@ function UserMenu() {
   // Use SSR user data from context instead of client-side hook
   const { user } = useUser()
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const navigate = useNavigate()
 
   if (!user) {
     return (
@@ -67,6 +68,11 @@ function UserMenu() {
         </Button>
       </Link>
     )
+  }
+
+  const handleProfileClick = () => {
+    const username = user.username || user.email?.split("@")[0] || "user"
+    navigate({ to: "/u/$username", params: { username } })
   }
 
   return (
@@ -91,7 +97,10 @@ function UserMenu() {
           }
         />
         <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuItem className="gap-2 text-sm">
+          <DropdownMenuItem 
+            className="gap-2 text-sm cursor-pointer"
+            onClick={handleProfileClick}
+          >
             <HugeiconsIcon icon={UserIcon} className="size-4" />
             Profile
           </DropdownMenuItem>
@@ -111,7 +120,7 @@ function UserMenu() {
             }}
           >
             <HugeiconsIcon icon={Logout01Icon} className="size-4" />
-            Log out
+            Log out11
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -4,7 +4,7 @@ import { config } from "dotenv"
 import { auth } from "./auth"
 import { user, design } from "./db/schema"
 import { db } from "./db"
-import { eq, desc, and } from "drizzle-orm"
+import { eq, desc, and, count } from "drizzle-orm"
 import { randomUUID } from "crypto"
 import { uploadFile, generateThumbnailKey, validateThumbnail, generateHtmlKey } from "./storage/r2"
 import { extname } from "path"
@@ -407,6 +407,77 @@ app.get("/api/designs/:username/:slug", async (c) => {
   } catch (error) {
     console.error("Error fetching design:", error)
     return c.json({ error: "Failed to fetch design" }, 500)
+  }
+})
+
+// Get public user profile by username
+app.get("/api/users/:username", async (c) => {
+  const username = c.req.param("username")
+  
+  try {
+    // Get user profile
+    const [userRecord] = await db
+      .select({
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        image: user.image,
+        bio: user.bio,
+        website: user.website,
+        github: user.github,
+        x: user.x,
+        telegram: user.telegram,
+        createdAt: user.createdAt,
+      })
+      .from(user)
+      .where(eq(user.username, username))
+      .limit(1)
+    
+    if (!userRecord) {
+      return c.json({ error: "User not found" }, 404)
+    }
+    
+    // Get user's public designs
+    const designs = await db
+      .select({
+        id: design.id,
+        name: design.name,
+        slug: design.slug,
+        description: design.description,
+        category: design.category,
+        thumbnailUrl: design.thumbnailUrl,
+        isPublic: design.isPublic,
+        viewCount: design.viewCount,
+        createdAt: design.createdAt,
+      })
+      .from(design)
+      .where(and(
+        eq(design.userId, userRecord.id),
+        eq(design.isPublic, true)
+      ))
+      .orderBy(desc(design.createdAt))
+    
+    // Get design count
+    const [{ count: designCount }] = await db
+      .select({ count: count() })
+      .from(design)
+      .where(and(
+        eq(design.userId, userRecord.id),
+        eq(design.isPublic, true)
+      ))
+    
+    return c.json({
+      user: userRecord,
+      designs,
+      stats: {
+        components: designCount,
+        followers: 0, // TODO: Add followers feature
+        following: 0, // TODO: Add following feature
+      }
+    })
+  } catch (error) {
+    console.error("Error fetching user profile:", error)
+    return c.json({ error: "Failed to fetch user profile" }, 500)
   }
 })
 
