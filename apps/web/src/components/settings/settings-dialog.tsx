@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { useUserProfile, useUpdateProfile } from "@/lib/queries/auth"
+import { useTheme } from "@/components/theme-provider"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { 
   UserIcon, 
@@ -37,6 +38,7 @@ type Tab = "profile" | "appearance"
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const { data: user, isLoading } = useUserProfile()
   const updateProfile = useUpdateProfile()
+  const { theme, setTheme } = useTheme()
   const [activeTab, setActiveTab] = useState<Tab>("profile")
   
   const [formData, setFormData] = useState<ProfileUpdateData>({})
@@ -335,10 +337,150 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 </div>
               </div>
             ) : (
-              <div className="p-6">
-                <h3 className="text-base font-semibold mb-6">Appearance</h3>
-                <div className="text-sm text-muted-foreground">
-                  Appearance settings coming soon...
+              <div className="p-8">
+                {/* Theme Section */}
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-base font-semibold mb-1">Theme</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Choose how tokenui looks for you.
+                    </p>
+                  </div>
+                  
+                  {/* Theme Preview Cards */}
+                  <div className="grid grid-cols-3 gap-4">
+                    {/* Light Theme */}
+                    <button
+                      onClick={() => setTheme("light")}
+                      className={cn(
+                        "group relative rounded-xl overflow-hidden border-2 transition-all",
+                        theme === "light"
+                          ? "border-blue-500 ring-2 ring-blue-500/20"
+                          : "border-border hover:border-muted-foreground/50"
+                      )}
+                    >
+                      <div className="aspect-[4/3] bg-[#f5f5f5] p-3">
+                        {/* Light theme preview */}
+                        <div className="h-full bg-white rounded-lg shadow-sm p-2 space-y-2">
+                          <div className="flex gap-2">
+                            <div className="w-6 h-6 rounded bg-gray-200" />
+                            <div className="flex-1 h-2 rounded bg-gray-100" />
+                          </div>
+                          <div className="flex gap-2">
+                            <div className="w-16 h-2 rounded bg-gray-100" />
+                            <div className="flex-1 h-2 rounded bg-gray-100" />
+                          </div>
+                          <div className="flex gap-2 pt-1">
+                            <div className="w-20 h-20 rounded bg-gray-100" />
+                            <div className="flex-1 space-y-1">
+                              <div className="h-2 rounded bg-gray-100" />
+                              <div className="h-2 rounded bg-gray-100 w-3/4" />
+                              <div className="h-2 rounded bg-gray-100 w-1/2" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* Dark Theme */}
+                    <button
+                      onClick={() => setTheme("dark")}
+                      className={cn(
+                        "group relative rounded-xl overflow-hidden border-2 transition-all",
+                        theme === "dark"
+                          ? "border-blue-500 ring-2 ring-blue-500/20"
+                          : "border-border hover:border-muted-foreground/50"
+                      )}
+                    >
+                      <div className="aspect-[4/3] bg-[#0a0a0a] p-3">
+                        {/* Dark theme preview */}
+                        <div className="h-full bg-[#141414] rounded-lg shadow-sm p-2 space-y-2 border border-[#222]">
+                          <div className="flex gap-2">
+                            <div className="w-6 h-6 rounded bg-[#222]" />
+                            <div className="flex-1 h-2 rounded bg-[#1a1a1a]" />
+                          </div>
+                          <div className="flex gap-2">
+                            <div className="w-16 h-2 rounded bg-[#1a1a1a]" />
+                            <div className="flex-1 h-2 rounded bg-[#1a1a1a]" />
+                          </div>
+                          <div className="flex gap-2 pt-1">
+                            <div className="w-20 h-20 rounded bg-[#1a1a1a]" />
+                            <div className="flex-1 space-y-1">
+                              <div className="h-2 rounded bg-[#1a1a1a]" />
+                              <div className="h-2 rounded bg-[#1a1a1a] w-3/4" />
+                              <div className="h-2 rounded bg-[#1a1a1a] w-1/2" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* System Theme */}
+                    <button
+                      onClick={() => setTheme("system")}
+                      className={cn(
+                        "group relative rounded-xl overflow-hidden border-2 transition-all",
+                        theme === "system"
+                          ? "border-blue-500 ring-2 ring-blue-500/20"
+                          : "border-border hover:border-muted-foreground/50"
+                      )}
+                    >
+                      <div className="aspect-[4/3] bg-[#f5f5f5] p-3">
+                        {/* System theme preview - half light half dark */}
+                        <div className="h-full rounded-lg shadow-sm overflow-hidden flex">
+                          {/* Left half - light */}
+                          <div className="flex-1 bg-white p-2 space-y-2">
+                            <div className="flex gap-2">
+                              <div className="w-6 h-6 rounded bg-gray-200" />
+                              <div className="flex-1 h-2 rounded bg-gray-100" />
+                            </div>
+                            <div className="flex gap-2">
+                              <div className="w-16 h-2 rounded bg-gray-100" />
+                              <div className="flex-1 h-2 rounded bg-gray-100" />
+                            </div>
+                            <div className="flex gap-2 pt-1">
+                              <div className="w-16 h-16 rounded bg-gray-100" />
+                              <div className="flex-1 space-y-1">
+                                <div className="h-2 rounded bg-gray-100" />
+                                <div className="h-2 rounded bg-gray-100 w-3/4" />
+                              </div>
+                            </div>
+                          </div>
+                          {/* Right half - dark */}
+                          <div className="flex-1 bg-[#141414] p-2 space-y-2 border-l border-[#222]">
+                            <div className="flex gap-2">
+                              <div className="w-6 h-6 rounded bg-[#222]" />
+                              <div className="flex-1 h-2 rounded bg-[#1a1a1a]" />
+                            </div>
+                            <div className="flex gap-2">
+                              <div className="w-16 h-2 rounded bg-[#1a1a1a]" />
+                              <div className="flex-1 h-2 rounded bg-[#1a1a1a]" />
+                            </div>
+                            <div className="flex gap-2 pt-1">
+                              <div className="w-16 h-16 rounded bg-[#1a1a1a]" />
+                              <div className="flex-1 space-y-1">
+                                <div className="h-2 rounded bg-[#1a1a1a]" />
+                                <div className="h-2 rounded bg-[#1a1a1a] w-3/4" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+
+                  {/* Theme Labels */}
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className={cn("text-sm", theme === "light" ? "text-foreground font-medium" : "text-muted-foreground")}>
+                      Light
+                    </div>
+                    <div className={cn("text-sm", theme === "dark" ? "text-foreground font-medium" : "text-muted-foreground")}>
+                      Dark
+                    </div>
+                    <div className={cn("text-sm", theme === "system" ? "text-foreground font-medium" : "text-muted-foreground")}>
+                      System
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

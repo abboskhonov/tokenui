@@ -9,6 +9,7 @@ export interface SessionUser {
   email: string
   image?: string | null
   username?: string | null
+  emailVerified?: boolean
 }
 
 export const getCurrentUserServerFn = createServerFn({ method: "GET" })

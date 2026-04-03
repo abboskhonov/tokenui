@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react"
 import { useNavigate } from "@tanstack/react-router"
 import { useStudioDesigns, useDeleteStudioDesign } from "./queries"
-import { StudioHeader } from "./components/StudioHeader"
+import { Navigation } from "@/components/navigation/main-navigation"
 import { StudioStats } from "./components/StudioStats"
 import { StudioFilters } from "./components/StudioFilters"
 import { DesignsTable } from "./components/DesignsTable"
@@ -55,7 +55,7 @@ export function StudioPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <StudioHeader />
+      <Navigation />
 
       <main className="mx-auto max-w-7xl px-6 py-8">
         {/* Stats */}

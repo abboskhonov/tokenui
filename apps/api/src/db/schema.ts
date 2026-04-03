@@ -82,4 +82,6 @@ export const design = pgTable("design", {
   index("design_public_idx").on(table.isPublic),
   index("design_slug_idx").on(table.slug),
   index("design_userId_slug_idx").on(table.userId, table.slug),
+  index("design_createdAt_idx").on(table.createdAt), // For sorting
+  index("design_public_createdAt_idx").on(table.isPublic, table.createdAt), // For public feed
 ])

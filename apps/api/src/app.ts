@@ -15,7 +15,7 @@ config()
 
 const app = new Hono()
 
-// Enable CORS for frontend - must be first!
+// Enable CORS and caching headers for frontend - must be first!
 app.use(
   "*",
   cors({
@@ -27,6 +27,21 @@ app.use(
     credentials: true,
   })
 )
+
+// Cache public GET requests for 60 seconds
+app.use("/api/designs", async (c, next) => {
+  await next()
+  if (c.req.method === "GET") {
+    c.header("Cache-Control", "public, max-age=60, stale-while-revalidate=300")
+  }
+})
+
+app.use("/api/users/*", async (c, next) => {
+  await next()
+  if (c.req.method === "GET") {
+    c.header("Cache-Control", "public, max-age=60, stale-while-revalidate=300")
+  }
+})
 
 // Better Auth - Mount all auth routes
 app.all("/api/auth/*", async (c) => {
@@ -68,7 +83,7 @@ app.get("/api/health", async (c) => {
   })
 })
 
-// Protected route example
+// Protected route example - returns user with full profile data including username
 app.get("/api/me", async (c) => {
   const session = await auth.api.getSession({
     headers: c.req.raw.headers,
@@ -78,7 +93,21 @@ app.get("/api/me", async (c) => {
     return c.json({ error: "Unauthorized" }, 401)
   }
   
-  return c.json({ user: session.user })
+  // Fetch full user record from database to get username and other fields
+  const [userRecord] = await db
+    .select({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      username: user.username,
+      image: user.image,
+      emailVerified: user.emailVerified,
+    })
+    .from(user)
+    .where(eq(user.id, session.user.id))
+    .limit(1)
+  
+  return c.json({ user: userRecord || session.user })
 })
 
 // Get full user profile
@@ -239,62 +268,44 @@ app.get("/api/designs/my", async (c) => {
   }
 })
 
-// Get public designs
+// Get public designs with pagination
 app.get("/api/designs", async (c) => {
   const category = c.req.query("category")
+  const limit = Math.min(parseInt(c.req.query("limit") || "20"), 50) // Max 50
+  const offset = parseInt(c.req.query("offset") || "0")
   
   try {
+    const conditions = [eq(design.isPublic, true)]
     if (category) {
-      const designs = await db
-        .select({
-          id: design.id,
-          name: design.name,
-          slug: design.slug,
-          description: design.description,
-          category: design.category,
-          thumbnailUrl: design.thumbnailUrl,
-          isPublic: design.isPublic,
-          viewCount: design.viewCount,
-          createdAt: design.createdAt,
-          userId: design.userId,
-          author: {
-            name: user.name,
-            username: user.username,
-            image: user.image,
-          }
-        })
-        .from(design)
-        .leftJoin(user, eq(design.userId, user.id))
-        .where(eq(design.isPublic, true) && eq(design.category, category))
-        .orderBy(desc(design.createdAt))
-      
-      return c.json({ designs })
-    } else {
-      const designs = await db
-        .select({
-          id: design.id,
-          name: design.name,
-          slug: design.slug,
-          description: design.description,
-          category: design.category,
-          thumbnailUrl: design.thumbnailUrl,
-          isPublic: design.isPublic,
-          viewCount: design.viewCount,
-          createdAt: design.createdAt,
-          userId: design.userId,
-          author: {
-            name: user.name,
-            username: user.username,
-            image: user.image,
-          }
-        })
-        .from(design)
-        .leftJoin(user, eq(design.userId, user.id))
-        .where(eq(design.isPublic, true))
-        .orderBy(desc(design.createdAt))
-      
-      return c.json({ designs })
+      conditions.push(eq(design.category, category))
     }
+    
+    const designs = await db
+      .select({
+        id: design.id,
+        name: design.name,
+        slug: design.slug,
+        description: design.description,
+        category: design.category,
+        thumbnailUrl: design.thumbnailUrl,
+        isPublic: design.isPublic,
+        viewCount: design.viewCount,
+        createdAt: design.createdAt,
+        userId: design.userId,
+        author: {
+          name: user.name,
+          username: user.username,
+          image: user.image,
+        }
+      })
+      .from(design)
+      .leftJoin(user, eq(design.userId, user.id))
+      .where(and(...conditions))
+      .orderBy(desc(design.createdAt))
+      .limit(limit)
+      .offset(offset)
+    
+    return c.json({ designs, pagination: { limit, offset } })
   } catch (error) {
     console.error("Error fetching designs:", error)
     return c.json({ error: "Failed to fetch designs" }, 500)
@@ -415,7 +426,7 @@ app.get("/api/users/:username", async (c) => {
   const username = c.req.param("username")
   
   try {
-    // Get user profile
+    // Get user profile first
     const [userRecord] = await db
       .select({
         id: user.id,
@@ -437,34 +448,35 @@ app.get("/api/users/:username", async (c) => {
       return c.json({ error: "User not found" }, 404)
     }
     
-    // Get user's public designs
-    const designs = await db
-      .select({
-        id: design.id,
-        name: design.name,
-        slug: design.slug,
-        description: design.description,
-        category: design.category,
-        thumbnailUrl: design.thumbnailUrl,
-        isPublic: design.isPublic,
-        viewCount: design.viewCount,
-        createdAt: design.createdAt,
-      })
-      .from(design)
-      .where(and(
-        eq(design.userId, userRecord.id),
-        eq(design.isPublic, true)
-      ))
-      .orderBy(desc(design.createdAt))
-    
-    // Get design count
-    const [{ count: designCount }] = await db
-      .select({ count: count() })
-      .from(design)
-      .where(and(
-        eq(design.userId, userRecord.id),
-        eq(design.isPublic, true)
-      ))
+    // Run designs and count queries in parallel
+    const [designs, [{ count: designCount }]] = await Promise.all([
+      db
+        .select({
+          id: design.id,
+          name: design.name,
+          slug: design.slug,
+          description: design.description,
+          category: design.category,
+          thumbnailUrl: design.thumbnailUrl,
+          isPublic: design.isPublic,
+          viewCount: design.viewCount,
+          createdAt: design.createdAt,
+        })
+        .from(design)
+        .where(and(
+          eq(design.userId, userRecord.id),
+          eq(design.isPublic, true)
+        ))
+        .orderBy(desc(design.createdAt))
+        .limit(50), // Add limit for profile page
+      db
+        .select({ count: count() })
+        .from(design)
+        .where(and(
+          eq(design.userId, userRecord.id),
+          eq(design.isPublic, true)
+        ))
+    ])
     
     return c.json({
       user: userRecord,

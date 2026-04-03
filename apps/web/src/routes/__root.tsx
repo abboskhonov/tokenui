@@ -12,6 +12,7 @@ import appCss from "../styles.css?url"
 import { getCurrentUserServerFn } from "@/lib/api/auth-server"
 import { QueryProvider } from "@/lib/query-provider"
 import { UserProvider } from "@/lib/user-context"
+import { ThemeProvider } from "@/components/theme-provider"
 
 export const Route = createRootRoute({
   head: () => ({
@@ -49,9 +50,11 @@ function RootComponent() {
   return (
     <UserProvider user={user}>
       <QueryProvider>
-        <RootDocument>
-          <Outlet />
-        </RootDocument>
+        <ThemeProvider>
+          <RootDocument>
+            <Outlet />
+          </RootDocument>
+        </ThemeProvider>
       </QueryProvider>
     </UserProvider>
   )

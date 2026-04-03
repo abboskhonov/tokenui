@@ -1,7 +1,7 @@
 "use client"
 
 import { ThemeProvider } from "@/components/theme-provider"
-import { HeroSection } from "@/components/ui/hero-section"
+import { HeroSection } from "@/components/marketing/hero-section"
 import { Footer } from "./sections/footer"
 import type { Design } from "@/lib/types/design"
 
