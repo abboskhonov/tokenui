@@ -16,14 +16,13 @@ import { signOut } from "@/lib/auth-client";
 import { SettingsDialog } from "@/components/settings/settings-dialog";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  Layers01Icon,
   Logout01Icon,
   Settings01Icon,
   UserIcon,
 } from "@hugeicons/core-free-icons";
 
 /**
- * UserMenu - Displays user avatar dropdown with profile, studio, settings, logout
+ * UserMenu - Displays user avatar dropdown with profile, settings, logout
  */
 export const UserMenu = memo(function UserMenu() {
   const { user } = useUser();
@@ -72,7 +71,7 @@ export const UserMenu = memo(function UserMenu() {
             </Button>
           }
         />
-        <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuContent align="end" className="w-40">
           <DropdownMenuItem 
             className="gap-2 text-sm cursor-pointer"
             onClick={handleProfileClick}
@@ -80,12 +79,6 @@ export const UserMenu = memo(function UserMenu() {
             <HugeiconsIcon icon={UserIcon} className="size-4" />
             Profile
           </DropdownMenuItem>
-          <Link to="/studio">
-            <DropdownMenuItem className="gap-2 text-sm cursor-pointer">
-              <HugeiconsIcon icon={Layers01Icon} className="size-4" />
-              Studio
-            </DropdownMenuItem>
-          </Link>
           <DropdownMenuItem
             className="gap-2 text-sm"
             onClick={() => setSettingsOpen(true)}

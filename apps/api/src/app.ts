@@ -4,7 +4,7 @@ import { config } from "dotenv"
 import { auth } from "./auth"
 import { user, design } from "./db/schema"
 import { db } from "./db"
-import { eq, desc, and, count } from "drizzle-orm"
+import { eq, desc, and, count, like, or } from "drizzle-orm"
 import { randomUUID } from "crypto"
 import { uploadFile, generateThumbnailKey, validateThumbnail, generateHtmlKey } from "./storage/r2"
 import { extname } from "path"
@@ -271,13 +271,26 @@ app.get("/api/designs/my", async (c) => {
 // Get public designs with pagination
 app.get("/api/designs", async (c) => {
   const category = c.req.query("category")
+  const search = c.req.query("search")
   const limit = Math.min(parseInt(c.req.query("limit") || "20"), 50) // Max 50
   const offset = parseInt(c.req.query("offset") || "0")
   
   try {
-    const conditions = [eq(design.isPublic, true)]
+    const conditions: (import("drizzle-orm").SQL | undefined)[] = [eq(design.isPublic, true)]
+    
     if (category) {
       conditions.push(eq(design.category, category))
+    }
+    
+    if (search) {
+      const searchPattern = `%${search.toLowerCase()}%`
+      conditions.push(
+        or(
+          like(design.name, searchPattern),
+          like(design.category, searchPattern),
+          like(design.description, searchPattern)
+        )
+      )
     }
     
     const designs = await db
@@ -305,7 +318,7 @@ app.get("/api/designs", async (c) => {
       .limit(limit)
       .offset(offset)
     
-    return c.json({ designs, pagination: { limit, offset } })
+    return c.json({ designs, pagination: { limit, offset, hasMore: designs.length === limit } })
   } catch (error) {
     console.error("Error fetching designs:", error)
     return c.json({ error: "Failed to fetch designs" }, 500)

@@ -120,7 +120,7 @@ function UserMenu() {
             }}
           >
             <HugeiconsIcon icon={Logout01Icon} className="size-4" />
-            Log out11
+            Log out
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -132,27 +132,29 @@ function UserMenu() {
 
 export function Header() {
   return (
-    <header className="flex items-center justify-between py-3 px-4 sm:px-6 lg:px-8 border-b border-border w-full">
-      {/* Left: Logo */}
-      <Link to="/" className="flex items-center gap-2">
-        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-foreground text-background">
-          <HugeiconsIcon icon={CommandLineIcon} className="size-4" />
-        </div>
-        <span className="text-base font-semibold text-foreground tracking-tight">
-          tasteui
-        </span>
-      </Link>
-
-      {/* Right: Actions */}
-      <div className="flex items-center gap-1">
-        <Link 
-          to="/docs" 
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors mr-2"
-        >
-          Docs
+    <header className="sticky top-0 z-50 bg-background border-b border-border w-full">
+      <div className="mx-auto flex max-w-7xl items-center justify-between py-3 px-4 sm:px-6 lg:px-8">
+        {/* Left: Logo */}
+        <Link to="/" className="flex items-center gap-2">
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-foreground text-background">
+            <HugeiconsIcon icon={CommandLineIcon} className="size-4" />
+          </div>
+          <span className="text-base font-semibold text-foreground tracking-tight">
+            tokenui
+          </span>
         </Link>
-        <ThemeToggle />
-        <UserMenu />
+
+        {/* Right: Actions */}
+        <div className="flex items-center gap-1">
+          <Link 
+            to="/docs" 
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors mr-2"
+          >
+            Docs
+          </Link>
+          <ThemeToggle />
+          <UserMenu />
+        </div>
       </div>
     </header>
   )

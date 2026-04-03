@@ -4,7 +4,7 @@ import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Moon01Icon, Sun01Icon } from "@hugeicons/core-free-icons";
+import { Moon02Icon, Sun01Icon } from "@hugeicons/core-free-icons";
 
 /**
  * ThemeToggle - A reusable theme toggle button
@@ -22,7 +22,7 @@ export const ThemeToggle = memo(function ThemeToggle() {
       aria-label={resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
     >
       <HugeiconsIcon
-        icon={resolvedTheme === "dark" ? Sun01Icon : Moon01Icon}
+        icon={resolvedTheme === "dark" ? Sun01Icon : Moon02Icon}
         className="size-4"
       />
     </Button>

@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query"
 import { api } from "@/lib/api/client"
 import type { Design, CreateDesignData } from "@/lib/types/design"
 
@@ -74,6 +74,38 @@ export function usePublicDesigns(category?: string) {
     },
     staleTime: 1000 * 60 * 5, // Data stays fresh for 5 minutes
     gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes even when not in use
+  })
+}
+
+// Get public designs with infinite scroll
+interface PublicDesignsPage {
+  designs: Design[]
+  pagination: {
+    limit: number
+    offset: number
+    hasMore: boolean
+  }
+}
+
+export function usePublicDesignsInfinite(category?: string, search?: string) {
+  return useInfiniteQuery({
+    queryKey: [...designKeys.public(category), "infinite", search],
+    queryFn: async ({ pageParam = 0 }) => {
+      const params = new URLSearchParams()
+      params.append("limit", "20")
+      params.append("offset", pageParam.toString())
+      if (category) params.append("category", category)
+      if (search) params.append("search", search)
+      
+      const response = await api.get<PublicDesignsPage>(`/api/designs?${params.toString()}`)
+      return response
+    },
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.pagination.hasMore) return undefined
+      return lastPage.pagination.offset + lastPage.pagination.limit
+    },
+    initialPageParam: 0,
+    staleTime: 1000 * 60 * 2,
   })
 }
 

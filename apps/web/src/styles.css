@@ -193,6 +193,45 @@
   animation: fade-in 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
+/* ----------------------------------------
+   CUSTOM MINIMALIST SCROLLBAR
+   ---------------------------------------- */
+
+/* WebKit browsers (Chrome, Safari, Edge) */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/* Hide scrollbar when not needed but keep functionality */
+.custom-scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.custom-scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
 /* ========================================
    VIEW TRANSITION ANIMATIONS
    ======================================== */

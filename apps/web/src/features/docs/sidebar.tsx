@@ -14,7 +14,7 @@ export function DocsSidebar() {
 
   return (
     <aside className="w-[200px] shrink-0 hidden md:block">
-      <nav className="sticky top-24 space-y-1">
+      <nav className="sticky top-20 space-y-1">
         {navItems.map((item) => {
           const isActive = pathname === item.to || (item.to !== "/docs" && pathname.startsWith(item.to))
           return (
