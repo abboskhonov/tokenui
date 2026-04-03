@@ -17,14 +17,10 @@ import { NavCollapsible } from "@/components/sidebar-01/nav-collapsible";
 import { NavFooter } from "@/components/sidebar-01/nav-footer";
 import { NavHeader } from "@/components/sidebar-01/nav-header";
 import { NavMain } from "@/components/sidebar-01/nav-main";
+import { useUser } from "@/lib/user-context";
 import type { SidebarData } from "./types";
 
-const data: SidebarData = {
-  user: {
-    name: "ephraim",
-    email: "ephraim@blocks.so",
-    avatar: "/avatar-01.png",
-  },
+const data: Omit<SidebarData, "user"> = {
   navMain: [
     {
       id: "overview",
@@ -124,10 +120,29 @@ const data: SidebarData = {
   },
 };
 
+// Default fallback user when not authenticated
+const defaultUser = {
+  name: "Guest",
+  email: "",
+  avatar: "/avatar-01.png",
+};
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  // Get SSR user data from context
+  const { user } = useUser();
+
+  // Use SSR user data if available, otherwise fallback to default
+  const sidebarUser = user
+    ? {
+        name: user.name || user.username || "User",
+        email: user.email,
+        avatar: user.image || "/avatar-01.png",
+      }
+    : defaultUser;
+
   return (
     <Sidebar {...props}>
-      <NavHeader data={data} />
+      <NavHeader data={{ ...data, user: sidebarUser }} />
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavCollapsible
@@ -136,7 +151,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           topics={data.navCollapsible.topics}
         />
       </SidebarContent>
-      <NavFooter user={data.user} />
+      <NavFooter user={sidebarUser} />
     </Sidebar>
   );
 }

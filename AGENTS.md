@@ -1,8 +1,9 @@
 # Agent Instructions for tokenui
 
-This is a monorepo with a TanStack Start frontend and Hono API backend.
+This repository is a monorepo with a TanStack Start frontend and a Hono API backend.
+These notes are for agentic coding work in this repo and should be kept current.
 
-## Project Structure
+## Repo Layout
 
 ```
 apps/web/          # TanStack Start frontend (port 3000)
@@ -24,109 +25,131 @@ apps/api/          # Hono API backend (port 3001)
   drizzle/         # Database migrations
 ```
 
-## Build Commands
+## Build And Run
 
 ```bash
-# Frontend (port 3000)
-cd apps/web && bun run dev          # Start dev server
-cd apps/web && bun run build        # Production build
-cd apps/web && bun run start        # Start production server
+# Frontend
+cd apps/web && bun run dev       # Vite dev server on port 3000
+cd apps/web && bun run build     # Production build
+cd apps/web && bun run preview   # Preview built app
 
-# API (port 3001)
-cd apps/api && bun run dev          # Start dev server with hot reload
-cd apps/api && bun run deploy       # Deploy to Cloudflare Workers
+# API
+cd apps/api && bun run dev       # Hono dev server on port 3001
+cd apps/api && bun run deploy    # Cloudflare Workers deploy
 
 # Database
-cd apps/api && bun run db:generate  # Generate migrations
-cd apps/api && bun run db:migrate   # Run migrations
-cd apps/api && bun run db:push      # Push schema changes
+cd apps/api && bun run db:generate  # Generate Drizzle migrations
+cd apps/api && bun run db:migrate   # Apply migrations
+cd apps/api && bun run db:push      # Push schema changes directly
 cd apps/api && bun run db:studio    # Open Drizzle Studio
+cd apps/api && bun run db:backfill  # Run data backfill script
 ```
 
-## Lint Commands
+## Lint, Format, Typecheck
 
 ```bash
-cd apps/web && bun run lint         # Run ESLint with tanstack config
-cd apps/web && bun run format       # Format with Prettier
+cd apps/web && bun run lint       # ESLint
+cd apps/web && bun run format     # Prettier write mode
+cd apps/web && bun run typecheck  # TypeScript no-emit check
 ```
 
 ## Testing
 
-**No test framework is currently configured.** Add tests using Vitest if needed:
+The active test runner is Vitest in `apps/web`.
+
 ```bash
-bun add -D vitest @testing-library/react
+cd apps/web && bun run test                 # Run all tests once
+cd apps/web && bun run test -- path/to.test.tsx  # Run a single test file
+cd apps/web && bun run test -- -t "name"    # Run tests matching a name
+cd apps/web && bun run test -- path/to.test.tsx:42  # Run the test at a line
 ```
 
-## Code Style Guidelines
+If you need DOM testing helpers, use `@testing-library/react` and `jsdom`.
+There is no separate backend test script defined in `apps/api` right now.
+
+## Code Style
 
 ### TypeScript
-- **Strict mode enabled**: Always use explicit types, avoid `any`
-- **Interface naming**: Use PascalCase (e.g., `User`, `Design`, `Session`)
-- **Type imports**: Use `import type { Foo }` for type-only imports
+- Prefer explicit types in exported surfaces and avoid `any` unless unavoidable.
+- Use `import type` for type-only imports.
+- Keep interfaces and type aliases in PascalCase.
+- Prefer small, focused types over broad union-heavy models.
 
 ### Imports
-- **Path aliases**: Use `@/` for internal imports (configured in tsconfig)
-  - `@/components/*` → `src/components/*`
-  - `@/lib/*` → `src/lib/*`
-  - `@/hooks/*` → `src/hooks/*`
-- **Import order**: React → External libs → Internal (@/*) → Relative
-- **No barrel files**: Import directly from source files
+- Use `@/` aliases for internal imports.
+- `@/components/*` maps to `src/components/*`.
+- `@/lib/*` maps to `src/lib/*`.
+- `@/hooks/*` maps to `src/hooks/*`.
+- Order imports as React, external packages, internal `@/*`, then relative imports.
+- Import directly from source files; avoid barrel files unless there is a clear reason.
 
-### Naming Conventions
-- **Components**: PascalCase functions, exported (e.g., `export function LoginPage()`)
-- **Hooks**: camelCase starting with `use` (e.g., `useSession`, `useMyDesigns`)
-- **Types/Interfaces**: PascalCase nouns (e.g., `User`, `CreateDesignData`)
-- **Query keys**: camelCase objects with functions (e.g., `designKeys.all`)
-- **Constants**: UPPER_SNAKE_CASE for true constants
-- **Files**: kebab-case for components, camelCase for utilities
+### Naming
+- Components: named PascalCase function exports, not anonymous defaults.
+- Hooks: camelCase starting with `use`.
+- Query key objects: camelCase, e.g. `designKeys.all`.
+- Constants: `UPPER_SNAKE_CASE` for true constants.
+- Files: kebab-case for components, camelCase for utilities.
 
-### React Patterns
-- **Function components**: Use named function exports, not arrow functions
-- **Routes**: Export `Route` using `createFileRoute()` or `createRootRoute()`
-- **State hooks**: Destructure at top of component (e.g., `const [email, setEmail] = useState()`)
-- **Mutations**: Handle errors in mutation hooks, component shows error state
-- **Client components**: Add `"use client"` directive when using hooks
+### React
+- Prefer named function components.
+- Export `Route` from `createFileRoute()` / `createRootRoute()` route files.
+- Keep state hooks near the top of the component body.
+- Handle async and mutation errors in the mutation/query layer where practical.
+- Use `use client` only where hooks require client execution.
 
-### API Patterns
-- **Hono routes**: Use async/await, return `c.json()` responses
-- **Auth checks**: Use `auth.api.getSession({ headers: c.req.raw.headers })`
-- **Error handling**: Return appropriate HTTP status codes (400, 401, 403, 404, 500)
-- **Drizzle queries**: Use `eq()`, `desc()` from `drizzle-orm`
+### API
+- Use async/await in Hono handlers and return `c.json()` responses.
+- Fetch sessions with `auth.api.getSession({ headers: c.req.raw.headers })`.
+- Return proper HTTP status codes: 400, 401, 403, 404, 500.
+- Use Drizzle helpers like `eq()` and `desc()` instead of raw SQL when possible.
 
 ### Data Fetching
-- **React Query**: Define query keys in separate objects (`authKeys`, `designKeys`)
-- **API client**: Use the `api` class from `@/lib/api/client` for HTTP requests
-- **Auth client**: Use functions from `@/lib/auth-client` for Better Auth
-- **Invalidation**: Clear queries on mutations with `queryClient.invalidateQueries()`
+- Keep React Query keys in dedicated objects.
+- Use `api` from `@/lib/api/client` for HTTP calls.
+- Use `@/lib/auth-client` for Better Auth client calls.
+- Invalidate queries after mutations with `queryClient.invalidateQueries()`.
 
 ### Styling
-- **Tailwind CSS**: Use utility classes exclusively
-- **shadcn/ui**: Install components via CLI, customize in `components/ui/`
-- **Icons**: Use `@hugeicons/react` with `HugeiconsIcon` component
-- **Dark mode**: Uses CSS variables, theme toggle in components
-- **cn() utility**: Use from `@/lib/utils` for conditional class merging
+- Use Tailwind utility classes exclusively.
+- Prefer shadcn/ui components in `components/ui/` and customize there.
+- Use `@hugeicons/react` with `HugeiconsIcon` for icons.
+- Use `cn()` from `@/lib/utils` for conditional class merging.
+- Preserve the existing CSS-variable-based dark mode approach.
 
 ### Error Handling
-- **API errors**: Log with `console.error()` and return user-friendly messages
-- **React errors**: Handle in try/catch, show in UI with error states
-- **Async errors**: Use mutation error states, don't throw in components
-- **Auth errors**: Better Auth returns error objects, check `result.error`
+- Log server-side failures with `console.error()` and return user-friendly messages.
+- Surface client-side async errors in component state.
+- Do not throw from components for routine request failures.
+- Check Better Auth result objects for `result.error` before assuming success.
 
 ### Database
-- **Schema**: Use Drizzle ORM with PostgreSQL on Neon
-- **Migrations**: Always run `bun drizzle-kit migrate` after schema changes
-- **Timestamps**: Use `new Date()` in JavaScript, not SQL `now()`
+- Use Drizzle ORM with PostgreSQL on Neon.
+- Run `bun run db:migrate` after schema changes when migrations are needed.
+- Use `new Date()` in JavaScript instead of SQL `now()` for timestamps.
 
 ### Environment Variables
-- **Frontend**: Uses `VITE_` prefix for exposed variables
-- **API**: Uses `process.env` directly
-- **Required**: `DATABASE_URL`, `BETTER_AUTH_SECRET`, OAuth credentials
+- Frontend env vars must use the `VITE_` prefix.
+- API env vars are read from `process.env`.
+- Common required values include `DATABASE_URL`, `BETTER_AUTH_SECRET`, and OAuth credentials.
 
-## Key Technologies
+## Practical Rules
 
-- **Frontend**: TanStack Start (React + Vite + SSR), TanStack Router, TanStack Query
-- **Backend**: Hono, Cloudflare Workers runtime (with Bun for dev)
-- **Auth**: Better Auth with Drizzle adapter
-- **Database**: Neon PostgreSQL with Drizzle ORM
-- **Storage**: Cloudflare R2 for images
-- **UI**: shadcn/ui components, Tailwind CSS, Hugeicons
+- Keep changes minimal and aligned with the existing architecture.
+- Prefer small refactors over introducing new abstractions.
+- Do not add backward-compatibility code unless there is a concrete need.
+- Do not revert or overwrite user changes outside the scope of the task.
+- Verify behavior with the smallest relevant command before widening the scope.
+
+## Current Tooling Notes
+
+- Frontend: TanStack Start, TanStack Router, TanStack Query, Vite, React 19 canary.
+- Backend: Hono, Cloudflare Workers runtime, Bun for local dev.
+- Auth: Better Auth with Drizzle adapter.
+- UI: shadcn/ui, Tailwind CSS, Hugeicons.
+- Storage: Cloudflare R2.
+
+## Rules Files
+
+- No `.cursor/rules/` files were present in this repository at the time of writing.
+- No `.cursorrules` file was present in this repository at the time of writing.
+- No `.github/copilot-instructions.md` file was present in this repository at the time of writing.

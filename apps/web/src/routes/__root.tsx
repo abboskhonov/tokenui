@@ -1,9 +1,17 @@
-import { HeadContent, Scripts, createRootRoute, Outlet } from "@tanstack/react-router"
+import {
+  HeadContent,
+  Outlet,
+  Scripts,
+  createRootRoute,
+} from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
-import { QueryProvider } from "@/lib/query-provider"
 
 import appCss from "../styles.css?url"
+
+import { getCurrentUserServerFn } from "@/lib/api/auth-server"
+import { QueryProvider } from "@/lib/query-provider"
+import { UserProvider } from "@/lib/user-context"
 
 export const Route = createRootRoute({
   head: () => ({
@@ -26,16 +34,26 @@ export const Route = createRootRoute({
       },
     ],
   }),
+  // Fetch user data on the server - this runs server-side during SSR
+  loader: async () => {
+    const user = await getCurrentUserServerFn()
+    return { user }
+  },
   component: RootComponent,
 })
 
 function RootComponent() {
+  // Get the server-fetched user from the route loader
+  const { user } = Route.useLoaderData()
+
   return (
-    <QueryProvider>
-      <RootDocument>
-        <Outlet />
-      </RootDocument>
-    </QueryProvider>
+    <UserProvider user={user}>
+      <QueryProvider>
+        <RootDocument>
+          <Outlet />
+        </RootDocument>
+      </QueryProvider>
+    </UserProvider>
   )
 }
 

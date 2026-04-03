@@ -54,47 +54,50 @@ function DesignCard({ design }: DesignCardProps) {
       username: username, 
       designSlug: design.slug 
     }}>
-      <article className="group relative cursor-pointer">
-        {/* Thumbnail Container with shared element transition */}
-        <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-muted ring-1 ring-border/50 transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:shadow-lg group-hover:shadow-foreground/5 group-hover:ring-border/80">
-          <ViewTransition name={thumbnailName} share="morph-forward" default="none">
-            {design.thumbnailUrl ? (
-              <img 
-                src={design.thumbnailUrl} 
-                alt={design.name}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <SkillCard variant="pattern" />
-            )}
-          </ViewTransition>
-        </div>
-        
-        {/* Metadata - appears below card on hover */}
-      <div className="absolute -bottom-10 left-0 right-0 flex items-center justify-between px-1 pt-3 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100">
-        <div className="flex items-center gap-2">
-          <div className="relative h-5 w-5">
-            {design.author?.image ? (
-              <img
-                src={design.author.image}
-                alt=""
-                className="h-full w-full rounded-full object-cover ring-1 ring-border/50"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center rounded-full bg-muted text-[10px] font-medium text-muted-foreground ring-1 ring-border/50">
-                {(design.author?.name || design.name).charAt(0).toUpperCase()}
-              </div>
-            )}
+      <article className="group relative cursor-pointer z-0 hover:z-50">
+        {/* Card Container */}
+        <div className="relative overflow-visible rounded-xl bg-muted ring-1 ring-border/50 transition-all duration-300 ease-out group-hover:-translate-y-4 group-hover:shadow-2xl group-hover:shadow-foreground/20 group-hover:ring-border group-hover:scale-[1.02]">
+          {/* Thumbnail */}
+          <div className="aspect-[4/3] overflow-hidden rounded-t-xl">
+            <ViewTransition name={thumbnailName} share="morph-forward" default="none">
+              {design.thumbnailUrl ? (
+                <img 
+                  src={design.thumbnailUrl} 
+                  alt={design.name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <SkillCard variant="pattern" />
+              )}
+            </ViewTransition>
           </div>
-          <h3 className="text-sm font-medium text-foreground tracking-tight">
-            {design.name}
-          </h3>
+          
+          {/* Footer - Always visible at bottom of card */}
+          <div className="flex items-center justify-between px-3 py-3 bg-background border-t border-border/50 rounded-b-xl">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="relative h-6 w-6 shrink-0">
+                {design.author?.image ? (
+                  <img
+                    src={design.author.image}
+                    alt=""
+                    className="h-full w-full rounded-full object-cover ring-1 ring-border/50"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center rounded-full bg-muted text-[10px] font-medium text-muted-foreground ring-1 ring-border/50">
+                    {(design.author?.name || design.name).charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </div>
+              <h3 className="text-sm font-medium text-foreground tracking-tight truncate">
+                {design.name}
+              </h3>
+            </div>
+            <span className="text-xs font-medium text-muted-foreground/70 tabular-nums shrink-0">
+              {design.viewCount.toLocaleString()} views
+            </span>
+          </div>
         </div>
-        <span className="text-xs font-medium text-muted-foreground/70 tabular-nums">
-          {design.viewCount.toLocaleString()} views
-        </span>
-      </div>
-    </article>
+      </article>
     </Link>
   )
 }
@@ -105,7 +108,7 @@ export function SkillsGallery() {
   return (
     <section className="relative w-full" id="skills">
       {/* Main bordered container */}
-      <div className="relative mx-auto flex w-full max-w-full flex-col border-y bg-[radial-gradient(35%_80%_at_50%_0%,--theme(--color-foreground/.08),transparent)] px-4 py-8">
+      <div className="relative mx-auto flex w-full max-w-full flex-col border-y bg-[radial-gradient(35%_80%_at_50%_0%,--theme(--color-foreground/.08),transparent)] px-4 pt-16 pb-8 overflow-visible">
         {/* Corner PlusIcons */}
         <PlusIcon
           className="absolute top-[-12.5px] left-[-11.5px] z-1 size-6"
@@ -192,7 +195,7 @@ export function SkillsGallery() {
 
           {/* Grid - Linear style 4 columns */}
           {!isLoading && !error && designs && (
-            <div className="grid gap-6 grid-cols-2 lg:grid-cols-4 pb-12">
+            <div className="grid gap-8 grid-cols-2 lg:grid-cols-4 pb-12 isolate">
               {designs.length === 0 ? (
                 <div className="col-span-full py-12 text-center">
                   <p className="text-sm text-muted-foreground">No designs published yet</p>

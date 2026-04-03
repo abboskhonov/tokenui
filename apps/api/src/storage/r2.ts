@@ -96,6 +96,17 @@ export function generateThumbnailKey(
 }
 
 /**
+ * Generate a unique key for design HTML previews
+ */
+export function generateHtmlKey(
+  designId: string
+): string {
+  const timestamp = Date.now()
+  const random = Math.random().toString(36).substring(2, 10)
+  return `design-previews/${designId}/${timestamp}-${random}.html`
+}
+
+/**
  * Validate file type and size for thumbnails
  */
 export function validateThumbnail(

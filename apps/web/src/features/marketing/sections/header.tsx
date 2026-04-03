@@ -11,7 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useSession, signOut } from "@/lib/auth-client"
+import { useUser } from "@/lib/user-context"
+import { signOut } from "@/lib/auth-client"
 import { SettingsDialog } from "@/components/settings/settings-dialog"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
@@ -50,16 +51,11 @@ function ThemeToggle() {
 }
 
 function UserMenu() {
-  const { data: session, isPending } = useSession()
+  // Use SSR user data from context instead of client-side hook
+  const { user } = useUser()
   const [settingsOpen, setSettingsOpen] = useState(false)
 
-  if (isPending) {
-    return (
-      <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
-    )
-  }
-
-  if (!session?.user) {
+  if (!user) {
     return (
       <Link to="/login">
         <Button
@@ -84,11 +80,11 @@ function UserMenu() {
             >
               <Avatar className="h-7 w-7 rounded-full">
                 <AvatarImage
-                  src={session.user.image || ""}
-                  alt={session.user.name || "User"}
+                  src={user.image || ""}
+                  alt={user.name || "User"}
                 />
                 <AvatarFallback className="bg-primary/20 text-primary text-xs rounded-full">
-                  {session.user.name?.charAt(0).toUpperCase() || "U"}
+                  {user.name?.charAt(0).toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
             </Button>

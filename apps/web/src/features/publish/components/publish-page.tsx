@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react"
 import { useNavigate, useSearch } from "@tanstack/react-router"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -17,15 +16,15 @@ import {
   ArrowLeft01Icon, 
   ImageUploadIcon, 
   Add01Icon, 
-  Globe02Icon,
   AlertCircleIcon,
   Loading02Icon,
   Tick02Icon,
 } from "@hugeicons/core-free-icons"
 import { categories } from "@/features/marketing/data"
-import { useCreateDesign, uploadImage } from "@/lib/queries/designs"
+import { useCreateDesign, uploadImage, uploadHtml } from "@/lib/queries/designs"
 import { useStudioDesign, useUpdateStudioDesign } from "@/features/studio"
 import type { CreateDesignData } from "@/lib/types/design"
+import { useMemo } from "react"
 
 // Toggle switch component
 function Toggle({ checked, onCheckedChange }: { checked: boolean; onCheckedChange: (checked: boolean) => void }) {
@@ -62,11 +61,14 @@ export function PublishPage() {
   const [description, setDescription] = useState("")
   const [category, setCategory] = useState("")
   const [skillContent, setSkillContent] = useState("")
+  const [htmlContent, setHtmlContent] = useState("")
   const [demoUrl, setDemoUrl] = useState("")
   const [isPublic, setIsPublic] = useState(true)
   const [thumbnailUrl, setThumbnailUrl] = useState("")
   const [isUploading, setIsUploading] = useState(false)
+  const [isUploadingHtml, setIsUploadingHtml] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [htmlError, setHtmlError] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -81,6 +83,14 @@ export function PublishPage() {
       setDemoUrl(existingDesign.demoUrl || "")
       setIsPublic(existingDesign.isPublic)
       setThumbnailUrl(existingDesign.thumbnailUrl || "")
+      
+      // If demoUrl is an HTML file hosted on R2, fetch the content
+      if (existingDesign.demoUrl?.endsWith('.html')) {
+        fetch(existingDesign.demoUrl)
+          .then(res => res.text())
+          .then(html => setHtmlContent(html))
+          .catch(() => setHtmlContent(""))
+      }
     }
   }, [isEditing, existingDesign])
 
@@ -137,12 +147,30 @@ export function PublishPage() {
   const handleSubmit = async () => {
     if (!validateForm()) return
     
+    let finalDemoUrl = demoUrl.trim() || undefined
+    
+    // Upload HTML content if provided and changed
+    if (htmlContent.trim()) {
+      try {
+        setIsUploadingHtml(true)
+        setHtmlError(null)
+        const result = await uploadHtml(htmlContent.trim())
+        finalDemoUrl = result.url
+      } catch (error) {
+        setHtmlError(error instanceof Error ? error.message : "Failed to upload HTML preview")
+        setIsUploadingHtml(false)
+        return
+      } finally {
+        setIsUploadingHtml(false)
+      }
+    }
+    
     const data: CreateDesignData = {
       name: designName.trim(),
       description: description.trim() || undefined,
       category,
       content: skillContent.trim(),
-      demoUrl: demoUrl.trim() || undefined,
+      demoUrl: finalDemoUrl,
       thumbnailUrl: thumbnailUrl || undefined,
       isPublic,
     }
@@ -160,9 +188,28 @@ export function PublishPage() {
     }
   }
 
-  const isPending = createDesign.isPending || updateDesign.isPending || isUploading
+  const isPending = createDesign.isPending || updateDesign.isPending || isUploading || isUploadingHtml
   const isLoading = isLoadingDesign
-  const error = uploadError || (Object.keys(errors).length > 0 ? errors : null) || createDesign.error || updateDesign.error
+  const error = uploadError || htmlError || (Object.keys(errors).length > 0 ? errors : null) || createDesign.error || updateDesign.error
+
+  // Create blob URL for HTML preview
+  const htmlPreviewUrl = useMemo(() => {
+    if (!htmlContent.trim()) return null
+    const blob = new Blob([htmlContent], { type: "text/html" })
+    return URL.createObjectURL(blob)
+  }, [htmlContent])
+
+  // Cleanup blob URL on unmount
+  useEffect(() => {
+    return () => {
+      if (htmlPreviewUrl) {
+        URL.revokeObjectURL(htmlPreviewUrl)
+      }
+    }
+  }, [htmlPreviewUrl])
+
+  // Determine which URL to use for preview
+  const previewUrl = htmlPreviewUrl || demoUrl || null
 
   // Show loading state when editing and data is still loading
   if (isEditing && isLoading) {
@@ -269,21 +316,39 @@ export function PublishPage() {
               />
             </div>
 
-            {/* Demo URL */}
+            {/* HTML Preview Content */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Demo URL</label>
-              <div className="relative">
-                <HugeiconsIcon icon={Globe02Icon} className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                <Input
-                  placeholder="https://example.com"
-                  value={demoUrl}
-                  onChange={(e) => setDemoUrl(e.target.value)}
-                  className="pl-9"
-                />
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">HTML Preview</label>
+                <span className="text-xs text-muted-foreground">Optional</span>
               </div>
+              <textarea
+                value={htmlContent}
+                onChange={(e) => setHtmlContent(e.target.value)}
+                placeholder="<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    /* Your design system styles here */
+  </style>
+</head>
+<body>
+  <!-- Your component preview here -->
+</body>
+</html>"
+                className={`w-full min-h-[200px] p-4 rounded-lg bg-muted/50 border text-xs font-mono resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/50 ${
+                  htmlError ? "border-destructive focus:ring-destructive/20" : "border-border/50"
+                }`}
+              />
               <p className="text-xs text-muted-foreground">
-                Link to a live demo or preview of your design. Use the device toggle in the preview to set the default view.
+                Paste HTML code to generate a live preview. Will be hosted automatically. Max 1MB.
               </p>
+              {isUploadingHtml && (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <HugeiconsIcon icon={Loading02Icon} className="size-3 animate-spin" />
+                  Uploading HTML preview...
+                </div>
+              )}
             </div>
 
             {/* Thumbnail */}
@@ -356,9 +421,9 @@ export function PublishPage() {
 
         {/* Right Panel - Preview */}
         <div className="flex-1 bg-muted/30 relative">
-          {demoUrl ? (
+          {previewUrl ? (
             <iframe
-              src={demoUrl}
+              src={previewUrl}
               className="w-full h-full border-0"
               sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
             />
@@ -366,7 +431,7 @@ export function PublishPage() {
             <div className="h-full flex items-center justify-center">
               <div className="text-center space-y-2">
                 <p className="text-sm text-muted-foreground">
-                  Add a demo URL to see a live preview
+                  Add HTML content or a demo URL to see a live preview
                 </p>
               </div>
             </div>

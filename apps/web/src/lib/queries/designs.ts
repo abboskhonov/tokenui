@@ -29,6 +29,25 @@ export async function uploadImage(file: File): Promise<{ url: string; key: strin
   return response.json()
 }
 
+// Upload HTML content to R2
+export async function uploadHtml(html: string): Promise<{ url: string; key: string; size: number; contentType: string }> {
+  const response = await fetch(`${api["baseURL"]}/api/upload/html`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ html }),
+    credentials: "include",
+  })
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: "Upload failed" }))
+    throw new Error(error.error || "Failed to upload HTML")
+  }
+  
+  return response.json()
+}
+
 // Get my designs
 export function useMyDesigns() {
   return useQuery({

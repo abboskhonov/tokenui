@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SkillCard } from "@/components/marketing/skill-card";
 import { usePublicDesigns } from "@/lib/queries/designs";
-import { useSession, signOut } from "@/lib/auth-client";
+import { useUser } from "@/lib/user-context";
+import { signOut } from "@/lib/auth-client";
 import { SettingsDialog } from "@/components/settings/settings-dialog";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useTheme } from "@/components/theme-provider";
@@ -47,9 +48,10 @@ const ThemeToggle = memo(function ThemeToggle() {
   );
 });
 
-// User Menu Component - memoized
+// User Menu Component - memoized, now uses SSR data
 const UserMenu = memo(function UserMenu() {
-  const { data: session, isPending } = useSession();
+  // Use SSR user data from context instead of client-side hook
+  const { user } = useUser();
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Handle sign out with useCallback to prevent recreating function
@@ -58,17 +60,7 @@ const UserMenu = memo(function UserMenu() {
     window.location.reload();
   }, []);
 
-  if (isPending) {
-    // Show neutral state - looks like login button but inactive
-    return (
-      <Button variant="ghost" className="h-8 px-3 gap-2 text-xs font-medium" disabled>
-        <HugeiconsIcon icon={UserIcon} className="size-4" />
-        <span className="hidden sm:inline">Login</span>
-      </Button>
-    );
-  }
-
-  if (!session?.user) {
+  if (!user) {
     return (
       <Link to="/login">
         <Button
@@ -93,11 +85,11 @@ const UserMenu = memo(function UserMenu() {
             >
               <Avatar className="h-7 w-7">
                 <AvatarImage
-                  src={session.user.image || ""}
-                  alt={session.user.name || "User"}
+                  src={user.image || ""}
+                  alt={user.name || "User"}
                 />
                 <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                  {session.user.name?.charAt(0).toUpperCase() || "U"}
+                  {user.name?.charAt(0).toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
             </Button>

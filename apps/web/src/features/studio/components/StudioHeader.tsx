@@ -1,10 +1,11 @@
 import { Link } from "@tanstack/react-router"
-import { useSession } from "@/lib/auth-client"
+import { useUser } from "@/lib/user-context"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { CommandLineIcon } from "@hugeicons/core-free-icons"
 
 export function StudioHeader() {
-  const { data: session, isPending } = useSession()
+  // Use SSR user data from context
+  const { user } = useUser()
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -41,12 +42,10 @@ export function StudioHeader() {
           </nav>
         </div>
         <div className="flex items-center gap-4">
-          {isPending ? (
-            <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
-          ) : session?.user?.image ? (
+          {user?.image ? (
             <img
-              src={session.user.image}
-              alt={session.user.name || "User"}
+              src={user.image}
+              alt={user.name || "User"}
               className="h-8 w-8 rounded-full"
             />
           ) : null}

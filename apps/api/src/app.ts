@@ -6,7 +6,7 @@ import { user, design } from "./db/schema"
 import { db } from "./db"
 import { eq, desc, and } from "drizzle-orm"
 import { randomUUID } from "crypto"
-import { uploadFile, generateThumbnailKey, validateThumbnail } from "./storage/r2"
+import { uploadFile, generateThumbnailKey, validateThumbnail, generateHtmlKey } from "./storage/r2"
 import { extname } from "path"
 import { generateSlug } from "./utils/slugs"
 
@@ -602,6 +602,52 @@ app.post("/api/upload/image", async (c) => {
     console.error("Error uploading image:", error)
     return c.json(
       { error: error instanceof Error ? error.message : "Failed to upload image" },
+      500
+    )
+  }
+})
+
+// Upload HTML content to R2
+app.post("/api/upload/html", async (c) => {
+  const session = await auth.api.getSession({
+    headers: c.req.raw.headers,
+  })
+  
+  if (!session) {
+    return c.json({ error: "Unauthorized" }, 401)
+  }
+  
+  try {
+    const body = await c.req.json()
+    const { html } = body
+    
+    if (!html || typeof html !== "string") {
+      return c.json({ error: "No HTML content provided" }, 400)
+    }
+    
+    // Validate HTML size (max 1MB)
+    const htmlBuffer = Buffer.from(html, "utf-8")
+    const maxSize = 1 * 1024 * 1024 // 1MB
+    if (htmlBuffer.length > maxSize) {
+      return c.json({ error: "HTML content too large. Maximum size is 1MB." }, 400)
+    }
+    
+    // Generate unique key
+    const key = generateHtmlKey(session.user.id)
+    
+    // Upload to R2
+    const result = await uploadFile(htmlBuffer, key, "text/html")
+    
+    return c.json({
+      url: result.url,
+      key: result.key,
+      size: result.size,
+      contentType: result.contentType,
+    })
+  } catch (error) {
+    console.error("Error uploading HTML:", error)
+    return c.json(
+      { error: error instanceof Error ? error.message : "Failed to upload HTML" },
       500
     )
   }
