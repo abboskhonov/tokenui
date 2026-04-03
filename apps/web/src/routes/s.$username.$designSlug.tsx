@@ -20,12 +20,8 @@ import {
   Tick02Icon,
 } from "@hugeicons/core-free-icons"
 import { useState, useCallback, useEffect } from "react"
-import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useUser } from "@/lib/user-context"
-
-// ViewTransition is available in React canary - import from react
-const ViewTransition = (React as { ViewTransition?: React.ComponentType<{ children?: React.ReactNode; name?: string; share?: string | object; enter?: string | object; exit?: string | object; default?: string; update?: string }> }).ViewTransition ?? (({ children }: { children?: React.ReactNode }) => children)
 
 // Route parameter validation
 export const Route = createFileRoute("/s/$username/$designSlug")({
@@ -46,7 +42,10 @@ type TabType = "preview" | "code"
 
 function SkillDetailPage() {
   const { username, designSlug } = Route.useParams()
+  const queryClient = useQueryClient()
+  
   const { data: design, isLoading, error } = useDesign(username, designSlug)
+  
   const [activeTab, setActiveTab] = useState<TabType>("preview")
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop")
   const [previewTheme, setPreviewTheme] = useState<"light" | "dark">("light")
@@ -56,7 +55,6 @@ function SkillDetailPage() {
   const createBookmark = useCreateBookmark()
   const deleteBookmark = useDeleteBookmark()
   const trackView = useTrackView()
-  const queryClient = useQueryClient()
 
   // Debug: log the design ID when loaded
   useEffect(() => {
@@ -152,91 +150,87 @@ function SkillDetailPage() {
     }
   }, [design?.demoUrl])
 
-  if (isLoading) {
-    return <SkillDetailLoading />
-  }
-
-  if (error || !design) {
+  if (error) {
     return <SkillDetailError />
   }
 
-  const installationCommand = `npx tokenui add ${design.author?.username || username}/${design.slug}`
+  // Show skeleton loading - the root Outlet is wrapped in ViewTransition
+  if (!design) {
+    return <SkillDetailSkeleton username={username} designSlug={designSlug} />
+  }
+
+  const installationCommand = design ? `npx tokenui add ${design.author?.username || username}/${design.slug}` : ""
 
   return (
-    <ViewTransition 
-      enter={{ 'nav-forward': 'nav-forward-enter', 'nav-back': 'nav-back-enter', default: 'none' }}
-      exit={{ 'nav-forward': 'nav-forward-exit', 'nav-back': 'nav-back-exit', default: 'none' }}
-      default="none"
-    >
-      <div className="min-h-screen bg-background text-foreground">
-        {/* Header */}
-      <header className="sticky top-0 z-50 h-14 border-b border-border bg-background/95 backdrop-blur-xl">
-        <div className="mx-auto h-full max-w-[1800px] px-4 flex items-center justify-between">
-          {/* Left: Menu + Breadcrumb */}
-          <div className="flex items-center gap-4">
-            <Link to="/">
-              <Button variant="ghost" size="icon-sm" className="h-8 w-8 -ml-2">
-                <HugeiconsIcon icon={Menu01Icon} className="size-4" />
-              </Button>
-            </Link>
-            
-            <div className="flex items-center gap-2 text-sm">
-              <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
-                Skills
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Header */}
+        <header className="sticky top-0 z-50 h-14 border-b border-border bg-background/95 backdrop-blur-xl">
+          <div className="mx-auto h-full max-w-[1800px] px-4 flex items-center justify-between">
+            {/* Left: Menu + Breadcrumb */}
+            <div className="flex items-center gap-4">
+              <Link to="/">
+                <Button variant="ghost" size="icon-sm" className="h-8 w-8 -ml-2">
+                  <HugeiconsIcon icon={Menu01Icon} className="size-4" />
+                </Button>
               </Link>
-              <span className="text-muted-foreground">/</span>
-              <span className="text-muted-foreground">{username}</span>
-              <span className="text-muted-foreground">/</span>
-              <span className="font-medium">{designSlug}</span>
+              
+              <div className="flex items-center gap-2 text-sm">
+                <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Skills
+                </Link>
+                <span className="text-muted-foreground">/</span>
+                <span className="text-muted-foreground">{username}</span>
+                <span className="text-muted-foreground">/</span>
+                <span className="font-medium">{designSlug}</span>
+              </div>
+            </div>
+
+            {/* Right: Actions */}
+            <div className="flex items-center gap-1">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-2 h-8 text-xs"
+                onClick={handleCopyPrompt}
+              >
+                <HugeiconsIcon 
+                  icon={isCopied === "prompt" ? Tick02Icon : Copy01Icon} 
+                  className={cn("size-4", isCopied === "prompt" && "text-green-500")} 
+                />
+                <span className="hidden sm:inline">
+                  {isCopied === "prompt" ? "Copied!" : "Copy prompt"}
+                </span>
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-2 h-8 text-xs"
+                onClick={handleCopyCode}
+              >
+                <HugeiconsIcon 
+                  icon={isCopied === "code" ? Tick02Icon : File01Icon} 
+                  className={cn("size-4", isCopied === "code" && "text-green-500")} 
+                />
+                <span className="hidden sm:inline">
+                  {isCopied === "code" ? "Copied!" : "Copy code"}
+                </span>
+              </Button>
+
+              <div className="h-4 w-px bg-border mx-1 hidden sm:block" />
+              
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-2 h-8 text-xs hidden sm:inline-flex"
+                onClick={() => setActiveTab(activeTab === "preview" ? "code" : "preview")}
+              >
+                <HugeiconsIcon icon={CodeIcon} className="size-4" />
+                View code
+              </Button>
             </div>
           </div>
-
-          {/* Right: Actions */}
-          <div className="flex items-center gap-1">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="gap-2 h-8 text-xs"
-              onClick={handleCopyPrompt}
-            >
-              <HugeiconsIcon 
-                icon={isCopied === "prompt" ? Tick02Icon : Copy01Icon} 
-                className={cn("size-4", isCopied === "prompt" && "text-green-500")} 
-              />
-              <span className="hidden sm:inline">
-                {isCopied === "prompt" ? "Copied!" : "Copy prompt"}
-              </span>
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="gap-2 h-8 text-xs"
-              onClick={handleCopyCode}
-            >
-              <HugeiconsIcon 
-                icon={isCopied === "code" ? Tick02Icon : File01Icon} 
-                className={cn("size-4", isCopied === "code" && "text-green-500")} 
-              />
-              <span className="hidden sm:inline">
-                {isCopied === "code" ? "Copied!" : "Copy code"}
-              </span>
-            </Button>
-
-            <div className="h-4 w-px bg-border mx-1 hidden sm:block" />
-            
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="gap-2 h-8 text-xs hidden sm:inline-flex"
-              onClick={() => setActiveTab(activeTab === "preview" ? "code" : "preview")}
-            >
-              <HugeiconsIcon icon={CodeIcon} className="size-4" />
-              View code
-            </Button>
-          </div>
-        </div>
-      </header>
+        </header>
       {/* Main Content */}
       <div className="flex">
         {/* Left Sidebar */}
@@ -244,13 +238,12 @@ function SkillDetailPage() {
           <div className="p-6 space-y-6">
             {/* Title Section */}
             <div>
-              <ViewTransition 
-                name={`design-name-${design.id}`}
-                share="fade-test"
-                default="none"
+              <h1 
+                className="text-2xl font-semibold tracking-tight"
+                style={{ viewTransitionName: `design-name-${design.id}` }}
               >
-                <h1 className="text-2xl font-semibold tracking-tight">{design.name.toLowerCase()}</h1>
-              </ViewTransition>
+                {design.name.toLowerCase()}
+              </h1>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
                 {design.description || "A reusable UI component for modern applications."}
               </p>
@@ -424,7 +417,7 @@ function SkillDetailPage() {
 
               {/* Preview Content */}
               <div className={cn(
-                "flex-1 overflow-hidden",
+                "flex-1 overflow-hidden min-h-0",
                 previewTheme === "dark" ? "bg-[#0d1117]" : "bg-background"
               )}>
                 <div 
@@ -434,10 +427,9 @@ function SkillDetailPage() {
                   )}
                 >
                   {design.demoUrl ? (
-                    <ViewTransition 
-                      name={`design-thumbnail-${design.id}`}
-                      share="morph-forward"
-                      default="none"
+                    <div 
+                      className="w-full h-full"
+                      style={{ viewTransitionName: `design-thumbnail-${design.id}` }}
                     >
                       <iframe
                         src={design.demoUrl}
@@ -445,7 +437,7 @@ function SkillDetailPage() {
                         sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
                         title={`${design.name} preview`}
                       />
-                    </ViewTransition>
+                    </div>
                   ) : (
                     <div className="h-full flex items-center justify-center">
                       <div className="text-center space-y-4">
@@ -501,14 +493,89 @@ function SkillDetailPage() {
         </main>
       </div>
     </div>
-    </ViewTransition>
   )
 }
 
-function SkillDetailLoading() {
+function SkillDetailSkeleton({ username, designSlug }: { username: string; designSlug: string }) {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Header */}
+      <header className="sticky top-0 z-50 h-14 border-b border-border bg-background/95 backdrop-blur-xl">
+        <div className="mx-auto h-full max-w-[1800px] px-4 flex items-center justify-between">
+          {/* Left: Menu + Breadcrumb */}
+          <div className="flex items-center gap-4">
+            <Link to="/">
+              <Button variant="ghost" size="icon-sm" className="h-8 w-8 -ml-2">
+                <HugeiconsIcon icon={Menu01Icon} className="size-4" />
+              </Button>
+            </Link>
+            
+            <div className="flex items-center gap-2 text-sm">
+              <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
+                Skills
+              </Link>
+              <span className="text-muted-foreground">/</span>
+              <span className="text-muted-foreground">{username}</span>
+              <span className="text-muted-foreground">/</span>
+              <span className="font-medium">{designSlug}</span>
+            </div>
+          </div>
+
+          {/* Right: Actions */}
+          <div className="flex items-center gap-1">
+            <div className="h-8 w-24 bg-muted animate-pulse rounded" />
+            <div className="h-8 w-24 bg-muted animate-pulse rounded" />
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex">
+        {/* Left Sidebar Skeleton */}
+        <aside className="w-[320px] min-h-[calc(100vh-56px)] border-r border-border bg-card/30 hidden lg:block">
+          <div className="p-6 space-y-6">
+            {/* Title Skeleton */}
+            <div className="space-y-2">
+              <div className="h-8 w-3/4 bg-muted animate-pulse rounded" />
+              <div className="h-4 w-full bg-muted animate-pulse rounded" />
+              <div className="h-4 w-2/3 bg-muted animate-pulse rounded" />
+            </div>
+
+            {/* Author Skeleton */}
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
+              <div className="space-y-1">
+                <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+                <div className="h-3 w-16 bg-muted animate-pulse rounded" />
+              </div>
+            </div>
+
+            {/* Install Command Skeleton */}
+            <div className="space-y-2">
+              <div className="h-3 w-12 bg-muted animate-pulse rounded" />
+              <div className="h-10 w-full bg-muted animate-pulse rounded" />
+            </div>
+
+            {/* Stats Skeleton */}
+            <div className="flex items-center gap-4 pt-4 border-t border-border">
+              <div className="text-center space-y-1">
+                <div className="h-6 w-12 bg-muted animate-pulse rounded mx-auto" />
+                <div className="h-3 w-10 bg-muted animate-pulse rounded mx-auto" />
+              </div>
+              <div className="h-8 w-px bg-border" />
+              <div className="text-center space-y-1">
+                <div className="h-6 w-12 bg-muted animate-pulse rounded mx-auto" />
+                <div className="h-3 w-10 bg-muted animate-pulse rounded mx-auto" />
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Preview Skeleton */}
+        <main className="flex-1 min-h-[calc(100vh-56px)] h-[calc(100vh-56px)] bg-muted/30 flex items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        </main>
+      </div>
     </div>
   )
 }

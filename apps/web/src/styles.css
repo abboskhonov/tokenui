@@ -486,3 +486,49 @@
     transform: none !important;
   }
 }
+
+/* ----------------------------------------
+   SKILL GALLERY VIEW TRANSITIONS
+   ---------------------------------------- */
+
+/* 
+   View Transitions API creates pseudo-elements based on the view-transition-name value.
+   Since we have dynamic names (design-thumbnail-${id}), we can't target them individually
+   in CSS. Instead, we rely on the browser's default View Transition behavior with
+   optimized timing.
+
+   The browser will automatically animate elements with matching view-transition-name
+   values between the old and new page.
+*/
+
+/* Default: fast, snappy transitions for all view transitions */
+::view-transition-group(*) {
+  animation-duration: 300ms;
+}
+
+::view-transition-old(*) {
+  animation: vt-fade-out 250ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+::view-transition-new(*) {
+  animation: vt-fade-in 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Fast fade animations */
+@keyframes vt-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

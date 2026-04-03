@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
+import * as React from "react"
 
 import appCss from "../styles.css?url"
 
@@ -14,6 +15,9 @@ import { QueryProvider } from "@/lib/query-provider"
 import { UserProvider } from "@/lib/user-context"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
+
+// ViewTransition from React 19 canary
+const ViewTransition = (React as { ViewTransition?: React.ComponentType<{ children?: React.ReactNode }> }).ViewTransition ?? (({ children }: { children?: React.ReactNode }) => children)
 
 export const Route = createRootRoute({
   head: () => ({
@@ -53,7 +57,9 @@ function RootComponent() {
       <QueryProvider>
         <ThemeProvider>
           <RootDocument>
-            <Outlet />
+            <ViewTransition>
+              <Outlet />
+            </ViewTransition>
           </RootDocument>
         </ThemeProvider>
       </QueryProvider>

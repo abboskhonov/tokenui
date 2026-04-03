@@ -26,16 +26,6 @@ import { useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api/client"
 import type { Design } from "@/lib/types/design"
 
-// Check if ViewTransition is available in React
-const hasViewTransition = !!(React as unknown as { ViewTransition?: React.ComponentType }).ViewTransition
-const hasStartViewTransition = typeof document !== 'undefined' && 'startViewTransition' in document
-
-// ViewTransition is available in React canary - import from react
-const ViewTransition = (React as unknown as { ViewTransition?: React.ComponentType<{ children?: React.ReactNode; name?: string; share?: string; default?: string }> }).ViewTransition ?? (({ children }: { children?: React.ReactNode }) => {
-  console.warn('[VT] ViewTransition not available in React')
-  return children
-})
-
 interface DesignCardProps {
   design: {
     id: string
@@ -58,39 +48,27 @@ interface DesignCardProps {
 
 function DesignCard({ design, queryClient }: DesignCardProps) {
   const navigate = useNavigate()
-  // Unique name for shared element transition (thumbnail morphs to preview)
-  const thumbnailName = `design-thumbnail-${design.id}`
-  // Unique name for the design name text morph animation
-  const designNameName = `design-name-${design.id}`
   const username = design.author?.username || "unknown"
-
-  // Debug: log the transition names
-  console.log('[VT] Card render - thumbnailName:', thumbnailName, 'designNameName:', designNameName)
   
   // Prefetch design data on hover for instant navigation
   const handleMouseEnter = useCallback(() => {
     const username = design.author?.username || "unknown"
     const slug = design.slug
     
-    // Prefetch the design detail query
     queryClient.prefetchQuery({
       queryKey: designKeys.detail(username, slug),
       queryFn: async () => {
         const response = await api.get<{ design: Design }>(`/api/designs/${username}/${slug}`)
         return response.design
       },
-      staleTime: 1000 * 60 * 2, // Data stays fresh for 2 minutes
+      staleTime: 1000 * 60 * 2,
     })
   }, [design, queryClient])
   
   const handleCardClick = useCallback(() => {
-    console.log('[VT] Card clicked, navigating with viewTransition')
-    console.log('[VT] React.ViewTransition available:', hasViewTransition)
-    console.log('[VT] document.startViewTransition available:', hasStartViewTransition)
     navigate({
       to: "/s/$username/$designSlug",
-      params: { username, designSlug: design.slug },
-      viewTransition: true,
+      params: { username, designSlug: design.slug }
     })
   }, [navigate, username, design.slug])
   
@@ -98,8 +76,7 @@ function DesignCard({ design, queryClient }: DesignCardProps) {
     e.stopPropagation()
     navigate({
       to: "/u/$username",
-      params: { username },
-      viewTransition: true,
+      params: { username }
     })
   }, [navigate, username])
   
@@ -111,7 +88,7 @@ function DesignCard({ design, queryClient }: DesignCardProps) {
     >
       {/* Thumbnail Container - moves up on hover */}
       <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-muted ring-1 ring-border/50 transition-all duration-300 ease-out group-hover:-translate-y-3 group-hover:shadow-lg group-hover:shadow-foreground/5 group-hover:ring-border group-hover:scale-[1.02]">
-        <ViewTransition name={thumbnailName} share="morph-forward" default="none">
+        <div style={{ viewTransitionName: `design-thumbnail-${design.id}` }}>
           {design.thumbnailUrl ? (
             <img 
               src={design.thumbnailUrl} 
@@ -121,7 +98,7 @@ function DesignCard({ design, queryClient }: DesignCardProps) {
           ) : (
             <SkillCard variant="pattern" />
           )}
-        </ViewTransition>
+        </div>
       </div>
       
       {/* Metadata - appears below the card on hover */}
@@ -143,11 +120,12 @@ function DesignCard({ design, queryClient }: DesignCardProps) {
               </div>
             )}
           </div>
-          <ViewTransition name={designNameName} share="fade-test" default="none">
-            <h3 className="text-sm font-medium text-foreground tracking-tight truncate hover:text-primary transition-colors">
-              {design.name}
-            </h3>
-          </ViewTransition>
+          <h3 
+            className="text-sm font-medium text-foreground tracking-tight truncate hover:text-primary transition-colors"
+            style={{ viewTransitionName: `design-name-${design.id}` }}
+          >
+            {design.name}
+          </h3>
         </div>
         <span className="text-xs font-medium text-muted-foreground/70 tabular-nums shrink-0">
           {design.viewCount.toLocaleString()}
