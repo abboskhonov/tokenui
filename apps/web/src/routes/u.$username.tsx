@@ -55,9 +55,8 @@ function UserProfilePage() {
     : designs
 
   return (
-    <ViewTransition default="none">
-      <div className="min-h-screen bg-background text-foreground">
-        {/* Header */}
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Header */}
         <header className="sticky top-0 z-50 h-14 border-b border-border bg-background/95 backdrop-blur-xl">
           <div className="mx-auto h-full max-w-6xl px-6 flex items-center justify-between">
             {/* Left: Back + Breadcrumb */}
@@ -228,7 +227,6 @@ function UserProfilePage() {
           )}
         </main>
       </div>
-    </ViewTransition>
   )
 }
 

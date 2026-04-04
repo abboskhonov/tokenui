@@ -6,7 +6,9 @@ interface StatsCardProps {
 }
 
 function SimpleBarChart({ data }: { data: number[] }) {
-  const max = Math.max(...data, 1) // avoid division by zero
+  // Use a baseline max so small values have visual room to show differences
+  // e.g., 9 views with baseline 10 → 90% height (not 100%), 0 views → 0%
+  const maxValue = Math.max(...data, 10)
   const days = ["M", "T", "W", "T", "F", "S", "S"]
   
   return (
@@ -14,9 +16,9 @@ function SimpleBarChart({ data }: { data: number[] }) {
       {data.map((value, i) => (
         <div key={i} className="flex flex-col items-center gap-1 flex-1">
           <div 
-            className="w-full bg-primary/20 rounded-t-sm transition-all duration-500 hover:bg-primary/40"
+            className="w-full bg-primary/30 rounded-t-sm transition-all duration-500 hover:bg-primary/50"
             style={{ 
-              height: `${(value / max) * 100}%`,
+              height: `${(value / maxValue) * 100}%`,
               minHeight: value > 0 ? 4 : 2
             }}
           />

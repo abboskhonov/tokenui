@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useCallback, startTransition } from "react"
+import { useCallback } from "react"
 import { PlusIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -28,9 +28,6 @@ import type { Design } from "@/lib/types/design"
 
 // ViewTransition from React 19 canary
 const ViewTransition = (React as { ViewTransition?: React.ComponentType<{ children?: React.ReactNode; name?: string; share?: string; default?: string }> }).ViewTransition ?? (({ children }: { children?: React.ReactNode }) => children)
-
-// addTransitionType is available in React canary
-const addTransitionType = (React as unknown as { addTransitionType?: (type: string) => void }).addTransitionType ?? (() => {})
 
 interface DesignCardProps {
   design: {
@@ -72,22 +69,17 @@ function DesignCard({ design, queryClient }: DesignCardProps) {
   }, [design, queryClient])
   
   const handleCardClick = useCallback(() => {
-    startTransition(() => {
-      addTransitionType('nav-forward')
-      navigate({
-        to: "/s/$username/$designSlug",
-        params: { username, designSlug: design.slug }
-      })
+    navigate({
+      to: "/s/$username/$designSlug",
+      params: { username, designSlug: design.slug }
     })
   }, [navigate, username, design.slug])
   
   const handleAuthorClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
-    startTransition(() => {
-      navigate({
-        to: "/u/$username",
-        params: { username }
-      })
+    navigate({
+      to: "/u/$username",
+      params: { username }
     })
   }, [navigate, username])
   

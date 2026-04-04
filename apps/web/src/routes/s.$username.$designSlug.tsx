@@ -19,16 +19,13 @@ import {
   MoreVerticalIcon,
   Tick02Icon,
 } from "@hugeicons/core-free-icons"
-import { useState, useCallback, useEffect, startTransition } from "react"
+import { useState, useCallback, useEffect } from "react"
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useUser } from "@/lib/user-context"
 
 // ViewTransition from React 19 canary
 const ViewTransition = (React as { ViewTransition?: React.ComponentType<{ children?: React.ReactNode; name?: string; share?: string; default?: string; enter?: string | object; exit?: string | object }> }).ViewTransition ?? (({ children }: { children?: React.ReactNode }) => children)
-
-// addTransitionType is available in React canary
-const addTransitionType = (React as unknown as { addTransitionType?: (type: string) => void }).addTransitionType ?? (() => {})
 
 // Route parameter validation
 export const Route = createFileRoute("/s/$username/$designSlug")({
@@ -169,56 +166,28 @@ function SkillDetailPage() {
   const installationCommand = design ? `npx tokenui add ${design.author?.username || username}/${design.slug}` : ""
 
   return (
-    <ViewTransition
-      enter={{
-        'nav-forward': 'nav-forward',
-        'nav-back': 'nav-back',
-        default: 'none',
-      }}
-      exit={{
-        'nav-forward': 'nav-forward',
-        'nav-back': 'nav-back',
-        default: 'none',
-      }}
-      default="none"
-    >
-      <div className="min-h-screen bg-background text-foreground">
-        {/* Header */}
-        <header className="sticky top-0 z-50 h-14 border-b border-border bg-background/95 backdrop-blur-xl">
-          <div className="mx-auto h-full max-w-[1800px] px-4 flex items-center justify-between">
-            {/* Left: Menu + Breadcrumb */}
-            <div className="flex items-center gap-4">
-              <Link 
-                to="/"
-                onClick={() => {
-                  startTransition(() => {
-                    addTransitionType('nav-back')
-                  })
-                }}
-              >
-                <Button variant="ghost" size="icon-sm" className="h-8 w-8 -ml-2">
-                  <HugeiconsIcon icon={Menu01Icon} className="size-4" />
-                </Button>
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Header */}
+      <header className="sticky top-0 z-50 h-14 border-b border-border bg-background/95 backdrop-blur-xl">
+        <div className="mx-auto h-full max-w-[1800px] px-4 flex items-center justify-between">
+          {/* Left: Menu + Breadcrumb */}
+          <div className="flex items-center gap-4">
+            <Link to="/">
+              <Button variant="ghost" size="icon-sm" className="h-8 w-8 -ml-2">
+                <HugeiconsIcon icon={Menu01Icon} className="size-4" />
+              </Button>
+            </Link>
+            
+            <div className="flex items-center gap-2 text-sm">
+              <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
+                Skills
               </Link>
-              
-              <div className="flex items-center gap-2 text-sm">
-                <Link 
-                  to="/" 
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={() => {
-                    startTransition(() => {
-                      addTransitionType('nav-back')
-                    })
-                  }}
-                >
-                  Skills
-                </Link>
-                <span className="text-muted-foreground">/</span>
-                <span className="text-muted-foreground">{username}</span>
-                <span className="text-muted-foreground">/</span>
-                <span className="font-medium">{designSlug}</span>
-              </div>
+              <span className="text-muted-foreground">/</span>
+              <span className="text-muted-foreground">{username}</span>
+              <span className="text-muted-foreground">/</span>
+              <span className="font-medium">{designSlug}</span>
             </div>
+          </div>
 
             {/* Right: Actions */}
             <div className="flex items-center gap-1">
@@ -521,12 +490,11 @@ function SkillDetailPage() {
                     </pre>
                   </div>
                 </div>
-              </div>
-            )}
-          </main>
-        </div>
+            </div>
+          )}
+        </main>
       </div>
-    </ViewTransition>
+    </div>
   )
 }
 
