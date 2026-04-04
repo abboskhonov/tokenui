@@ -3,12 +3,32 @@ import { api } from "@/lib/api/client"
 import { signIn, signUp, signOut } from "@/lib/auth-client"
 import type { User, ProfileUpdateData, LoginCredentials, SignUpCredentials, Session } from "@/lib/types/auth"
 
+interface UploadImageResponse {
+  url: string
+  key: string
+  size: number
+  contentType: string
+}
+
 // Query keys
 export const authKeys = {
   all: ["auth"] as const,
   session: () => [...authKeys.all, "session"] as const,
   user: () => [...authKeys.all, "user"] as const,
   profile: () => [...authKeys.all, "profile"] as const,
+}
+
+// Upload image to R2
+export function useUploadImage() {
+  return useMutation({
+    mutationFn: async (file: File): Promise<UploadImageResponse> => {
+      const formData = new FormData()
+      formData.append("file", file)
+      
+      const response = await api.post<UploadImageResponse>("/api/upload/image", formData)
+      return response
+    },
+  })
 }
 
 // Get current user/session
@@ -57,6 +77,9 @@ export function useUpdateProfile() {
         }
         return old
       })
+      
+      // Invalidate all designs queries to refetch with new author image
+      queryClient.invalidateQueries({ queryKey: ["designs"] })
     },
   })
 }

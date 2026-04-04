@@ -97,22 +97,23 @@ function DesignCard({ design, queryClient }: DesignCardProps) {
             share="morph"
             default="none"
           >
-            <div className="h-full w-full">
-              {design.thumbnailUrl ? (
-                <img 
-                  src={design.thumbnailUrl} 
-                  alt={design.name}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <SkillCard variant="pattern" />
-              )}
-            </div>
+              <div className="h-full w-full">
+                {design.thumbnailUrl ? (
+                  <img 
+                    src={design.thumbnailUrl} 
+                    alt={design.name}
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <SkillCard variant="pattern" />
+                )}
+              </div>
           </ViewTransition>
         </div>
         
-        {/* Metadata - appears below the card on hover */}
-        <div className="absolute -bottom-3 left-0 right-0 flex items-center justify-between px-1 pt-3 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100">
+        {/* Metadata - appears below the card on hover with more space */}
+        <div className="absolute -bottom-8 left-0 right-0 flex items-center justify-between px-1 pt-3 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100">
           <div 
             className="flex items-center gap-3 min-w-0 cursor-pointer"
             onClick={handleAuthorClick}
@@ -122,6 +123,7 @@ function DesignCard({ design, queryClient }: DesignCardProps) {
                 <img
                   src={design.author.image}
                   alt=""
+                  loading="lazy"
                   className="h-full w-full rounded-full object-cover ring-1 ring-border/50"
                 />
               ) : (

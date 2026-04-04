@@ -58,12 +58,13 @@ export async function uploadFile(
     throw new Error("R2 credentials not configured")
   }
   
-  // Upload to R2
+  // Upload to R2 with cache headers
   const command = new PutObjectCommand({
     Bucket: config.bucketName,
     Key: key,
     Body: buffer,
     ContentType: contentType,
+    CacheControl: "public, max-age=31536000, immutable", // Cache for 1 year
   })
 
   await getS3Client().send(command)

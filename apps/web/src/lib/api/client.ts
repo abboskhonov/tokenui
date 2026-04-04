@@ -20,12 +20,28 @@ class ApiClient {
   ): Promise<T> {
     const url = `${this.internalBaseURL}${endpoint}`
     
+    // Check if body is FormData - don't set Content-Type, browser will set it with boundary
+    const isFormData = options.body instanceof FormData
+    
+    const headers: Record<string, string> = {}
+    
+    // Only set Content-Type to application/json if not FormData
+    if (!isFormData) {
+      headers["Content-Type"] = "application/json"
+    }
+    
+    // Merge with any provided headers (they take precedence)
+    if (options.headers) {
+      Object.entries(options.headers).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          headers[key] = String(value)
+        }
+      })
+    }
+    
     const config: RequestInit = {
       ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
+      headers,
       credentials: "include",
     }
 
@@ -54,26 +70,32 @@ class ApiClient {
   }
 
   post<T>(endpoint: string, body: unknown, options?: RequestInit): Promise<T> {
+    // Don't stringify if it's FormData
+    const requestBody = body instanceof FormData ? body : JSON.stringify(body)
     return this.request<T>(endpoint, {
       ...options,
       method: "POST",
-      body: JSON.stringify(body),
+      body: requestBody,
     })
   }
 
   put<T>(endpoint: string, body: unknown, options?: RequestInit): Promise<T> {
+    // Don't stringify if it's FormData
+    const requestBody = body instanceof FormData ? body : JSON.stringify(body)
     return this.request<T>(endpoint, {
       ...options,
       method: "PUT",
-      body: JSON.stringify(body),
+      body: requestBody,
     })
   }
 
   patch<T>(endpoint: string, body: unknown, options?: RequestInit): Promise<T> {
+    // Don't stringify if it's FormData
+    const requestBody = body instanceof FormData ? body : JSON.stringify(body)
     return this.request<T>(endpoint, {
       ...options,
       method: "PATCH",
-      body: JSON.stringify(body),
+      body: requestBody,
     })
   }
 

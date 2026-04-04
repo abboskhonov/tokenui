@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
-import { useUserProfile, useUpdateProfile } from "@/lib/queries/auth"
+import { useUserProfile, useUpdateProfile, useUploadImage } from "@/lib/queries/auth"
 import { useTheme } from "@/components/theme-provider"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { 
@@ -38,8 +38,11 @@ type Tab = "profile" | "appearance"
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const { data: user, isLoading } = useUserProfile()
   const updateProfile = useUpdateProfile()
+  const uploadImage = useUploadImage()
   const { theme, setTheme } = useTheme()
   const [activeTab, setActiveTab] = useState<Tab>("profile")
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
   
   const [formData, setFormData] = useState<ProfileUpdateData>({})
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
@@ -87,6 +90,59 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     const newData = { ...formData, [field]: value }
     setFormData(newData)
     triggerSave(newData)
+  }
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"]
+    if (!allowedTypes.includes(file.type)) {
+      alert("Please upload a valid image file (JPEG, PNG, WebP, GIF, or AVIF)")
+      return
+    }
+
+    // Validate file size (5MB max)
+    const maxSize = 5 * 1024 * 1024
+    if (file.size > maxSize) {
+      alert("File too large. Maximum size is 5MB.")
+      return
+    }
+
+    setIsUploadingAvatar(true)
+    
+    try {
+      const result = await uploadImage.mutateAsync(file)
+      
+      // Update form data with new image URL
+      const newData = { ...formData, image: result.url }
+      setFormData(newData)
+      
+      // Save immediately (don't wait for debounce)
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
+      setIsSaving(true)
+      updateProfile.mutate(newData, {
+        onSuccess: () => {
+          setLastSaved(new Date())
+          setIsSaving(false)
+        },
+        onError: () => setIsSaving(false),
+      })
+    } catch (error) {
+      console.error("Failed to upload avatar:", error)
+      alert("Failed to upload avatar. Please try again.")
+    } finally {
+      setIsUploadingAvatar(false)
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
+      }
+    }
   }
 
   if (isLoading) {
@@ -173,6 +229,13 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
                 {/* Profile Card */}
                 <div className="bg-muted/30 rounded-xl p-4 flex items-center gap-4">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+                    className="hidden"
+                  />
                   <Avatar className="h-14 w-14">
                     <AvatarImage src={formData.image || ""} alt={userName} />
                     <AvatarFallback className="bg-primary/20 text-primary text-lg">
@@ -187,9 +250,24 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                     </div>
                   </div>
                   
-                  <Button variant="outline" size="sm" className="gap-2 shrink-0">
-                    <HugeiconsIcon icon={ImageUploadIcon} className="size-4" />
-                    Change Avatar
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="gap-2 shrink-0"
+                    onClick={handleAvatarClick}
+                    disabled={isUploadingAvatar}
+                  >
+                    {isUploadingAvatar ? (
+                      <>
+                        <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <HugeiconsIcon icon={ImageUploadIcon} className="size-4" />
+                        Change Avatar
+                      </>
+                    )}
                   </Button>
                 </div>
 
