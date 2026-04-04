@@ -1,4 +1,3 @@
-export { StudioHeader } from "./StudioHeader"
 export { StatsCard } from "./StatsCard"
 export { StudioStats } from "./StudioStats"
 export { DesignRow } from "./DesignRow"

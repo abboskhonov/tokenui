@@ -13,6 +13,7 @@ export const user = pgTable("user", {
   github: text("github"),
   x: text("x"),
   telegram: text("telegram"),
+  role: text("role").notNull().default("user"), // "user" | "admin"
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (table) => [
@@ -69,21 +70,24 @@ export const design = pgTable("design", {
   slug: text("slug"),
   description: text("description"),
   category: text("category").notNull(),
-  content: text("content").notNull(), // The skill/prompt content
+  content: text("content").notNull(), // The skill/prompt content (main SKILL.md)
   demoUrl: text("demo_url"),
   thumbnailUrl: text("thumbnail_url"),
-  isPublic: boolean("is_public").notNull().default(true),
+  // Status: draft, pending, approved, rejected
+  status: text("status").notNull().default("draft"),
+  reviewMessage: text("review_message"), // Admin feedback message
   viewCount: integer("view_count").notNull().default(0),
+  files: text("files"), // JSON array of additional files [{path, content, type}]
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (table) => [
   index("design_userId_idx").on(table.userId),
   index("design_category_idx").on(table.category),
-  index("design_public_idx").on(table.isPublic),
+  index("design_status_idx").on(table.status),
   index("design_slug_idx").on(table.slug),
   index("design_userId_slug_idx").on(table.userId, table.slug),
-  index("design_createdAt_idx").on(table.createdAt), // For sorting
-  index("design_public_createdAt_idx").on(table.isPublic, table.createdAt), // For public feed
+  index("design_createdAt_idx").on(table.createdAt),
+  index("design_approved_createdAt_idx").on(table.status, table.createdAt), // For public feed
 ])
 
 // Bookmarks table

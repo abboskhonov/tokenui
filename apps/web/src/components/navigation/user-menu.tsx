@@ -20,6 +20,7 @@ import {
   Logout01Icon,
   Settings01Icon,
   UserIcon,
+  Shield02Icon,
 } from "@hugeicons/core-free-icons";
 
 /**
@@ -93,6 +94,17 @@ export const UserMenu = memo(function UserMenu() {
             <HugeiconsIcon icon={Settings01Icon} className="size-4" />
             Settings
           </DropdownMenuItem>
+          
+          {/* Admin Link - Only visible for admins */}
+          {user?.role === "admin" && (
+            <Link to="/admin">
+              <DropdownMenuItem className="gap-2 text-sm cursor-pointer text-primary">
+                <HugeiconsIcon icon={Shield02Icon} className="size-4" />
+                Admin Panel
+              </DropdownMenuItem>
+            </Link>
+          )}
+          
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="gap-2 text-sm text-destructive"

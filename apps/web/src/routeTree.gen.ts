@@ -14,12 +14,18 @@ import { Route as PublishRouteImport } from './routes/publish'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as BookmarksRouteImport } from './routes/bookmarks'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DocsIndexRouteImport } from './routes/docs.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as DocsFaqRouteImport } from './routes/docs.faq'
 import { Route as DocsCliRouteImport } from './routes/docs.cli'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminReviewRouteImport } from './routes/admin.review'
+import { Route as AdminDesignsRouteImport } from './routes/admin.designs'
 import { Route as SUsernameDesignSlugRouteImport } from './routes/s.$username.$designSlug'
 
 const StudioRoute = StudioRouteImport.update({
@@ -47,6 +53,11 @@ const BookmarksRoute = BookmarksRouteImport.update({
   path: '/bookmarks',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SplatRoute = SplatRouteImport.update({
   id: '/$',
   path: '/$',
@@ -61,6 +72,11 @@ const DocsIndexRoute = DocsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DocsRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const UUsernameRoute = UUsernameRouteImport.update({
   id: '/u/$username',
@@ -77,6 +93,26 @@ const DocsCliRoute = DocsCliRouteImport.update({
   path: '/cli',
   getParentRoute: () => DocsRoute,
 } as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReviewRoute = AdminReviewRouteImport.update({
+  id: '/review',
+  path: '/review',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDesignsRoute = AdminDesignsRouteImport.update({
+  id: '/designs',
+  path: '/designs',
+  getParentRoute: () => AdminRoute,
+} as any)
 const SUsernameDesignSlugRoute = SUsernameDesignSlugRouteImport.update({
   id: '/s/$username/$designSlug',
   path: '/s/$username/$designSlug',
@@ -86,14 +122,20 @@ const SUsernameDesignSlugRoute = SUsernameDesignSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/admin': typeof AdminRouteWithChildren
   '/bookmarks': typeof BookmarksRoute
   '/docs': typeof DocsRouteWithChildren
   '/login': typeof LoginRoute
   '/publish': typeof PublishRoute
   '/studio': typeof StudioRoute
+  '/admin/designs': typeof AdminDesignsRoute
+  '/admin/review': typeof AdminReviewRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/docs/cli': typeof DocsCliRoute
   '/docs/faq': typeof DocsFaqRoute
   '/u/$username': typeof UUsernameRoute
+  '/admin/': typeof AdminIndexRoute
   '/docs/': typeof DocsIndexRoute
   '/s/$username/$designSlug': typeof SUsernameDesignSlugRoute
 }
@@ -104,9 +146,14 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/publish': typeof PublishRoute
   '/studio': typeof StudioRoute
+  '/admin/designs': typeof AdminDesignsRoute
+  '/admin/review': typeof AdminReviewRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/docs/cli': typeof DocsCliRoute
   '/docs/faq': typeof DocsFaqRoute
   '/u/$username': typeof UUsernameRoute
+  '/admin': typeof AdminIndexRoute
   '/docs': typeof DocsIndexRoute
   '/s/$username/$designSlug': typeof SUsernameDesignSlugRoute
 }
@@ -114,14 +161,20 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/admin': typeof AdminRouteWithChildren
   '/bookmarks': typeof BookmarksRoute
   '/docs': typeof DocsRouteWithChildren
   '/login': typeof LoginRoute
   '/publish': typeof PublishRoute
   '/studio': typeof StudioRoute
+  '/admin/designs': typeof AdminDesignsRoute
+  '/admin/review': typeof AdminReviewRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/docs/cli': typeof DocsCliRoute
   '/docs/faq': typeof DocsFaqRoute
   '/u/$username': typeof UUsernameRoute
+  '/admin/': typeof AdminIndexRoute
   '/docs/': typeof DocsIndexRoute
   '/s/$username/$designSlug': typeof SUsernameDesignSlugRoute
 }
@@ -130,14 +183,20 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$'
+    | '/admin'
     | '/bookmarks'
     | '/docs'
     | '/login'
     | '/publish'
     | '/studio'
+    | '/admin/designs'
+    | '/admin/review'
+    | '/admin/settings'
+    | '/admin/users'
     | '/docs/cli'
     | '/docs/faq'
     | '/u/$username'
+    | '/admin/'
     | '/docs/'
     | '/s/$username/$designSlug'
   fileRoutesByTo: FileRoutesByTo
@@ -148,23 +207,34 @@ export interface FileRouteTypes {
     | '/login'
     | '/publish'
     | '/studio'
+    | '/admin/designs'
+    | '/admin/review'
+    | '/admin/settings'
+    | '/admin/users'
     | '/docs/cli'
     | '/docs/faq'
     | '/u/$username'
+    | '/admin'
     | '/docs'
     | '/s/$username/$designSlug'
   id:
     | '__root__'
     | '/'
     | '/$'
+    | '/admin'
     | '/bookmarks'
     | '/docs'
     | '/login'
     | '/publish'
     | '/studio'
+    | '/admin/designs'
+    | '/admin/review'
+    | '/admin/settings'
+    | '/admin/users'
     | '/docs/cli'
     | '/docs/faq'
     | '/u/$username'
+    | '/admin/'
     | '/docs/'
     | '/s/$username/$designSlug'
   fileRoutesById: FileRoutesById
@@ -172,6 +242,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
+  AdminRoute: typeof AdminRouteWithChildren
   BookmarksRoute: typeof BookmarksRoute
   DocsRoute: typeof DocsRouteWithChildren
   LoginRoute: typeof LoginRoute
@@ -218,6 +289,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookmarksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/$': {
       id: '/$'
       path: '/$'
@@ -238,6 +316,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/docs/'
       preLoaderRoute: typeof DocsIndexRouteImport
       parentRoute: typeof DocsRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/u/$username': {
       id: '/u/$username'
@@ -260,6 +345,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsCliRouteImport
       parentRoute: typeof DocsRoute
     }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/review': {
+      id: '/admin/review'
+      path: '/review'
+      fullPath: '/admin/review'
+      preLoaderRoute: typeof AdminReviewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/designs': {
+      id: '/admin/designs'
+      path: '/designs'
+      fullPath: '/admin/designs'
+      preLoaderRoute: typeof AdminDesignsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/s/$username/$designSlug': {
       id: '/s/$username/$designSlug'
       path: '/s/$username/$designSlug'
@@ -269,6 +382,24 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AdminRouteChildren {
+  AdminDesignsRoute: typeof AdminDesignsRoute
+  AdminReviewRoute: typeof AdminReviewRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminDesignsRoute: AdminDesignsRoute,
+  AdminReviewRoute: AdminReviewRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface DocsRouteChildren {
   DocsCliRoute: typeof DocsCliRoute
@@ -287,6 +418,7 @@ const DocsRouteWithChildren = DocsRoute._addFileChildren(DocsRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
+  AdminRoute: AdminRouteWithChildren,
   BookmarksRoute: BookmarksRoute,
   DocsRoute: DocsRouteWithChildren,
   LoginRoute: LoginRoute,

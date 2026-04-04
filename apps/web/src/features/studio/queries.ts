@@ -6,7 +6,7 @@ import {
   createDesign,
   updateDesign,
   deleteDesign,
-  toggleDesignVisibility,
+  updateDesignStatus,
 } from "./api"
 
 // Query keys
@@ -73,13 +73,13 @@ export function useDeleteStudioDesign() {
   })
 }
 
-// Toggle visibility
-export function useToggleDesignVisibility() {
+// Update design status
+export function useUpdateDesignStatus() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ id, isPublic }: { id: string; isPublic: boolean }) =>
-      toggleDesignVisibility(id, isPublic),
+    mutationFn: ({ id, status }: { id: string; status: "draft" | "pending" | "approved" }) =>
+      updateDesignStatus(id, status),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: studioKeys.designs() })
       queryClient.invalidateQueries({ queryKey: studioKeys.design(variables.id) })

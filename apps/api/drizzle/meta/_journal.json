@@ -36,6 +36,20 @@
       "when": 1775158664732,
       "tag": "0004_add_username_and_slug",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1775331213012,
+      "tag": "0005_mighty_stone_men",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1743790000000,
+      "tag": "0006_add_status",
+      "breakpoints": true
     }
   ]
 }

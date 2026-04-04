@@ -33,13 +33,13 @@ export async function deleteDesign(id: string): Promise<void> {
   await api.delete(`/api/designs/${id}`)
 }
 
-// Toggle design visibility
-export async function toggleDesignVisibility(
+// Update design status (for submitting to review or changing visibility)
+export async function updateDesignStatus(
   id: string,
-  isPublic: boolean
+  status: "draft" | "pending" | "approved"
 ): Promise<Design> {
   const response = await api.patch<{ design: Design }>(`/api/designs/${id}/visibility`, {
-    isPublic,
+    status,
   })
   return response.design
 }

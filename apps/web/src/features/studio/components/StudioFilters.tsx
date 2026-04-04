@@ -8,8 +8,8 @@ import type { Design } from "@/lib/types/design"
 
 interface StudioFiltersProps {
   designs: Design[] | undefined
-  activeTab: "published" | "draft"
-  onTabChange: (tab: "published" | "draft") => void
+  activeTab: "approved" | "pending" | "draft" | "rejected"
+  onTabChange: (tab: "approved" | "pending" | "draft" | "rejected") => void
   searchQuery: string
   onSearchChange: (query: string) => void
 }
@@ -22,38 +22,39 @@ export function StudioFilters({
   onSearchChange,
 }: StudioFiltersProps) {
   const counts = useMemo(() => {
-    if (!designs) return { published: 0, drafts: 0 }
+    if (!designs) return { approved: 0, pending: 0, draft: 0, rejected: 0 }
     return {
-      published: designs.filter((d) => d.isPublic).length,
-      drafts: designs.filter((d) => !d.isPublic).length,
+      approved: designs.filter((d) => d.status === "approved").length,
+      pending: designs.filter((d) => d.status === "pending").length,
+      draft: designs.filter((d) => d.status === "draft").length,
+      rejected: designs.filter((d) => d.status === "rejected").length,
     }
   }, [designs])
 
+  const tabs = [
+    { id: "approved", label: "Published", count: counts.approved },
+    { id: "pending", label: "Reviewing", count: counts.pending },
+    { id: "draft", label: "Draft", count: counts.draft },
+    { id: "rejected", label: "Rejected", count: counts.rejected },
+  ] as const
+
   return (
     <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-      <div className="flex items-center gap-2 rounded-lg bg-muted p-1">
-        <button
-          onClick={() => onTabChange("published")}
-          className={cn(
-            "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-            activeTab === "published"
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          Published {counts.published}
-        </button>
-        <button
-          onClick={() => onTabChange("draft")}
-          className={cn(
-            "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-            activeTab === "draft"
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          Draft {counts.drafts}
-        </button>
+      <div className="flex items-center gap-1 rounded-lg bg-muted p-1">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => onTabChange(tab.id)}
+            className={cn(
+              "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+              activeTab === tab.id
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {tab.label} {tab.count}
+          </button>
+        ))}
       </div>
 
       <div className="flex items-center gap-3">

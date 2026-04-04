@@ -122,21 +122,19 @@ function PatternBackground() {
 
 function DotMatrixPattern() {
   return (
-    <div className="absolute inset-0 overflow-hidden">
-      {/* Large title text */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-4xl font-bold tracking-tight text-white/90">
-          Falling Pattern
-        </span>
-      </div>
+    <div className="absolute inset-0 overflow-hidden bg-black">
+      {/* Subtle gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-black to-zinc-900" />
       {/* Dot matrix overlay */}
       <div
         className="absolute inset-0"
         style={{
-          backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px)`,
-          backgroundSize: "8px 8px",
+          backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+          backgroundSize: "12px 12px",
         }}
       />
+      {/* Subtle glow effect */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-800/20 via-transparent to-transparent" />
     </div>
   )
 }

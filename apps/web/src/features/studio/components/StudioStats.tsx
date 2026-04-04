@@ -19,11 +19,12 @@ export function StudioStats({ designs }: StudioStatsProps) {
   
   const stats = useMemo(() => {
     if (!designs) {
-      return { published: 0, drafts: 0, views: 0, bookmarks: 0 }
+      return { published: 0, drafts: 0, reviewing: 0, views: 0, bookmarks: 0 }
     }
     return {
-      published: designs.filter((d) => d.isPublic).length,
-      drafts: designs.filter((d) => !d.isPublic).length,
+      published: designs.filter((d) => d.status === "approved").length,
+      drafts: designs.filter((d) => d.status === "draft").length,
+      reviewing: designs.filter((d) => d.status === "pending").length,
       views: viewAnalytics?.totalViews || designs.reduce((sum, d) => sum + d.viewCount, 0),
       bookmarks: 0, // Not implemented yet
     }

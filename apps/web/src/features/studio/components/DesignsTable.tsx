@@ -4,7 +4,7 @@ import type { Design } from "@/lib/types/design"
 interface DesignsTableProps {
   designs: Design[]
   isLoading: boolean
-  activeTab: "published" | "draft"
+  activeTab: "approved" | "pending" | "draft" | "rejected"
   onEdit: (id: string) => void
   onDelete: (id: string) => void
 }
@@ -57,7 +57,7 @@ export function DesignsTable({
                 colSpan={7}
                 className="py-12 text-center text-muted-foreground"
               >
-                No {activeTab === "published" ? "demos" : "drafts"} yet
+                No {activeTab === "draft" ? "drafts" : activeTab === "approved" ? "published" : activeTab} designs yet
               </td>
             </tr>
           ) : (

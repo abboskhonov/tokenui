@@ -1,3 +1,5 @@
+import type { FileNode } from "@/features/publish/components/file-tree"
+
 export interface Design {
   id: string
   userId: string
@@ -8,8 +10,10 @@ export interface Design {
   content: string
   demoUrl: string | null
   thumbnailUrl: string | null
-  isPublic: boolean
+  status: "draft" | "pending" | "approved" | "rejected"
+  reviewMessage: string | null
   viewCount: number
+  files: FileNode[] | null // Additional files for multi-file skills
   createdAt: string
   updatedAt: string
   author?: {
@@ -21,12 +25,14 @@ export interface Design {
 
 export interface CreateDesignData {
   name: string
+  slug?: string
   description?: string
   category: string
   content: string
   demoUrl?: string
   thumbnailUrl?: string
-  isPublic?: boolean
+  status?: "draft" | "pending" | "approved"
+  files?: FileNode[] // Additional files for multi-file skills
 }
 
 export interface Bookmark {

@@ -22,13 +22,13 @@ export function StudioPage() {
   const { data: designs, isLoading } = useStudioDesigns()
   const deleteMutation = useDeleteStudioDesign()
   
-  const [activeTab, setActiveTab] = useState<"published" | "draft">("published")
+  const [activeTab, setActiveTab] = useState<"approved" | "pending" | "draft" | "rejected">("approved")
   const [searchQuery, setSearchQuery] = useState("")
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
   // Filter designs based on tab and search
   const filteredDesigns = designs?.filter((design) => {
-    const matchesTab = activeTab === "published" ? design.isPublic : !design.isPublic
+    const matchesTab = design.status === activeTab
     const matchesSearch = design.name.toLowerCase().includes(searchQuery.toLowerCase())
     return matchesTab && matchesSearch
   }) || []
