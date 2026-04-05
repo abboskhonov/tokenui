@@ -21,10 +21,12 @@ import {
   GithubIcon,
   TwitterIcon,
   TelegramIcon,
-  LinkIcon,
   Mail01Icon,
   ImageUploadIcon,
   Alert01Icon,
+  GlobeIcon,
+  YoutubeIcon,
+  InstagramIcon,
 } from "@hugeicons/core-free-icons"
 import type { ProfileUpdateData } from "@/lib/types/auth"
 import { cn } from "@/lib/utils"
@@ -68,6 +70,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
         github: user.github || "",
         x: user.x || "",
         telegram: user.telegram || "",
+        youtube: user.youtube || "",
+        instagram: user.instagram || "",
         image: user.image || "",
       })
       setDebouncedUsername(user.username || "")
@@ -248,22 +252,25 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           {/* Main Content */}
           <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted-foreground/20 [&::-webkit-scrollbar-thumb]:rounded-full">
             {activeTab === "profile" ? (
-              <div className="p-6 space-y-8">
+              <div className="p-8 space-y-10">
                 {/* Header */}
                 <div className="flex items-center justify-between">
-                  <h3 className="text-base font-semibold">Account</h3>
+                  <h3 className="text-lg font-semibold tracking-tight">Account</h3>
                   {isSaving ? (
-                    <span className="text-xs text-muted-foreground">Saving...</span>
+                    <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                      <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      Saving...
+                    </span>
                   ) : lastSaved ? (
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <HugeiconsIcon icon={Tick02Icon} className="size-3 text-green-500" />
                       Saved {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   ) : null}
                 </div>
 
-                {/* Profile Card */}
-                <div className="bg-muted/30 rounded-xl p-4 flex items-center gap-4">
+                {/* Profile Section */}
+                <div className="space-y-4">
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -271,209 +278,239 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                     accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
                     className="hidden"
                   />
-                  <Avatar className="h-14 w-14">
-                    <AvatarImage src={formData.image || ""} alt={userName} />
-                    <AvatarFallback className="bg-primary/20 text-primary text-lg">
-                      {userName.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
                   
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium truncate">{userName}</div>
-                    <div className="text-sm text-muted-foreground truncate">
-                      @{userHandle}
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-16 w-16 ring-2 ring-border ring-offset-2 ring-offset-background cursor-pointer" onClick={handleAvatarClick}>
+                      <AvatarImage src={formData.image || ""} alt={userName} />
+                      <AvatarFallback className="bg-primary/10 text-primary text-lg font-semibold">
+                        {userName.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-foreground">{userName}</div>
+                      <div className="text-sm text-muted-foreground">@{userHandle}</div>
+                    </div>
+                    
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="gap-2 text-muted-foreground hover:text-foreground"
+                      onClick={handleAvatarClick}
+                      disabled={isUploadingAvatar}
+                    >
+                      {isUploadingAvatar ? (
+                        <>
+                          <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <HugeiconsIcon icon={ImageUploadIcon} className="size-4" />
+                          Change avatar
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Identity Fields */}
+                <div className="space-y-5">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Display name</label>
+                      <Input
+                        value={formData.name || ""}
+                        onChange={(e) => handleChange("name", e.target.value)}
+                        placeholder="Your name"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Username</label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                          @
+                        </span>
+                        <Input
+                          value={formData.username || ""}
+                          onChange={(e) => handleChange("username", e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))}
+                          placeholder="username"
+                          className={cn(
+                            "pl-7",
+                            (usernameError || (usernameCheck && !usernameCheck.available && !usernameCheck.current)) && "border-red-500 focus-visible:ring-red-500",
+                            usernameCheck?.available && !usernameCheck.current && !usernameError && "border-green-500 focus-visible:ring-green-500"
+                          )}
+                        />
+                        {formData.username && formData.username.length >= 3 && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            {isCheckingUsername ? (
+                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+                            ) : usernameError || (usernameCheck && !usernameCheck.available && !usernameCheck.current) ? (
+                              <HugeiconsIcon icon={Alert01Icon} className="size-4 text-red-500" />
+                            ) : usernameCheck?.available && !usernameCheck.current && !usernameError ? (
+                              <HugeiconsIcon icon={Tick02Icon} className="size-4 text-green-500" />
+                            ) : null}
+                          </div>
+                        )}
+                      </div>
+                      {usernameError || (usernameCheck && !usernameCheck.available && !usernameCheck.current) ? (
+                        <p className="text-xs text-red-500">{usernameError || "Username taken"}</p>
+                      ) : usernameCheck?.available && !usernameCheck.current && formData.username && formData.username.length >= 3 && !usernameError ? (
+                        <p className="text-xs text-green-500">Available</p>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">tokenui.dev/@{formData.username || "username"}</p>
+                      )}
                     </div>
                   </div>
-                  
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="gap-2 shrink-0"
-                    onClick={handleAvatarClick}
-                    disabled={isUploadingAvatar}
-                  >
-                    {isUploadingAvatar ? (
-                      <>
-                        <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                        Uploading...
-                      </>
-                    ) : (
-                      <>
-                        <HugeiconsIcon icon={ImageUploadIcon} className="size-4" />
-                        Change Avatar
-                      </>
-                    )}
-                  </Button>
-                </div>
 
-                {/* Display Name */}
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Display Name
-                  </label>
-                  <Input
-                    value={formData.name || ""}
-                    onChange={(e) => handleChange("name", e.target.value)}
-                    placeholder="Your name"
-                  />
-                </div>
-
-                {/* Username */}
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Username
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-                      @
-                    </span>
-                    <Input
-                      value={formData.username || ""}
-                      onChange={(e) => handleChange("username", e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))}
-                      placeholder="username"
-                      className={cn(
-                        "pl-7",
-                        (usernameError || (usernameCheck && !usernameCheck.available && !usernameCheck.current)) && "border-red-500 focus-visible:ring-red-500",
-                        usernameCheck?.available && !usernameCheck.current && !usernameError && "border-green-500 focus-visible:ring-green-500"
-                      )}
-                    />
-                    {/* Status indicator */}
-                    {formData.username && formData.username.length >= 3 && (
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        {isCheckingUsername ? (
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
-                        ) : usernameError || (usernameCheck && !usernameCheck.available && !usernameCheck.current) ? (
-                          <HugeiconsIcon icon={Alert01Icon} className="size-4 text-red-500" />
-                        ) : usernameCheck?.available && !usernameCheck.current && !usernameError ? (
-                          <HugeiconsIcon icon={Tick02Icon} className="size-4 text-green-500" />
-                        ) : null}
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Error or success message */}
-                  {usernameError || (usernameCheck && !usernameCheck.available && !usernameCheck.current) ? (
-                    <p className="text-xs text-red-500">
-                      {usernameError || "Username already taken"}
-                    </p>
-                  ) : usernameCheck?.available && !usernameCheck.current && formData.username && formData.username.length >= 3 && !usernameError ? (
-                    <p className="text-xs text-green-500">
-                      Username available
-                    </p>
-                  ) : (
-                    <p className="text-xs text-muted-foreground">
-                      Your public URL: tokenui.dev/@{formData.username || "username"}
-                    </p>
-                  )}
-                </div>
-
-                <Separator />
-
-                {/* Bio */}
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Bio
-                  </label>
-                  <textarea
-                    value={formData.bio || ""}
-                    onChange={(e) => handleChange("bio", e.target.value.slice(0, 160))}
-                    placeholder="Tell us about yourself"
-                    className="w-full min-h-[100px] rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
-                  />
-                  <div className="text-xs text-muted-foreground text-right">
-                    {(formData.bio || "").length}/160
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Website */}
-                <div className="space-y-3">
-                  <h4 className="text-sm font-medium">Website</h4>
-                  <div className="relative">
-                    <HugeiconsIcon icon={LinkIcon} className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      placeholder="https://yourwebsite.com"
-                      value={formData.website || ""}
-                      onChange={(e) => handleChange("website", e.target.value)}
-                      className="pl-9"
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Bio</label>
+                      <span className={cn(
+                        "text-xs",
+                        (formData.bio || "").length > 140 ? "text-orange-500" : "text-muted-foreground"
+                      )}>
+                        {(formData.bio || "").length}/160
+                      </span>
+                    </div>
+                    <textarea
+                      value={formData.bio || ""}
+                      onChange={(e) => handleChange("bio", e.target.value.slice(0, 160))}
+                      placeholder="Tell us about yourself..."
+                      className="w-full min-h-[80px] rounded-lg border border-input bg-transparent px-3 py-2.5 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
                     />
                   </div>
                 </div>
 
-                <Separator />
+                <Separator className="bg-border/50" />
 
-                {/* Social Links */}
+                {/* Links Section */}
                 <div className="space-y-4">
-                  <h4 className="text-sm font-medium">Social Links</h4>
+                  <label className="text-sm font-medium text-muted-foreground uppercase tracking-wide text-xs">Links</label>
                   
                   <div className="space-y-3">
                     <div className="relative">
-                      <HugeiconsIcon icon={GithubIcon} className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                      <HugeiconsIcon icon={GlobeIcon} className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
-                        placeholder="GitHub username"
-                        value={formData.github || ""}
-                        onChange={(e) => handleChange("github", e.target.value)}
+                        placeholder="Website URL"
+                        value={formData.website || ""}
+                        onChange={(e) => handleChange("website", e.target.value)}
                         className="pl-9"
                       />
                     </div>
 
-                    <div className="relative">
-                      <HugeiconsIcon icon={TwitterIcon} className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input
-                        placeholder="X (Twitter) username"
-                        value={formData.x || ""}
-                        onChange={(e) => handleChange("x", e.target.value)}
-                        className="pl-9"
-                      />
-                    </div>
-
-                    <div className="relative">
-                      <HugeiconsIcon icon={TelegramIcon} className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input
-                        placeholder="Telegram username"
-                        value={formData.telegram || ""}
-                        onChange={(e) => handleChange("telegram", e.target.value)}
-                        className="pl-9"
-                      />
+                    <div className="grid grid-cols-5 gap-3">
+                      <div className="relative">
+                        <HugeiconsIcon icon={GithubIcon} className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          placeholder="GitHub"
+                          value={formData.github || ""}
+                          onChange={(e) => handleChange("github", e.target.value)}
+                          className="pl-9"
+                        />
+                      </div>
+                      <div className="relative">
+                        <HugeiconsIcon icon={TwitterIcon} className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          placeholder="X / Twitter"
+                          value={formData.x || ""}
+                          onChange={(e) => handleChange("x", e.target.value)}
+                          className="pl-9"
+                        />
+                      </div>
+                      <div className="relative">
+                        <HugeiconsIcon icon={TelegramIcon} className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          placeholder="Telegram"
+                          value={formData.telegram || ""}
+                          onChange={(e) => handleChange("telegram", e.target.value)}
+                          className="pl-9"
+                        />
+                      </div>
+                      <div className="relative">
+                        <HugeiconsIcon icon={YoutubeIcon} className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          placeholder="YouTube"
+                          value={formData.youtube || ""}
+                          onChange={(e) => handleChange("youtube", e.target.value)}
+                          className="pl-9"
+                        />
+                      </div>
+                      <div className="relative">
+                        <HugeiconsIcon icon={InstagramIcon} className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          placeholder="Instagram"
+                          value={formData.instagram || ""}
+                          onChange={(e) => handleChange("instagram", e.target.value)}
+                          className="pl-9"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <Separator />
+                <Separator className="bg-border/50" />
 
                 {/* Connected Accounts */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-medium">Connected accounts</h4>
-                    <Button variant="ghost" size="sm" className="h-auto py-1 px-2 text-xs gap-1">
+                    <label className="text-sm font-medium text-muted-foreground uppercase tracking-wide text-xs">Connected Accounts</label>
+                    <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground">
                       Manage
                       <HugeiconsIcon icon={ArrowUpRightIcon} className="size-3" />
                     </Button>
                   </div>
                   
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3 p-3 rounded-lg border bg-muted/20">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-3 py-2">
                       <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
                         <HugeiconsIcon icon={Mail01Icon} className="size-4 text-muted-foreground" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium truncate">{user?.email}</div>
-                          <div className="text-xs text-muted-foreground">Email</div>
-                        </div>
-                      <span className="text-xs bg-muted px-2 py-0.5 rounded">Primary</span>
+                        <div className="text-sm truncate">{user?.email}</div>
+                        <div className="text-xs text-muted-foreground">Primary email</div>
+                      </div>
                     </div>
                     
-                    <div className="flex items-center gap-3 p-3 rounded-lg border bg-muted/20">
-                      <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                        <HugeiconsIcon icon={GithubIcon} className="size-4 text-muted-foreground" />
+                    {formData.github && (
+                      <div className="flex items-center gap-3 py-2">
+                        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+                          <HugeiconsIcon icon={GithubIcon} className="size-4 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm truncate">{formData.github}</div>
+                          <div className="text-xs text-muted-foreground">GitHub</div>
+                        </div>
+                        <span className="text-xs text-green-500">Connected</span>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium truncate">{formData.github || "GitHub"}</div>
-                        <div className="text-xs text-muted-foreground">GitHub</div>
+                    )}
+                    
+                    {formData.youtube && (
+                      <div className="flex items-center gap-3 py-2">
+                        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+                          <HugeiconsIcon icon={YoutubeIcon} className="size-4 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm truncate">{formData.youtube}</div>
+                          <div className="text-xs text-muted-foreground">YouTube</div>
+                        </div>
+                        <span className="text-xs text-green-500">Connected</span>
                       </div>
-                      <span className="text-xs bg-green-500/10 text-green-500 px-2 py-0.5 rounded">Connected</span>
-                    </div>
+                    )}
+                    
+                    {formData.instagram && (
+                      <div className="flex items-center gap-3 py-2">
+                        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+                          <HugeiconsIcon icon={InstagramIcon} className="size-4 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm truncate">{formData.instagram}</div>
+                          <div className="text-xs text-muted-foreground">Instagram</div>
+                        </div>
+                        <span className="text-xs text-green-500">Connected</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

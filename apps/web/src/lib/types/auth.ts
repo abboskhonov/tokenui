@@ -9,6 +9,8 @@ export interface User {
   github: string | null
   x: string | null
   telegram: string | null
+  youtube: string | null
+  instagram: string | null
   emailVerified: boolean
   createdAt: string
   updatedAt: string
@@ -33,6 +35,8 @@ export interface ProfileUpdateData {
   github?: string
   x?: string
   telegram?: string
+  youtube?: string
+  instagram?: string
   image?: string
 }
 

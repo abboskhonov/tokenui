@@ -13,6 +13,8 @@ export interface UserProfile {
   github: string | null
   x: string | null
   telegram: string | null
+  youtube: string | null
+  instagram: string | null
   createdAt: string
 }
 

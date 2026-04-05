@@ -57,6 +57,13 @@
       "when": 1743798000000,
       "tag": "0007_add_files_column",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1775380320929,
+      "tag": "0008_massive_maria_hill",
+      "breakpoints": true
     }
   ]
 }

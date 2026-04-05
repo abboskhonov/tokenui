@@ -13,6 +13,8 @@ export const user = pgTable("user", {
   github: text("github"),
   x: text("x"),
   telegram: text("telegram"),
+  youtube: text("youtube"),
+  instagram: text("instagram"),
   role: text("role").notNull().default("user"), // "user" | "admin"
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

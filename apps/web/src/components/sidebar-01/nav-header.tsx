@@ -38,6 +38,10 @@ export function NavHeader({ data }: NavHeaderProps) {
   return (
     <>
       <SidebarHeader>
+        <div className="flex items-center gap-3 px-3 py-3">
+          <img src="/logo_1.jpg" alt="TokenUI" className="h-6 w-6 rounded-md object-cover" />
+          <span className="font-semibold text-sm">TokenUI</span>
+        </div>
         <div
           className="flex items-center justify-between px-2 pb-0 pt-3 cursor-pointer"
           onClick={() => setOpen(true)}
