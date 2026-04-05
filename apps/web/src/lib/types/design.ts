@@ -50,3 +50,19 @@ export interface Bookmark {
   authorUsername: string | null
   authorImage: string | null
 }
+
+export interface Star {
+  id: string
+  createdAt: string
+  designId: string
+  designName: string
+  designSlug: string
+  designDescription: string | null
+  designCategory: string
+  designThumbnailUrl: string | null
+  designViewCount: number
+  designCreatedAt: string
+  authorName: string | null
+  authorUsername: string | null
+  authorImage: string | null
+}

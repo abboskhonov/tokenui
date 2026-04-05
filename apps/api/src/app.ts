@@ -13,6 +13,7 @@ import designRoutes from "./routes/designs"
 import analyticsRoutes from "./routes/analytics"
 import uploadRoutes from "./routes/uploads"
 import bookmarkRoutes from "./routes/bookmarks"
+import starRoutes from "./routes/stars"
 import adminRoutes from "./routes/admin"
 
 // Load environment variables
@@ -39,6 +40,7 @@ app.route("/api/designs", designRoutes)
 app.route("/api/analytics", analyticsRoutes)
 app.route("/api/upload", uploadRoutes)
 app.route("/api/bookmarks", bookmarkRoutes)
+app.route("/api/stars", starRoutes)
 app.route("/api/admin", adminRoutes)
 
 export default app

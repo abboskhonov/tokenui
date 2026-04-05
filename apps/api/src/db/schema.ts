@@ -124,3 +124,19 @@ export const designView = pgTable("design_view", {
   index("designView_viewedAt_idx").on(table.viewedAt),
 ])
 
+// Stars table - similar to GitHub stars
+export const star = pgTable("star", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  designId: text("design_id")
+    .notNull()
+    .references(() => design.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("star_userId_idx").on(table.userId),
+  index("star_designId_idx").on(table.designId),
+  index("star_user_design_idx").on(table.userId, table.designId),
+])
+

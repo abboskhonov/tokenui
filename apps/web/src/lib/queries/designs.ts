@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query"
 import { api } from "@/lib/api/client"
-import type { Design, CreateDesignData, Bookmark } from "@/lib/types/design"
+import type { Design, CreateDesignData, Bookmark, Star } from "@/lib/types/design"
 
 // Query keys
 export const designKeys = {
@@ -10,6 +10,9 @@ export const designKeys = {
   detail: (username: string, slug: string) => [...designKeys.all, "detail", username, slug] as const,
   bookmarks: () => [...designKeys.all, "bookmarks"] as const,
   bookmarkCheck: (designId: string) => [...designKeys.all, "bookmark-check", designId] as const,
+  stars: () => [...designKeys.all, "stars"] as const,
+  starCheck: (designId: string) => [...designKeys.all, "star-check", designId] as const,
+  starCount: (designId: string) => [...designKeys.all, "star-count", designId] as const,
   viewAnalytics: () => [...designKeys.all, "view-analytics"] as const,
 }
 
@@ -191,6 +194,74 @@ export function useDeleteBookmark() {
     onSuccess: (_, designId) => {
       queryClient.invalidateQueries({ queryKey: designKeys.bookmarks() })
       queryClient.invalidateQueries({ queryKey: designKeys.bookmarkCheck(designId) })
+    },
+  })
+}
+
+// Get user's stars
+export function useStars() {
+  return useQuery({
+    queryKey: designKeys.stars(),
+    queryFn: async () => {
+      const response = await api.get<{ stars: Star[] }>("/api/stars")
+      return response.stars
+    },
+  })
+}
+
+// Check if a design is starred
+export function useStarCheck(designId: string) {
+  return useQuery({
+    queryKey: designKeys.starCheck(designId),
+    queryFn: async () => {
+      const response = await api.get<{ isStarred: boolean }>(`/api/stars/check/${designId}`)
+      return response.isStarred
+    },
+    enabled: !!designId,
+  })
+}
+
+// Get star count for a design
+export function useStarCount(designId: string) {
+  return useQuery({
+    queryKey: designKeys.starCount(designId),
+    queryFn: async () => {
+      const response = await api.get<{ count: number }>(`/api/stars/count/${designId}`)
+      return response.count
+    },
+    enabled: !!designId,
+  })
+}
+
+// Create star mutation (star a design)
+export function useCreateStar() {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async (designId: string) => {
+      const response = await api.post<{ star: { id: string }; isNew: boolean }>("/api/stars", { designId })
+      return response
+    },
+    onSuccess: (_, designId) => {
+      queryClient.invalidateQueries({ queryKey: designKeys.stars() })
+      queryClient.invalidateQueries({ queryKey: designKeys.starCheck(designId) })
+      queryClient.invalidateQueries({ queryKey: designKeys.starCount(designId) })
+    },
+  })
+}
+
+// Delete star mutation (unstar a design)
+export function useDeleteStar() {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async (designId: string) => {
+      await api.delete(`/api/stars/${designId}`)
+    },
+    onSuccess: (_, designId) => {
+      queryClient.invalidateQueries({ queryKey: designKeys.stars() })
+      queryClient.invalidateQueries({ queryKey: designKeys.starCheck(designId) })
+      queryClient.invalidateQueries({ queryKey: designKeys.starCount(designId) })
     },
   })
 }
