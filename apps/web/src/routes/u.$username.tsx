@@ -1,13 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useUserProfile } from "@/lib/queries/users"
+import { useBookmarks, useStars } from "@/lib/queries/designs"
 import { useState } from "react"
 import { useProfileSearch } from "@/features/user-profile/hooks"
+import type { TabType } from "@/features/user-profile/components"
 import {
   ProfileHeader,
   ProfileInfo,
   ProfileTabs,
   SearchInput,
   DesignsGrid,
+  BookmarkCard,
+  StarCard,
   ProfileLoading,
   ProfileError,
   ProfileNotFound,
@@ -26,12 +30,14 @@ export const Route = createFileRoute("/u/$username")({
   notFoundComponent: () => <ProfileNotFound />,
 })
 
-type TabType = "components" | "bookmarks"
-
 function UserProfilePage() {
   const { username } = Route.useParams()
   const { data: profileData, isLoading, error } = useUserProfile(username)
-  const [activeTab, setActiveTab] = useState<TabType>("components")
+  const { data: bookmarks = [] } = useBookmarks()
+  const { data: stars = [] } = useStars()
+  const [activeTab, setActiveTab] = useState<TabType>("skills")
+  
+  // Search only applies to skills tab
   const { searchQuery, setSearchQuery, filteredDesigns } = useProfileSearch(
     profileData?.designs || []
   )
@@ -50,33 +56,78 @@ function UserProfilePage() {
     <div className="min-h-screen bg-background text-foreground">
       <ProfileHeader username={username} />
 
-      <main className="mx-auto max-w-6xl px-6 py-4">
+      <main className="mx-auto max-w-7xl px-6 py-4">
         <ProfileInfo user={user} username={username} stats={stats} />
 
         {/* Tabs & Search */}
         <div className="flex items-center justify-between mb-6">
           <ProfileTabs
             activeTab={activeTab}
-            componentsCount={stats.components}
-            bookmarksCount={0}
+            skillsCount={stats.components}
+            bookmarksCount={bookmarks.length}
+            starsCount={stars.length}
             onTabChange={setActiveTab}
           />
-          <SearchInput
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Search components..."
-          />
+          {activeTab === "skills" && (
+            <SearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search skills..."
+            />
+          )}
         </div>
 
         {/* Content */}
-        {activeTab === "components" ? (
+        {activeTab === "skills" && (
           <DesignsGrid designs={filteredDesigns} username={username} />
-        ) : (
-          <div className="py-12 text-center">
-            <p className="text-sm text-muted-foreground">No bookmarks yet</p>
-          </div>
+        )}
+        
+        {activeTab === "bookmarks" && (
+          <BookmarksGrid bookmarks={bookmarks} />
+        )}
+        
+        {activeTab === "stars" && (
+          <StarsGrid stars={stars} />
         )}
       </main>
+    </div>
+  )
+}
+
+import type { Bookmark, Star } from "@/lib/types/design"
+
+function BookmarksGrid({ bookmarks }: { bookmarks: Bookmark[] }) {
+  if (bookmarks.length === 0) {
+    return (
+      <div className="py-12 text-center">
+        <p className="text-sm text-muted-foreground">No bookmarks yet</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 pb-12">
+      {bookmarks.map((bookmark) => (
+        <BookmarkCard key={bookmark.id} bookmark={bookmark} />
+      ))}
+    </div>
+  )
+}
+
+function StarsGrid({ stars }: { stars: Star[] }) {
+  if (stars.length === 0) {
+    return (
+      <div className="py-12 text-center">
+        <p className="text-sm text-muted-foreground">No starred designs yet</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 pb-12">
+      {stars.map((star) => (
+        <StarCard key={star.id} star={star} />
+      ))}
     </div>
   )
 }

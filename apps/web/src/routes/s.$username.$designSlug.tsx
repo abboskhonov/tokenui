@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useQueryClient } from "@tanstack/react-query"
-import { useDesign, useTrackView, designKeys, useStarCount } from "@/lib/queries/designs"
+import { useDesign, useTrackView, designKeys } from "@/lib/queries/designs"
 import { useState, useCallback, useEffect } from "react"
 import { useDesignActions } from "@/features/design-detail/hooks"
 import {
@@ -34,7 +34,6 @@ function SkillDetailPage() {
   const queryClient = useQueryClient()
   
   const { data: design, isLoading, error } = useDesign(username, designSlug)
-  const { data: starCount } = useStarCount(design?.id || "")
   const trackView = useTrackView()
   
   const [activeTab, setActiveTab] = useState<TabType>("preview")
@@ -93,15 +92,6 @@ function SkillDetailPage() {
     setPreviewTheme(prev => prev === "light" ? "dark" : "light")
   }, [])
 
-  const refreshPreview = useCallback(() => {
-    const iframe = document.querySelector("iframe") as HTMLIFrameElement
-    if (iframe && design?.demoUrl) {
-      const url = new URL(design.demoUrl)
-      url.searchParams.set("_t", Date.now().toString())
-      iframe.src = url.toString()
-    }
-  }, [design?.demoUrl])
-
   if (error) {
     return <SkillDetailError />
   }
@@ -115,18 +105,16 @@ function SkillDetailPage() {
       <SkillDetailHeader
         username={username}
         designSlug={designSlug}
-        isCopied={isCopied}
-        onCopyPrompt={handleCopyPrompt}
-        onCopyCode={handleCopyCode}
-        onToggleCodeView={() => setActiveTab(activeTab === "preview" ? "code" : "preview")}
       />
 
       <div className="flex">
         <SkillDetailSidebar
           design={design}
           username={username}
-          starCount={starCount || 0}
           isCopied={isCopied}
+          onCopyPrompt={handleCopyPrompt}
+          onCopyCode={handleCopyCode}
+          onViewCode={() => setActiveTab(activeTab === "preview" ? "code" : "preview")}
           onCopyInstall={handleCopyInstall}
         />
 
@@ -143,7 +131,6 @@ function SkillDetailPage() {
                 user={user}
                 onSetPreviewMode={setPreviewMode}
                 onToggleTheme={togglePreviewTheme}
-                onRefresh={refreshPreview}
                 onViewCode={() => setActiveTab("code")}
                 onStarClick={handleStarClick}
                 onBookmarkClick={handleBookmarkClick}

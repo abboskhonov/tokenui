@@ -1,33 +1,41 @@
 import { cn } from "@/lib/utils"
 
-type TabType = "components" | "bookmarks"
+export type TabType = "skills" | "bookmarks" | "stars"
 
 interface ProfileTabsProps {
   activeTab: TabType
-  componentsCount: number
+  skillsCount: number
   bookmarksCount: number
+  starsCount: number
   onTabChange: (tab: TabType) => void
 }
 
 export function ProfileTabs({ 
   activeTab, 
-  componentsCount, 
+  skillsCount, 
   bookmarksCount,
+  starsCount,
   onTabChange 
 }: ProfileTabsProps) {
   return (
     <div className="flex items-center gap-6 border-b border-border">
       <TabButton
-        active={activeTab === "components"}
-        label="Components"
-        count={componentsCount}
-        onClick={() => onTabChange("components")}
+        active={activeTab === "skills"}
+        label="Skills"
+        count={skillsCount}
+        onClick={() => onTabChange("skills")}
       />
       <TabButton
         active={activeTab === "bookmarks"}
         label="Bookmarks"
         count={bookmarksCount}
         onClick={() => onTabChange("bookmarks")}
+      />
+      <TabButton
+        active={activeTab === "stars"}
+        label="Stars"
+        count={starsCount}
+        onClick={() => onTabChange("stars")}
       />
     </div>
   )

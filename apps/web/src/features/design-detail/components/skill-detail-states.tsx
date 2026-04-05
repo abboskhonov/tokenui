@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router"
 import { Button } from "@/components/ui/button"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { 
-  Menu01Icon, 
   Cancel01Icon, 
   ArrowLeftIcon,
   File01Icon 
@@ -17,31 +16,17 @@ export function SkillDetailSkeleton({ username, designSlug }: SkillDetailSkeleto
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="sticky top-0 z-50 h-14 border-b border-border bg-background/95 backdrop-blur-xl">
-        <div className="mx-auto h-full max-w-[1800px] px-4 flex items-center justify-between">
-          {/* Left: Menu + Breadcrumb */}
-          <div className="flex items-center gap-4">
-            <Link to="/">
-              <Button variant="ghost" size="icon-sm" className="h-8 w-8 -ml-2">
-                <HugeiconsIcon icon={Menu01Icon} className="size-4" />
-              </Button>
+      <header className="sticky top-0 z-50 h-12 border-b border-border bg-background/95 backdrop-blur-xl">
+        <div className="mx-auto h-full max-w-[1800px] px-4 flex items-center">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-sm">
+            <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
+              Skills
             </Link>
-            
-            <div className="flex items-center gap-2 text-sm">
-              <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
-                Skills
-              </Link>
-              <span className="text-muted-foreground">/</span>
-              <span className="text-muted-foreground">{username}</span>
-              <span className="text-muted-foreground">/</span>
-              <span className="font-medium">{designSlug}</span>
-            </div>
-          </div>
-
-          {/* Right: Actions */}
-          <div className="flex items-center gap-1">
-            <div className="h-8 w-24 bg-muted animate-pulse rounded" />
-            <div className="h-8 w-24 bg-muted animate-pulse rounded" />
+            <span className="text-muted-foreground">/</span>
+            <span className="text-muted-foreground">{username}</span>
+            <span className="text-muted-foreground">/</span>
+            <span className="font-medium">{designSlug}</span>
           </div>
         </div>
       </header>
@@ -49,18 +34,17 @@ export function SkillDetailSkeleton({ username, designSlug }: SkillDetailSkeleto
       {/* Main Content */}
       <div className="flex">
         {/* Left Sidebar Skeleton */}
-        <aside className="w-[320px] min-h-[calc(100vh-56px)] border-r border-border bg-card/30 hidden lg:block">
+        <aside className="w-[320px] min-h-[calc(100vh-48px)] border-r border-border bg-card/30 hidden lg:block">
           <div className="p-6 space-y-6">
             {/* Title Skeleton */}
             <div className="space-y-2">
-              <div className="h-8 w-3/4 bg-muted animate-pulse rounded" />
+              <div className="h-6 w-3/4 bg-muted animate-pulse rounded" />
               <div className="h-4 w-full bg-muted animate-pulse rounded" />
-              <div className="h-4 w-2/3 bg-muted animate-pulse rounded" />
             </div>
 
             {/* Author Skeleton */}
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
+              <div className="h-10 w-10 rounded-lg bg-muted animate-pulse" />
               <div className="space-y-1">
                 <div className="h-4 w-24 bg-muted animate-pulse rounded" />
                 <div className="h-3 w-16 bg-muted animate-pulse rounded" />
@@ -69,27 +53,21 @@ export function SkillDetailSkeleton({ username, designSlug }: SkillDetailSkeleto
 
             {/* Install Command Skeleton */}
             <div className="space-y-2">
-              <div className="h-3 w-12 bg-muted animate-pulse rounded" />
+              <div className="h-4 w-20 bg-muted animate-pulse rounded" />
               <div className="h-10 w-full bg-muted animate-pulse rounded" />
             </div>
 
-            {/* Stats Skeleton */}
-            <div className="flex items-center gap-4 pt-4 border-t border-border">
-              <div className="text-center space-y-1">
-                <div className="h-6 w-12 bg-muted animate-pulse rounded mx-auto" />
-                <div className="h-3 w-10 bg-muted animate-pulse rounded mx-auto" />
-              </div>
-              <div className="h-8 w-px bg-border" />
-              <div className="text-center space-y-1">
-                <div className="h-6 w-12 bg-muted animate-pulse rounded mx-auto" />
-                <div className="h-3 w-10 bg-muted animate-pulse rounded mx-auto" />
-              </div>
+            {/* Buttons Skeleton */}
+            <div className="flex gap-2">
+              <div className="h-8 w-24 bg-muted animate-pulse rounded" />
+              <div className="h-8 w-20 bg-muted animate-pulse rounded" />
+              <div className="h-8 w-20 bg-muted animate-pulse rounded" />
             </div>
           </div>
         </aside>
 
         {/* Main Preview Skeleton */}
-        <main className="flex-1 min-h-[calc(100vh-56px)] h-[calc(100vh-56px)] bg-muted/30 flex items-center justify-center">
+        <main className="flex-1 min-h-[calc(100vh-48px)] h-[calc(100vh-48px)] bg-muted/30 flex items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         </main>
       </div>

@@ -4,10 +4,8 @@ import {
   ComputerIcon,
   Sun01Icon,
   Moon01Icon,
-  ReloadIcon,
   CodeIcon,
   Bookmark01Icon,
-  MoreVerticalIcon,
   StarIcon,
 } from "@hugeicons/core-free-icons"
 import { cn } from "@/lib/utils"
@@ -24,7 +22,6 @@ interface PreviewToolbarProps {
   user: SessionUser | null
   onSetPreviewMode: (mode: "desktop" | "mobile") => void
   onToggleTheme: () => void
-  onRefresh: () => void
   onViewCode: () => void
   onStarClick: () => void
   onBookmarkClick: () => void
@@ -40,49 +37,44 @@ export function PreviewToolbar({
   user,
   onSetPreviewMode,
   onToggleTheme,
-  onRefresh,
   onViewCode,
   onStarClick,
   onBookmarkClick,
 }: PreviewToolbarProps) {
   return (
-    <div className="h-12 border-b border-border flex items-center justify-between px-4 bg-background/50">
+    <div className="h-10 border-b border-border flex items-center justify-between px-3 bg-background/50">
       <div className="flex items-center gap-1">
-        {/* Device Toggle */}
-        <div className="flex items-center bg-muted rounded-lg p-0.5">
+        {/* Device Toggle - minimal */}
+        <div className="flex items-center bg-muted rounded-md p-0.5">
           <button
             onClick={() => onSetPreviewMode("desktop")}
             className={cn(
-              "px-2.5 py-1 rounded text-xs font-medium transition-all flex items-center gap-1.5",
+              "px-2 py-1 rounded text-xs font-medium transition-all",
               previewMode === "desktop" 
                 ? "bg-background text-foreground shadow-sm" 
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
             <HugeiconsIcon icon={ComputerIcon} className="size-3.5" />
-            <span className="hidden sm:inline">Desktop</span>
           </button>
           <button
             onClick={() => onSetPreviewMode("mobile")}
             className={cn(
-              "px-2.5 py-1 rounded text-xs font-medium transition-all flex items-center gap-1.5",
+              "px-2 py-1 rounded text-xs font-medium transition-all",
               previewMode === "mobile" 
                 ? "bg-background text-foreground shadow-sm" 
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
             <HugeiconsIcon icon={ComputerIcon} className="size-3.5 rotate-90" />
-            <span className="hidden sm:inline">Mobile</span>
           </button>
         </div>
-
-        <div className="h-4 w-px bg-border mx-2" />
 
         {/* Theme Toggle */}
         <Button 
           variant="ghost" 
           size="icon-sm" 
-          className="h-7 w-7"
+          className="h-7 w-7 ml-1"
           onClick={onToggleTheme}
         >
           <HugeiconsIcon 
@@ -90,20 +82,10 @@ export function PreviewToolbar({
             className="size-3.5" 
           />
         </Button>
-
-        {/* Refresh */}
-        <Button 
-          variant="ghost" 
-          size="icon-sm" 
-          className="h-7 w-7"
-          onClick={onRefresh}
-        >
-          <HugeiconsIcon icon={ReloadIcon} className="size-3.5" />
-        </Button>
       </div>
 
-      {/* Right Toolbar */}
-      <div className="flex items-center gap-1">
+      {/* Right Toolbar - minimal */}
+      <div className="flex items-center gap-0.5">
         <Button 
           variant="ghost" 
           size="icon-sm" 
@@ -129,7 +111,7 @@ export function PreviewToolbar({
               icon={StarIcon} 
               className={cn(
                 "size-3.5 transition-all duration-200",
-                isStarredState && "fill-current scale-110"
+                isStarredState && "fill-current"
               )} 
             />
           </Button>
@@ -151,14 +133,11 @@ export function PreviewToolbar({
               icon={Bookmark01Icon} 
               className={cn(
                 "size-3.5 transition-all duration-200",
-                isBookmarkedState && "fill-current scale-110"
+                isBookmarkedState && "fill-current"
               )} 
             />
           </Button>
         )}
-        <Button variant="ghost" size="icon-sm" className="h-7 w-7">
-          <HugeiconsIcon icon={MoreVerticalIcon} className="size-3.5" />
-        </Button>
       </div>
     </div>
   )

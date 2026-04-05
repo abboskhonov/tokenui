@@ -47,7 +47,7 @@ export function ProfileInfo({ user, username, stats }: ProfileInfoProps) {
       <div className="flex items-center gap-6 text-sm shrink-0">
         <div className="text-center">
           <span className="block text-xl font-semibold">{stats.components}</span>
-          <span className="text-xs text-muted-foreground">components</span>
+          <span className="text-xs text-muted-foreground">skills</span>
         </div>
         <div className="text-center">
           <span className="block text-xl font-semibold">{stats.followers}</span>
