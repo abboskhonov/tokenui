@@ -364,12 +364,13 @@ export function useTopContributors(limit = 5) {
 
 // CLI Analytics type
 export interface CliAnalytics {
-  dailyInstalls: number[]
-  totalInstalls: number
-  uniqueInstalls: number
+  dailyRuns: number[]
+  totalRuns: number
+  uniqueMachines: number
+  todayRuns: number
 }
 
-// Get CLI install analytics (last 7 days) - admin only
+// Get CLI run analytics (last 7 days) - admin only
 export function useCliAnalytics() {
   return useQuery({
     queryKey: designKeys.cliAnalytics(),

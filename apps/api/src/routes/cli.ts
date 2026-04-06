@@ -1,68 +1,39 @@
 import { Hono } from "hono"
 import { eq, sql } from "drizzle-orm"
 import { db } from "../db"
-import { cliInstall, user } from "../db/schema"
+import { cliRun, user } from "../db/schema"
 import { success, internalError, logError } from "../utils/errors"
 import type { AuthContext } from "../types"
 
 const app = new Hono<AuthContext>()
 
-// Track CLI install - public endpoint (no auth required)
-// Called by CLI on first run to track installations
-app.post("/install", async (c) => {
+// Track CLI run - public endpoint (no auth required)
+// Simple anonymous counter - just +1 in the database
+app.post("/run", async (c) => {
   try {
     const body = await c.req.json<{
-      installId: string
       version?: string
-      platformHash?: string
+      command?: string
     }>()
 
-    if (!body.installId) {
-      return c.json({ error: "installId is required" }, 400)
-    }
-
-    // Get IP hash for basic deduplication
-    const forwarded = c.req.header("x-forwarded-for")
-    const ip = forwarded ? forwarded.split(",")[0].trim() : c.req.header("cf-connecting-ip") || "unknown"
-    const ipHash = await hashString(ip)
-
-    // Check if this install already exists
-    const existing = await db
-      .select({ id: cliInstall.id })
-      .from(cliInstall)
-      .where(eq(cliInstall.installId, body.installId))
-      .limit(1)
-
-    if (existing.length > 0) {
-      // Already tracked, just return success
-      return success(c, { 
-        success: true, 
-        isNew: false,
-        message: "Install already tracked" 
-      })
-    }
-
-    // Record new install
-    await db.insert(cliInstall).values({
+    // Record anonymous run - no machine ID, no IP tracking
+    await db.insert(cliRun).values({
       id: crypto.randomUUID(),
-      installId: body.installId,
       version: body.version || "unknown",
-      platformHash: body.platformHash || null,
-      ipHash,
+      command: body.command || null,
     })
 
     return success(c, { 
-      success: true, 
-      isNew: true,
-      message: "Install tracked successfully" 
+      success: true,
+      message: "Run tracked" 
     })
   } catch (error) {
-    logError("TrackCliInstall", error)
-    return internalError(c, "Failed to track install")
+    logError("TrackCliRun", error)
+    return internalError(c, "Failed to track")
   }
 })
 
-// Get CLI install analytics - admin only
+// Get CLI run analytics - admin only
 app.get("/analytics", async (c) => {
   const session = c.get("session")
 
@@ -79,7 +50,7 @@ app.get("/analytics", async (c) => {
       .limit(1)
 
     if (userData?.role !== "admin") {
-      return c.json({ error: "Forbidden - Admin access required" }, 403)
+      return c.json({ error: "Forbidden" }, 403)
     }
 
     // Calculate last 7 days
@@ -91,54 +62,40 @@ app.get("/analytics", async (c) => {
       days.push(date)
     }
 
-    // Get installs for each day
-    const dailyInstalls = await Promise.all(
+    // Get runs for each day
+    const dailyRuns = await Promise.all(
       days.map(async (day) => {
         const nextDay = new Date(day)
         nextDay.setDate(nextDay.getDate() + 1)
 
-        const dayStr = day.toISOString()
-        const nextDayStr = nextDay.toISOString()
-
         const result = await db.execute(sql`
           SELECT COUNT(*) as count 
-          FROM cli_install 
-          WHERE installed_at >= ${dayStr}::timestamp
-            AND installed_at < ${nextDayStr}::timestamp
+          FROM cli_run 
+          WHERE run_at >= ${day.toISOString()}::timestamp
+            AND run_at < ${nextDay.toISOString()}::timestamp
         `)
 
         return Number(result.rows[0]?.count || 0)
       })
     )
 
-    // Get total installs
+    // Get total runs
     const totalResult = await db.execute(sql`
-      SELECT COUNT(*) as count FROM cli_install
-    `)
-
-    // Get unique installs by IP hash (rough estimate of unique users)
-    const uniqueResult = await db.execute(sql`
-      SELECT COUNT(DISTINCT ip_hash) as count FROM cli_install
+      SELECT COUNT(*) as count FROM cli_run
     `)
 
     return success(c, {
-      dailyInstalls,
+      dailyInstalls: dailyRuns,
+      dailyRuns: dailyRuns,  // Alias for StudioStats component
       totalInstalls: Number(totalResult.rows[0]?.count || 0),
-      uniqueInstalls: Number(uniqueResult.rows[0]?.count || 0),
+      totalRuns: Number(totalResult.rows[0]?.count || 0),  // Alias for StudioStats component
+      uniqueInstalls: 0,
+      uniqueMachines: 0,  // Alias for StudioStats component
     })
   } catch (error) {
     logError("FetchCliAnalytics", error)
     return internalError(c, "Failed to fetch analytics")
   }
 })
-
-// Simple hash function for IP addresses
-async function hashString(str: string): Promise<string> {
-  const encoder = new TextEncoder()
-  const data = encoder.encode(str)
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("").slice(0, 16)
-}
 
 export default app

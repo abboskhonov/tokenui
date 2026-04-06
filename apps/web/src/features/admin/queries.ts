@@ -9,6 +9,11 @@ export const adminKeys = {
   users: () => [...adminKeys.all, "users"] as const,
   designs: () => [...adminKeys.all, "designs"] as const,
   pending: () => [...adminKeys.all, "pending"] as const,
+  analytics: () => [...adminKeys.all, "analytics"] as const,
+  cliAnalytics: () => [...adminKeys.analytics(), "cli"] as const,
+  viewAnalytics: () => [...adminKeys.analytics(), "views"] as const,
+  topDesigns: () => [...adminKeys.analytics(), "top-designs"] as const,
+  summary: () => [...adminKeys.analytics(), "summary"] as const,
 }
 
 // Dashboard stats
@@ -181,5 +186,91 @@ export function useDeleteDesign() {
       // Also invalidate public designs
       queryClient.invalidateQueries({ queryKey: designKeys.public() })
     },
+  })
+}
+
+// CLI Analytics Types
+export interface CliAnalytics {
+  dailyInstalls: number[]
+  totalInstalls: number
+  uniqueInstalls: number
+  versionBreakdown: { version: string; count: number }[]
+}
+
+// Get CLI install analytics
+export function useCliAnalytics() {
+  return useQuery({
+    queryKey: adminKeys.cliAnalytics(),
+    queryFn: async (): Promise<CliAnalytics> => {
+      const response = await api.get<CliAnalytics>("/api/admin/analytics/cli")
+      return response
+    },
+    staleTime: 60 * 1000, // 1 minute
+  })
+}
+
+// View Analytics Types
+export interface ViewAnalytics {
+  dailyViews: number[]
+  totalViews: number
+  uniqueViewers: number
+}
+
+// Get global view analytics
+export function useViewAnalytics() {
+  return useQuery({
+    queryKey: adminKeys.viewAnalytics(),
+    queryFn: async (): Promise<ViewAnalytics> => {
+      const response = await api.get<ViewAnalytics>("/api/admin/analytics/views")
+      return response
+    },
+    staleTime: 60 * 1000,
+  })
+}
+
+// Top Design Type
+export interface TopDesign {
+  id: string
+  name: string
+  slug: string | null
+  category: string
+  thumbnailUrl: string | null
+  viewCount: number
+  userId: string
+  author: string
+}
+
+// Get top viewed designs
+export function useTopDesigns(limit: number = 10) {
+  return useQuery({
+    queryKey: [...adminKeys.topDesigns(), limit],
+    queryFn: async (): Promise<TopDesign[]> => {
+      const response = await api.get<{ designs: TopDesign[] }>(`/api/admin/analytics/top-designs?limit=${limit}`)
+      return response.designs
+    },
+    staleTime: 60 * 1000,
+  })
+}
+
+// Summary Analytics Type
+export interface SummaryAnalytics {
+  totalUsers: number
+  totalDesigns: number
+  totalCliInstalls: number
+  totalViews: number
+  viewsToday: number
+  installsToday: number
+  newUsersToday: number
+}
+
+// Get summary analytics
+export function useSummaryAnalytics() {
+  return useQuery({
+    queryKey: adminKeys.summary(),
+    queryFn: async (): Promise<SummaryAnalytics> => {
+      const response = await api.get<SummaryAnalytics>("/api/admin/analytics/summary")
+      return response
+    },
+    staleTime: 30 * 1000,
   })
 }

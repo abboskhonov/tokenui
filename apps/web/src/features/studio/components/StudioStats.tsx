@@ -20,7 +20,7 @@ export function StudioStats({ designs }: StudioStatsProps) {
   
   const stats = useMemo(() => {
     if (!designs) {
-      return { published: 0, drafts: 0, reviewing: 0, views: 0, bookmarks: 0, cliInstalls: 0 }
+      return { published: 0, drafts: 0, reviewing: 0, views: 0, bookmarks: 0, cliRuns: 0 }
     }
     return {
       published: designs.filter((d) => d.status === "approved").length,
@@ -28,7 +28,7 @@ export function StudioStats({ designs }: StudioStatsProps) {
       reviewing: designs.filter((d) => d.status === "pending").length,
       views: viewAnalytics?.totalViews || designs.reduce((sum, d) => sum + d.viewCount, 0),
       bookmarks: 0, // Not implemented yet
-      cliInstalls: cliAnalytics?.totalInstalls || 0,
+      cliRuns: cliAnalytics?.totalRuns || 0,
     }
   }, [designs, viewAnalytics, cliAnalytics])
 
@@ -73,10 +73,10 @@ export function StudioStats({ designs }: StudioStatsProps) {
           icon={<HugeiconsIcon icon={Copy01Icon} className="size-4" />}
         />
         <StatsCard
-          label="CLI Installs"
-          value={stats.cliInstalls}
+          label="CLI Runs"
+          value={stats.cliRuns}
           icon={<HugeiconsIcon icon={Download01Icon} className="size-4" />}
-          chartData={cliAnalytics?.dailyInstalls}
+          chartData={cliAnalytics?.dailyRuns}
         />
       </div>
     </>

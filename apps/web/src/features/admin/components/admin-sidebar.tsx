@@ -10,6 +10,7 @@ import {
   Shield,
   CheckCircle,
   AlertCircle,
+  BarChart3,
 } from "lucide-react";
 import { AdminNavFooter } from "./admin-nav-footer";
 
@@ -46,6 +47,12 @@ const adminNavItems = [
     title: "Users",
     to: "/admin/users",
     icon: Users,
+  },
+  {
+    id: "analytics",
+    title: "Analytics",
+    to: "/admin/analytics",
+    icon: BarChart3,
   },
   {
     id: "settings",

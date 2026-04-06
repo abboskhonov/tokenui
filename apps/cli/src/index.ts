@@ -2,7 +2,7 @@
 import c from 'picocolors';
 import { printHelp } from './utils/banner.js';
 import { getVersion } from './utils/version.js';
-import { trackInstall } from './utils/tracking.js';
+import { trackRun } from './utils/tracking.js';
 import { listCommand } from './commands/list.js';
 import { addCommand } from './commands/add.js';
 import { configCommand } from './commands/config.js';
@@ -12,10 +12,11 @@ const command = args[0];
 const subcommand = args[1];
 
 async function main() {
-  // Track install in background (fire and forget)
-  // This runs on every CLI invocation to track new installs/version updates
   const version = getVersion();
-  trackInstall(version).catch(() => {
+  
+  // Track every CLI run in background (fire and forget)
+  // This tracks every single invocation with the command used
+  trackRun(version, command).catch(() => {
     // Silently ignore tracking errors
   });
 

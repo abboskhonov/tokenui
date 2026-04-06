@@ -142,21 +142,17 @@ export const star = pgTable("star", {
   index("star_user_design_idx").on(table.userId, table.designId),
 ])
 
-// CLI installs table - for tracking CLI package installations
-export const cliInstall = pgTable("cli_install", {
+// CLI runs table - anonymous counter for every CLI invocation
+export const cliRun = pgTable("cli_run", {
   id: text("id").primaryKey(),
-  // Unique identifier for the installation (machine fingerprint)
-  installId: text("install_id").notNull().unique(),
-  // CLI version that was installed
+  // CLI version used (optional, just for stats)
   version: text("version"),
-  // Platform info (OS, Node version hash)
-  platformHash: text("platform_hash"),
-  // IP hash for basic deduplication
-  ipHash: text("ip_hash"),
-  // When the install was recorded
-  installedAt: timestamp("installed_at").notNull().defaultNow(),
+  // Command that was run (list, add, config, etc.)
+  command: text("command"),
+  // When the run was recorded
+  runAt: timestamp("run_at").notNull().defaultNow(),
 }, (table) => [
-  index("cliInstall_installId_idx").on(table.installId),
-  index("cliInstall_installedAt_idx").on(table.installedAt),
+  index("cliRun_runAt_idx").on(table.runAt),
+  index("cliRun_command_idx").on(table.command),
 ])
 
