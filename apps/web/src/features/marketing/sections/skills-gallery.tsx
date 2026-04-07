@@ -21,6 +21,7 @@ import {
 } from "@hugeicons/core-free-icons"
 import { ChevronRight } from "lucide-react"
 import { usePublicDesigns, designKeys } from "@/lib/queries/designs"
+import { useUser } from "@/lib/user-context"
 import { useNavigate, useRouter } from "@tanstack/react-router"
 import { useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api/client"
@@ -52,6 +53,7 @@ interface DesignCardProps {
 function DesignCard({ design, queryClient }: DesignCardProps) {
   const navigate = useNavigate()
   const router = useRouter()
+  const { user } = useUser()
   const username = design.author?.username || "unknown"
   
   // Prefetch design data AND route on hover for instant navigation
@@ -65,7 +67,7 @@ function DesignCard({ design, queryClient }: DesignCardProps) {
       params: { username, designSlug: slug }
     })
     
-    // Prefetch the design data
+    // Prefetch the design data (now includes starCount, isStarred, isBookmarked)
     queryClient.prefetchQuery({
       queryKey: designKeys.detail(username, slug),
       queryFn: async () => {
@@ -74,7 +76,7 @@ function DesignCard({ design, queryClient }: DesignCardProps) {
       },
       staleTime: 1000 * 60 * 2,
     })
-  }, [design, queryClient, router])
+  }, [design, queryClient, router, user])
   
   const handleCardClick = useCallback(() => {
     navigate({

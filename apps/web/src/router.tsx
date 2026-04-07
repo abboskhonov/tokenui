@@ -7,8 +7,9 @@ export function getRouter() {
 
     scrollRestoration: true,
     defaultPreload: "intent",
-    defaultPreloadStaleTime: 1000 * 60 * 2, // 2 minutes - match query staleTime
+    defaultPreloadStaleTime: 1000 * 60 * 5, // 5 minutes - keep data fresh longer
     defaultPreloadDelay: 0, // Start preloading immediately on intent
+    defaultGcTime: 1000 * 60 * 10, // 10 minutes garbage collection
     // View transitions disabled globally - only used for specific shared element morphs
   })
 

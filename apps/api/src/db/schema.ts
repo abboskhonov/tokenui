@@ -79,6 +79,7 @@ export const design = pgTable("design", {
   status: text("status").notNull().default("draft"),
   reviewMessage: text("review_message"), // Admin feedback message
   viewCount: integer("view_count").notNull().default(0),
+  downloadCount: integer("download_count").notNull().default(0),
   files: text("files"), // JSON array of additional files [{path, content, type}]
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -124,6 +125,22 @@ export const designView = pgTable("design_view", {
   index("designView_design_user_idx").on(table.designId, table.userId),
   index("designView_design_ip_idx").on(table.designId, table.ipHash),
   index("designView_viewedAt_idx").on(table.viewedAt),
+])
+
+// Design downloads table - for tracking downloads
+export const designDownload = pgTable("design_download", {
+  id: text("id").primaryKey(),
+  designId: text("design_id")
+    .notNull()
+    .references(() => design.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .references(() => user.id, { onDelete: "cascade" }), // null for anonymous
+  downloadedAt: timestamp("downloaded_at").notNull().defaultNow(),
+}, (table) => [
+  index("designDownload_designId_idx").on(table.designId),
+  index("designDownload_userId_idx").on(table.userId),
+  index("designDownload_design_user_idx").on(table.designId, table.userId),
+  index("designDownload_downloadedAt_idx").on(table.downloadedAt),
 ])
 
 // Stars table - similar to GitHub stars

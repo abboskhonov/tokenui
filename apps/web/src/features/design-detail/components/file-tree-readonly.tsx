@@ -107,7 +107,7 @@ export function FileTree({ files, activePath, onSelect }: FileTreeProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b">
+      <div className="flex items-center justify-between p-3 border-b border-border">
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Files</span>
       </div>
 

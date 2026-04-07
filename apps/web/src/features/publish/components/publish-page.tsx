@@ -13,6 +13,7 @@ import {
   SaveIcon,
 } from "@hugeicons/core-free-icons"
 import { useCreateDesign, uploadImage, uploadHtml } from "@/lib/queries/designs"
+import { compressImage, formatFileSize, type CompressionResult } from "@/lib/image-compression"
 import { useStudioDesign, useUpdateStudioDesign } from "@/features/studio"
 import type { CreateDesignData } from "@/lib/types/design"
 import { FileTree } from "./file-tree-component"
@@ -95,6 +96,8 @@ export function PublishPage() {
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop")
   const [previewTheme, setPreviewTheme] = useState<"light" | "dark">("light")
   const [isCopied, setIsCopied] = useState(false)
+  const [compressionInfo, setCompressionInfo] = useState<CompressionResult | null>(null)
+  const [isCompressing, setIsCompressing] = useState(false)
   
   // Derived values
   const activeContent = useMemo(() => getFileContent(files, activeFile), [files, activeFile])
@@ -159,12 +162,43 @@ export function PublishPage() {
       return
     }
     
+    setIsCompressing(true)
+    setCompressionInfo(null)
+    
     try {
-      const result = await uploadImage(file)
+      // Compress image before upload for optimal performance
+      const compressed = await compressImage(file, {
+        maxWidth: 1920,
+        maxHeight: 1080,
+        quality: 0.85,
+        format: 'webp',
+      })
+      
+      setCompressionInfo(compressed)
+      
+      // Upload the compressed image
+      const result = await uploadImage(compressed.file)
       setThumbnailUrl(result.url)
-    } catch {
-      const url = URL.createObjectURL(file)
-      setThumbnailUrl(url)
+      
+      // Log compression stats for debugging
+      console.log('Image compressed:', {
+        original: formatFileSize(compressed.originalSize),
+        compressed: formatFileSize(compressed.compressedSize),
+        ratio: `${Math.round((1 - compressed.compressionRatio) * 100)}%`,
+        dimensions: `${compressed.width}x${compressed.height}`,
+      })
+    } catch (error) {
+      console.error('Compression/upload failed:', error)
+      // Fallback to uploading original file if compression fails
+      try {
+        const result = await uploadImage(file)
+        setThumbnailUrl(result.url)
+      } catch {
+        const url = URL.createObjectURL(file)
+        setThumbnailUrl(url)
+      }
+    } finally {
+      setIsCompressing(false)
     }
   }
 
@@ -400,6 +434,8 @@ export function PublishPage() {
             thumbnailUrl={thumbnailUrl}
             onThumbnailUpload={handleThumbnailUpload}
             files={files}
+            isCompressing={isCompressing}
+            compressionInfo={compressionInfo}
           />
 
           <div className="flex-1 flex flex-col min-h-0 relative">

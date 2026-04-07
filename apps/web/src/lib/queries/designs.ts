@@ -17,6 +17,8 @@ export const designKeys = {
   starCheck: (designId: string) => [...designKeys.all, "star-check", designId] as const,
   starCount: (designId: string) => [...designKeys.all, "star-count", designId] as const,
   viewAnalytics: () => [...designKeys.all, "view-analytics"] as const,
+  starAnalytics: () => [...designKeys.all, "star-analytics"] as const,
+  downloadAnalytics: () => [...designKeys.all, "download-analytics"] as const,
   cliAnalytics: () => [...designKeys.all, "cli-analytics"] as const,
   contributors: () => [...designKeys.all, "contributors"] as const,
 }
@@ -116,7 +118,7 @@ export function usePublicDesignsInfinite(category?: string, search?: string) {
       return lastPage.pagination.offset + lastPage.pagination.limit
     },
     initialPageParam: 0,
-    staleTime: 1000 * 60 * 2,
+    staleTime: 1000 * 60 * 5, // 5 minutes - match router staleTime for instant navigation
   })
 }
 
@@ -202,7 +204,7 @@ export function useBookmarks() {
 }
 
 // Check if a design is bookmarked
-export function useBookmarkCheck(designId: string) {
+export function useBookmarkCheck(designId: string, initialData?: boolean) {
   return useQuery({
     queryKey: designKeys.bookmarkCheck(designId),
     queryFn: async () => {
@@ -210,6 +212,7 @@ export function useBookmarkCheck(designId: string) {
       return response.isBookmarked
     },
     enabled: !!designId,
+    initialData: initialData,
   })
 }
 
@@ -256,7 +259,7 @@ export function useStars() {
 }
 
 // Check if a design is starred
-export function useStarCheck(designId: string) {
+export function useStarCheck(designId: string, initialData?: boolean) {
   return useQuery({
     queryKey: designKeys.starCheck(designId),
     queryFn: async () => {
@@ -264,11 +267,12 @@ export function useStarCheck(designId: string) {
       return response.isStarred
     },
     enabled: !!designId,
+    initialData: initialData,
   })
 }
 
 // Get star count for a design
-export function useStarCount(designId: string) {
+export function useStarCount(designId: string, initialData?: number) {
   return useQuery({
     queryKey: designKeys.starCount(designId),
     queryFn: async () => {
@@ -276,6 +280,7 @@ export function useStarCount(designId: string) {
       return response.count
     },
     enabled: !!designId,
+    initialData: initialData,
   })
 }
 
@@ -326,7 +331,38 @@ export function useTrackView() {
   })
 }
 
-// Get view analytics (last 7 days)
+// Track download mutation - records a download
+export function useTrackDownload() {
+  return useMutation({
+    mutationFn: async (designId: string) => {
+      const response = await api.post<{ 
+        success: boolean
+        downloadCount: number 
+      }>(`/api/designs/${designId}/download`, {})
+      return response
+    },
+  })
+}
+
+// Get combined view + star + download analytics (last 7 days)
+export function useAnalyticsSummary() {
+  return useQuery({
+    queryKey: [...designKeys.all, "analytics-summary"],
+    queryFn: async () => {
+      const response = await api.get<{ 
+        dailyViews: number[]
+        totalViews: number
+        dailyStars: number[]
+        totalStars: number
+        dailyDownloads: number[]
+        totalDownloads: number
+      }>("/api/analytics/summary")
+      return response
+    },
+  })
+}
+
+// Get view analytics (last 7 days) - legacy, use useAnalyticsSummary instead
 export function useViewAnalytics() {
   return useQuery({
     queryKey: designKeys.viewAnalytics(),
@@ -335,6 +371,34 @@ export function useViewAnalytics() {
         dailyViews: number[]
         totalViews: number 
       }>("/api/analytics/views")
+      return response
+    },
+  })
+}
+
+// Get star analytics (last 7 days) - legacy, use useAnalyticsSummary instead
+export function useStarAnalytics() {
+  return useQuery({
+    queryKey: designKeys.starAnalytics(),
+    queryFn: async () => {
+      const response = await api.get<{ 
+        dailyStars: number[]
+        totalStars: number 
+      }>("/api/analytics/stars")
+      return response
+    },
+  })
+}
+
+// Get download analytics (last 7 days) - legacy, use useAnalyticsSummary instead
+export function useDownloadAnalytics() {
+  return useQuery({
+    queryKey: designKeys.downloadAnalytics(),
+    queryFn: async () => {
+      const response = await api.get<{ 
+        dailyDownloads: number[]
+        totalDownloads: number 
+      }>("/api/analytics/downloads")
       return response
     },
   })

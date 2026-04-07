@@ -22,8 +22,8 @@ async function designLoader({ params }: { params: { username: string; designSlug
   // Fetch the design data immediately
   const response = await api.get<{ design: Design }>(`/api/designs/${username}/${designSlug}`)
   
-  // Prefetch the demo URL HTML content if available
-  if (response.design.demoUrl) {
+  // Prefetch the demo URL HTML content if available (browser only)
+  if (typeof window !== "undefined" && response.design.demoUrl) {
     const link = document.createElement("link")
     link.rel = "prefetch"
     link.href = response.design.demoUrl
@@ -70,20 +70,12 @@ function SkillDetailPage() {
   const trackView = useTrackView()
   
   const [activeTab, setActiveTab] = useState<TabType>("preview")
-  const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop")
   const [previewTheme, setPreviewTheme] = useState<"light" | "dark">("light")
   
-  const {
-    user,
-    isBookmarkedState,
-    isBookmarkPending,
-    handleBookmarkClick,
-    isStarredState,
-    isStarPending,
-    handleStarClick,
-    isCopied,
-    handleCopy,
-  } = useDesignActions(design)
+  // Only use design actions when design is loaded
+  const designActions = useDesignActions(design)
+  
+  const { user, isBookmarkedState, handleBookmarkClick, isStarredState, handleStarClick, isCopied, handleCopy } = designActions
 
   // Track view when page loads
   useEffect(() => {
@@ -102,20 +94,6 @@ function SkillDetailPage() {
     }
   }, [design?.id, isLoading, username, designSlug])
 
-  // Copy handlers
-  const handleCopyPrompt = useCallback(() => {
-    if (design?.content) {
-      handleCopy(design.content, "prompt")
-    }
-  }, [design?.content, handleCopy])
-
-  const handleCopyCode = useCallback((content?: string) => {
-    const textToCopy = content || design?.content || ""
-    if (textToCopy) {
-      handleCopy(textToCopy, "code")
-    }
-  }, [design?.content, handleCopy])
-
   const handleCopyInstall = useCallback(() => {
     const command = design ? `npx tokenui.sh add ${design.author?.username || username}/${design.slug}` : ""
     handleCopy(command, "install")
@@ -127,6 +105,7 @@ function SkillDetailPage() {
   }, [])
 
   if (error) {
+    console.error("Route error:", error)
     return <SkillDetailError />
   }
 
@@ -139,44 +118,34 @@ function SkillDetailPage() {
       <SkillDetailHeader
         username={username}
         designSlug={designSlug}
+        previewTheme={previewTheme}
+        isShowingFiles={activeTab === "code"}
+        onToggleFiles={() => setActiveTab(activeTab === "preview" ? "code" : "preview")}
+        onToggleTheme={togglePreviewTheme}
       />
 
       <div className="flex">
         <SkillDetailSidebar
           design={design}
           username={username}
+          user={user}
           isCopied={isCopied}
-          onCopyPrompt={handleCopyPrompt}
-          onCopyCode={handleCopyCode}
-          onViewCode={() => setActiveTab(activeTab === "preview" ? "code" : "preview")}
+          isStarredState={!!isStarredState}
+          isBookmarkedState={!!isBookmarkedState}
           onCopyInstall={handleCopyInstall}
+          onStarClick={handleStarClick}
+          onBookmarkClick={handleBookmarkClick}
         />
 
-        <main className="flex-1 h-[calc(100vh-56px)] bg-muted/30 overflow-hidden">
+        <main className="flex-1 h-[calc(100vh-56px)] overflow-hidden">
           {activeTab === "preview" ? (
             <PreviewContent
-              designName={design.name}
+              design={design}
               demoUrl={design.demoUrl}
-              previewMode={previewMode}
               previewTheme={previewTheme}
-              isStarredState={!!isStarredState}
-              isStarPending={isStarPending}
-              isBookmarkedState={!!isBookmarkedState}
-              isBookmarkPending={isBookmarkPending}
-              user={user}
-              onSetPreviewMode={setPreviewMode}
-              onToggleTheme={togglePreviewTheme}
-              onViewCode={() => setActiveTab("code")}
-              onStarClick={handleStarClick}
-              onBookmarkClick={handleBookmarkClick}
             />
           ) : (
-            <CodeView
-              design={design}
-              isCopied={isCopied === "code"}
-              onBackToPreview={() => setActiveTab("preview")}
-              onCopyCode={handleCopyCode}
-            />
+            <CodeView design={design} />
           )}
         </main>
       </div>

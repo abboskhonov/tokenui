@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react"
 import { useNavigate } from "@tanstack/react-router"
 import { useStudioDesigns, useDeleteStudioDesign } from "./queries"
-import { useViewAnalytics, useCliAnalytics } from "@/lib/queries/designs"
+import { useAnalyticsSummary, useCliAnalytics } from "@/lib/queries/designs"
 import { Navigation } from "@/components/navigation/main-navigation"
 import { StudioStats } from "./components/StudioStats"
 import { StudioFilters } from "./components/StudioFilters"
@@ -23,7 +23,8 @@ export function StudioPage() {
   
   // Fire all queries in parallel for maximum speed
   const { data: designs, isLoading: isDesignsLoading } = useStudioDesigns()
-  const { data: viewAnalytics, isLoading: isViewAnalyticsLoading } = useViewAnalytics()
+  // Combined analytics - views and stars load together in one request
+  const { data: analytics, isLoading: isAnalyticsLoading } = useAnalyticsSummary()
   const { data: cliAnalytics, isLoading: isCliAnalyticsLoading } = useCliAnalytics()
   
   const deleteMutation = useDeleteStudioDesign()
@@ -67,9 +68,11 @@ export function StudioPage() {
         {/* Stats - shows skeleton while loading */}
         <StudioStats 
           designs={designs} 
-          viewAnalytics={viewAnalytics}
+          viewAnalytics={analytics ? { dailyViews: analytics.dailyViews, totalViews: analytics.totalViews } : undefined}
+          starAnalytics={analytics ? { dailyStars: analytics.dailyStars, totalStars: analytics.totalStars } : undefined}
+          downloadAnalytics={analytics ? { dailyDownloads: analytics.dailyDownloads, totalDownloads: analytics.totalDownloads } : undefined}
           cliAnalytics={cliAnalytics}
-          isViewLoading={isViewAnalyticsLoading}
+          isAnalyticsLoading={isAnalyticsLoading}
           isCliLoading={isCliAnalyticsLoading}
         />
 

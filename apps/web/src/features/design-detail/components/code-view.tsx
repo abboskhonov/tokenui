@@ -1,26 +1,16 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Button } from "@/components/ui/button"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { ArrowLeftIcon, Copy01Icon, Tick02Icon } from "@hugeicons/core-free-icons"
-import { cn } from "@/lib/utils"
 import type { Design } from "@/lib/types/design"
 import type { FileNode } from "@/features/publish/components/file-tree"
 import { FileTree } from "./file-tree-readonly"
 
 interface CodeViewProps {
   design: Design
-  isCopied: boolean
-  onBackToPreview: () => void
-  onCopyCode: (content?: string) => void
 }
 
 export function CodeView({
   design,
-  isCopied,
-  onBackToPreview,
-  onCopyCode,
 }: CodeViewProps) {
   // Build file tree from design
   const files = useMemo(() => {
@@ -51,60 +41,29 @@ export function CodeView({
     return findFileContent(files, activePath) || ""
   }, [files, activePath])
 
-  const handleCopy = () => {
-    onCopyCode(activeContent)
-  }
-
   return (
-    <div className="h-full flex flex-col">
-      {/* Toolbar */}
-      <div className="h-10 border-b border-border flex items-center justify-between px-3 bg-background/50">
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="gap-2 h-8 text-xs"
-            onClick={onBackToPreview}
-          >
-            <HugeiconsIcon icon={ArrowLeftIcon} className="size-3.5" />
-            Back to preview
-          </Button>
-        </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="gap-2 h-8 text-xs"
-          onClick={handleCopy}
-        >
-          <HugeiconsIcon 
-            icon={isCopied ? Tick02Icon : Copy01Icon} 
-            className={cn("size-3.5", isCopied && "text-green-500")}
-          />
-          {isCopied ? "Copied!" : "Copy code"}
-        </Button>
+    <div className="h-full flex bg-background">
+      {/* File Tree Sidebar - FileTree component has its own header */}
+      <div className="w-64 border-r border-border bg-muted/30 flex flex-col overflow-hidden">
+        <FileTree 
+          files={files} 
+          activePath={activePath} 
+          onSelect={setActivePath}
+        />
       </div>
 
-      {/* Content - File Tree + Editor */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* File Tree Sidebar */}
-        <div className="w-64 border-r border-border bg-muted/30">
-          <FileTree 
-            files={files} 
-            activePath={activePath} 
-            onSelect={setActivePath}
-          />
+      {/* Code Editor */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* File path header - match exactly with FileTree header (p-3 border-b) */}
+        <div className="p-3 border-b border-border bg-muted/50 flex items-center shrink-0">
+          <span className="text-xs font-medium text-muted-foreground font-mono">{activePath}</span>
         </div>
-
-        {/* Code Editor */}
-        <div className="flex-1 overflow-auto bg-[#0d1117]">
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs text-muted-foreground font-mono">{activePath}</span>
-            </div>
-            <pre className="text-sm font-mono text-white/90 whitespace-pre-wrap">
-              {activeContent || "// No code available"}
-            </pre>
-          </div>
+        
+        {/* Code content */}
+        <div className="flex-1 overflow-auto bg-background">
+          <pre className="p-4 text-sm font-mono text-foreground/90 whitespace-pre-wrap leading-relaxed">
+            {activeContent || "// No code available"}
+          </pre>
         </div>
       </div>
     </div>

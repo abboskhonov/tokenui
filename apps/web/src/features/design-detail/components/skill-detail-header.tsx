@@ -1,39 +1,43 @@
 import { Link } from "@tanstack/react-router"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { 
-  Menu01Icon,
-  Copy01Icon,
-  File01Icon,
-  CodeIcon,
-  Tick02Icon,
+  ArrowLeft01Icon,
+  Folder01Icon,
+  FolderOpenIcon,
+  Sun01Icon,
+  Moon02Icon,
 } from "@hugeicons/core-free-icons"
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
 interface SkillDetailHeaderProps {
   username: string
   designSlug: string
-  isCopied: string | null
-  onCopyPrompt: () => void
-  onCopyCode: () => void
-  onViewCode: () => void
+  previewTheme: "light" | "dark"
+  isShowingFiles: boolean
+  onToggleFiles: () => void
+  onToggleTheme: () => void
 }
 
 export function SkillDetailHeader({
   username,
   designSlug,
-  isCopied,
-  onCopyPrompt,
-  onCopyCode,
-  onViewCode,
+  previewTheme,
+  isShowingFiles,
+  onToggleFiles,
+  onToggleTheme,
 }: SkillDetailHeaderProps) {
   return (
     <header className="sticky top-0 z-50 h-12 border-b border-border bg-background/95 backdrop-blur-xl">
       <div className="mx-auto h-full max-w-full px-4 flex items-center justify-between">
-        {/* Left: Menu button */}
-        <Button variant="ghost" size="icon-sm" className="h-8 w-8 -ml-1">
-          <HugeiconsIcon icon={Menu01Icon} className="size-4" />
-        </Button>
+        {/* Left: Back button */}
+        <div className="flex items-center">
+          <Link to="/" preload="intent">
+            <Button variant="ghost" size="sm" className="h-8 gap-1.5 px-2 -ml-1">
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+              <span className="text-sm">Back</span>
+            </Button>
+          </Link>
+        </div>
 
         {/* Center: Breadcrumb */}
         <div className="flex items-center gap-2 text-sm absolute left-1/2 -translate-x-1/2">
@@ -48,40 +52,33 @@ export function SkillDetailHeader({
           <span className="font-medium truncate max-w-[200px]">{designSlug}</span>
         </div>
 
-        {/* Right: Action buttons */}
+        {/* Right: Minimalist actions */}
         <div className="flex items-center gap-1">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-8 text-xs gap-1.5 px-2.5"
-            onClick={onCopyPrompt}
+          {/* Toggle files */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 text-xs gap-1.5 px-2"
+            onClick={onToggleFiles}
           >
             <HugeiconsIcon 
-              icon={isCopied === "prompt" ? Tick02Icon : Copy01Icon} 
-              className={cn("size-3.5", isCopied === "prompt" && "text-green-500")} 
+              icon={isShowingFiles ? FolderOpenIcon : Folder01Icon} 
+              className="size-3.5" 
             />
-            Copy prompt
+            {isShowingFiles ? "Hide files" : "Show files"}
           </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-8 text-xs gap-1.5 px-2.5"
-            onClick={onCopyCode}
+
+          {/* Theme toggle */}
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="h-8 w-8"
+            onClick={onToggleTheme}
           >
             <HugeiconsIcon 
-              icon={isCopied === "code" ? Tick02Icon : File01Icon} 
-              className={cn("size-3.5", isCopied === "code" && "text-green-500")} 
+              icon={previewTheme === "dark" ? Sun01Icon : Moon02Icon} 
+              className="size-4" 
             />
-            Copy code
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-8 text-xs gap-1.5 px-2.5"
-            onClick={onViewCode}
-          >
-            <HugeiconsIcon icon={CodeIcon} className="size-3.5" />
-            View code
           </Button>
         </div>
       </div>

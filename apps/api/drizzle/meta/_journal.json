@@ -78,6 +78,13 @@
       "when": 1775504359682,
       "tag": "0010_black_felicia_hardy",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1775590189422,
+      "tag": "0011_good_susan_delgado",
+      "breakpoints": true
     }
   ]
 }

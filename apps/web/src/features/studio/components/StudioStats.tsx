@@ -4,8 +4,7 @@ import type { Design } from "@/lib/types/design"
 import type { CliAnalytics } from "@/lib/queries/designs"
 import {
   EyeIcon,
-  CodeIcon,
-  Copy01Icon,
+  StarIcon,
   Download01Icon,
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
@@ -13,32 +12,37 @@ import { HugeiconsIcon } from "@hugeicons/react"
 interface StudioStatsProps {
   designs: Design[] | undefined
   viewAnalytics?: { dailyViews: number[]; totalViews: number }
+  starAnalytics?: { dailyStars: number[]; totalStars: number }
+  downloadAnalytics?: { dailyDownloads: number[]; totalDownloads: number }
   cliAnalytics?: CliAnalytics
-  isViewLoading?: boolean
+  isAnalyticsLoading?: boolean
   isCliLoading?: boolean
 }
 
 export function StudioStats({ 
   designs, 
   viewAnalytics, 
+  starAnalytics,
+  downloadAnalytics,
   cliAnalytics,
-  isViewLoading = false,
+  isAnalyticsLoading = false,
   isCliLoading = false,
 }: StudioStatsProps) {
   
   const stats = useMemo(() => {
     if (!designs) {
-      return { published: 0, drafts: 0, reviewing: 0, views: 0, bookmarks: 0, cliRuns: 0 }
+      return { published: 0, drafts: 0, reviewing: 0, views: 0, stars: 0, downloads: 0, cliRuns: 0 }
     }
     return {
       published: designs.filter((d) => d.status === "approved").length,
       drafts: designs.filter((d) => d.status === "draft").length,
       reviewing: designs.filter((d) => d.status === "pending").length,
       views: viewAnalytics?.totalViews || designs.reduce((sum, d) => sum + d.viewCount, 0),
-      bookmarks: 0, // Not implemented yet
+      stars: starAnalytics?.totalStars || designs.reduce((sum, d) => sum + (d.starCount || 0), 0),
+      downloads: downloadAnalytics?.totalDownloads || designs.reduce((sum, d) => sum + (d.downloadCount || 0), 0),
       cliRuns: cliAnalytics?.totalRuns || 0,
     }
-  }, [designs, viewAnalytics, cliAnalytics])
+  }, [designs, viewAnalytics, starAnalytics, downloadAnalytics, cliAnalytics])
 
   return (
     <>
@@ -57,14 +61,14 @@ export function StudioStats({
           <span className="text-muted-foreground">views</span>
         </div>
         <div>
-          <span className="font-semibold">{stats.bookmarks}</span>{" "}
-          <span className="text-muted-foreground">bookmarks</span>
+          <span className="font-semibold">{stats.downloads}</span>{" "}
+          <span className="text-muted-foreground">downloads</span>
         </div>
       </div>
 
       {/* Stats Cards */}
       <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {isViewLoading ? (
+        {isAnalyticsLoading ? (
           <StatsCardSkeleton icon={<HugeiconsIcon icon={EyeIcon} className="size-4" />} />
         ) : (
           <StatsCard
@@ -75,17 +79,27 @@ export function StudioStats({
           />
         )}
         
-        <StatsCard
-          label="Code Copies"
-          value={0}
-          icon={<HugeiconsIcon icon={CodeIcon} className="size-4" />}
-        />
+        {isAnalyticsLoading ? (
+          <StatsCardSkeleton icon={<HugeiconsIcon icon={StarIcon} className="size-4" />} />
+        ) : (
+          <StatsCard
+            label="Stars"
+            value={stats.stars}
+            icon={<HugeiconsIcon icon={StarIcon} className="size-4" />}
+            chartData={starAnalytics?.dailyStars}
+          />
+        )}
         
-        <StatsCard
-          label="Prompt Copies"
-          value={0}
-          icon={<HugeiconsIcon icon={Copy01Icon} className="size-4" />}
-        />
+        {isAnalyticsLoading ? (
+          <StatsCardSkeleton icon={<HugeiconsIcon icon={Download01Icon} className="size-4" />} />
+        ) : (
+          <StatsCard
+            label="Downloads"
+            value={stats.downloads}
+            icon={<HugeiconsIcon icon={Download01Icon} className="size-4" />}
+            chartData={downloadAnalytics?.dailyDownloads}
+          />
+        )}
         
         {isCliLoading ? (
           <StatsCardSkeleton icon={<HugeiconsIcon icon={Download01Icon} className="size-4" />} />

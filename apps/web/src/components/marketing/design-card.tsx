@@ -1,15 +1,15 @@
 "use client";
 
-import { memo, useCallback } from "react";
-import { Link } from "@tanstack/react-router";
-import { toast } from "sonner";
-import type { Design } from "@/lib/types/design";
-import { SkillCard } from "@/components/marketing/skill-card";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { Bookmark01Icon } from "@hugeicons/core-free-icons";
-import { useBookmarkCheck, useCreateBookmark, useDeleteBookmark } from "@/lib/queries/designs";
-import { useUser } from "@/lib/user-context";
-import { cn } from "@/lib/utils";
+import { memo, useCallback } from "react"
+import { Link, useNavigate } from "@tanstack/react-router"
+import { toast } from "sonner"
+import type { Design } from "@/lib/types/design"
+import { SkillCard } from "@/components/marketing/skill-card"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { Bookmark01Icon } from "@hugeicons/core-free-icons"
+import { useBookmarkCheck, useCreateBookmark, useDeleteBookmark } from "@/lib/queries/designs"
+import { useUser } from "@/lib/user-context"
+import { cn } from "@/lib/utils"
 
 /**
  * DesignCard - Displays a design thumbnail with hover metadata
@@ -22,6 +22,7 @@ interface DesignCardProps {
 export const DesignCard = memo(function DesignCard({ design }: DesignCardProps) {
   const username = design.author?.username || "unknown";
   const { user } = useUser();
+  const navigate = useNavigate();
   const { data: isBookmarked } = useBookmarkCheck(design.id);
   const createBookmark = useCreateBookmark();
   const deleteBookmark = useDeleteBookmark();
@@ -88,10 +89,13 @@ export const DesignCard = memo(function DesignCard({ design }: DesignCardProps) 
         
         {/* Metadata - appears below the card on hover */}
         <div className="absolute -bottom-3 left-0 right-0 flex items-center justify-between px-1 pt-2 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100">
-          <Link 
-            to="/u/$username" 
-            params={{ username }} 
-            className="flex items-center gap-2 min-w-0"
+          <div 
+            className="flex items-center gap-2 min-w-0 cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              navigate({ to: "/u/$username", params: { username } });
+            }}
           >
             <AuthorAvatar 
               image={design.author?.image} 
@@ -100,7 +104,7 @@ export const DesignCard = memo(function DesignCard({ design }: DesignCardProps) 
             <h3 className="text-xs font-medium text-foreground tracking-tight truncate hover:text-primary transition-colors">
               {design.name}
             </h3>
-          </Link>
+          </div>
           <div className="flex items-center gap-2">
             {user && (
               <button

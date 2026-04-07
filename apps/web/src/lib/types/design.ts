@@ -13,6 +13,10 @@ export interface Design {
   status: "draft" | "pending" | "approved" | "rejected"
   reviewMessage: string | null
   viewCount: number
+  downloadCount: number
+  starCount: number
+  isStarred?: boolean
+  isBookmarked?: boolean
   files: FileNode[] | null // Additional files for multi-file skills
   createdAt: string
   updatedAt: string

@@ -3,7 +3,7 @@ import { eq, and, desc, count, like, or, sql, gte } from "drizzle-orm"
 import { randomUUID } from "crypto"
 import { auth } from "../auth"
 import { db } from "../db"
-import { user, design, designView, star } from "../db/schema"
+import { user, design, designView, designDownload, star, bookmark } from "../db/schema"
 import type { AuthContext } from "../types"
 import { generateSlug } from "../utils/slugs"
 import { success, created, unauthorized, notFound, internalError, badRequest, forbidden, logError } from "../utils/errors"
@@ -16,6 +16,16 @@ async function getPublicViewCount(designId: string): Promise<number> {
     .select({ count: count() })
     .from(designView)
     .where(eq(designView.designId, designId))
+
+  return Number(result?.count || 0)
+}
+
+// Helper to get download count
+async function getPublicDownloadCount(designId: string): Promise<number> {
+  const [result] = await db
+    .select({ count: count() })
+    .from(designDownload)
+    .where(eq(designDownload.designId, designId))
 
   return Number(result?.count || 0)
 }
@@ -472,10 +482,56 @@ app.get("/:username/:slug", async (c) => {
       return forbidden(c)
     }
 
+    // Get star count
+    const [starCountResult] = await db
+      .select({ count: count() })
+      .from(star)
+      .where(eq(star.designId, designRecord.id))
+
+    const starCount = Number(starCountResult?.count || 0)
+
+    // Get download count
+    const [downloadCountResult] = await db
+      .select({ count: count() })
+      .from(designDownload)
+      .where(eq(designDownload.designId, designRecord.id))
+
+    const downloadCount = Number(downloadCountResult?.count || 0)
+
+    // Check if current user has starred (if logged in)
+    let isStarred = false
+    let isBookmarked = false
+
+    if (session) {
+      const [existingStar] = await db
+        .select()
+        .from(star)
+        .where(and(
+          eq(star.userId, session.user.id),
+          eq(star.designId, designRecord.id)
+        ))
+        .limit(1)
+      isStarred = !!existingStar
+
+      const [existingBookmark] = await db
+        .select()
+        .from(bookmark)
+        .where(and(
+          eq(bookmark.userId, session.user.id),
+          eq(bookmark.designId, designRecord.id)
+        ))
+        .limit(1)
+      isBookmarked = !!existingBookmark
+    }
+
     // Parse files JSON before returning
     const designWithParsedFiles = {
       ...designRecord,
       files: parseFiles(designRecord.files as string | null),
+      starCount,
+      downloadCount,
+      isStarred,
+      isBookmarked,
     }
 
     return success(c, { design: designWithParsedFiles })
@@ -552,6 +608,56 @@ app.post("/:id/view", async (c) => {
   } catch (error) {
     logError("RecordView", error)
     return internalError(c, "Failed to record view")
+  }
+})
+
+// Record a download for a design
+app.post("/:id/download", async (c) => {
+  const designId = c.req.param("id")
+
+  try {
+    const [designRecord] = await db
+      .select({ id: design.id, status: design.status, userId: design.userId })
+      .from(design)
+      .where(eq(design.id, designId))
+      .limit(1)
+
+    if (!designRecord) {
+      return notFound(c, "Design")
+    }
+
+    const session = await auth.api.getSession({
+      headers: c.req.raw.headers,
+    })
+
+    const userId = session?.user?.id
+
+    // Record the download
+    await db.insert(designDownload).values({
+      id: randomUUID(),
+      designId,
+      userId: userId || null,
+      downloadedAt: new Date(),
+    })
+
+    // Update cached download count on design
+    await db
+      .update(design)
+      .set({
+        downloadCount: sql`${design.downloadCount} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(design.id, designId))
+
+    const downloadCount = designRecord.status === "approved" ? await getPublicDownloadCount(designId) : 0
+
+    return success(c, {
+      success: true,
+      downloadCount
+    })
+  } catch (error) {
+    logError("RecordDownload", error)
+    return internalError(c, "Failed to record download")
   }
 })
 

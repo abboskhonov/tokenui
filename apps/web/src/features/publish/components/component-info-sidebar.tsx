@@ -12,6 +12,7 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { ImageUploadIcon, File01Icon } from "@hugeicons/core-free-icons"
 import { categories } from "@/features/marketing/data"
 import type { FileNode } from "./file-tree"
+import type { CompressionResult } from "@/lib/image-compression"
 
 interface ComponentInfoSidebarProps {
   name: string
@@ -25,6 +26,8 @@ interface ComponentInfoSidebarProps {
   thumbnailUrl: string
   onThumbnailUpload: (e: React.ChangeEvent<HTMLInputElement>) => void
   files: FileNode[]
+  isCompressing?: boolean
+  compressionInfo?: CompressionResult | null
 }
 
 export function ComponentInfoSidebar({
@@ -39,6 +42,8 @@ export function ComponentInfoSidebar({
   thumbnailUrl,
   onThumbnailUpload,
   files,
+  isCompressing = false,
+  compressionInfo = null,
 }: ComponentInfoSidebarProps) {
   return (
     <aside className="w-[300px] min-h-0 border-r bg-card/30 overflow-y-auto">
@@ -116,15 +121,36 @@ export function ComponentInfoSidebar({
               onChange={onThumbnailUpload}
               className="hidden"
               id="thumbnail"
+              disabled={isCompressing}
             />
-            <label htmlFor="thumbnail" className="cursor-pointer flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md border hover:bg-muted transition-colors text-sm">
-              <HugeiconsIcon icon={ImageUploadIcon} className="size-4" />
-              {thumbnailUrl ? "Change" : "Upload"}
+            <label 
+              htmlFor="thumbnail" 
+              className={`cursor-pointer flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md border hover:bg-muted transition-colors text-sm ${isCompressing ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {isCompressing ? (
+                <>
+                  <div className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  Optimizing...
+                </>
+              ) : (
+                <>
+                  <HugeiconsIcon icon={ImageUploadIcon} className="size-4" />
+                  {thumbnailUrl ? "Change" : "Upload"}
+                </>
+              )}
             </label>
             {thumbnailUrl && (
               <img src={thumbnailUrl} alt="Thumbnail" className="h-10 w-10 object-cover rounded" />
             )}
           </div>
+          {compressionInfo && compressionInfo.compressionRatio < 1 && (
+            <p className="text-xs text-green-600">
+              Optimized: {Math.round((1 - compressionInfo.compressionRatio) * 100)}% smaller
+              <span className="text-muted-foreground ml-1">
+                ({compressionInfo.width}x{compressionInfo.height})
+              </span>
+            </p>
+          )}
         </div>
 
         {/* Files Summary */}

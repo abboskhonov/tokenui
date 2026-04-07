@@ -15,13 +15,17 @@ export function useDesignActions(design: Design | undefined) {
   const { user } = useUser()
   const designId = design?.id || ""
   
-  // Bookmark state
-  const { data: isBookmarked } = useBookmarkCheck(designId)
+  // Use prefetched values from design object as initial data
+  const prefetchedIsStarred = design?.isStarred ?? false
+  const prefetchedIsBookmarked = design?.isBookmarked ?? false
+  
+  // Bookmark state - pass initialData from prefetch
+  const { data: isBookmarked } = useBookmarkCheck(designId, prefetchedIsBookmarked)
   const createBookmark = useCreateBookmark()
   const deleteBookmark = useDeleteBookmark()
   
-  // Star state
-  const { data: isStarred } = useStarCheck(designId)
+  // Star state - pass initialData from prefetch
+  const { data: isStarred } = useStarCheck(designId, prefetchedIsStarred)
   const createStar = useCreateStar()
   const deleteStar = useDeleteStar()
   
@@ -29,9 +33,9 @@ export function useDesignActions(design: Design | undefined) {
   const [isCopied, setIsCopied] = useState<string | null>(null)
   
   // Optimistic states
-  const isBookmarkedState = isBookmarked || (design && createBookmark.variables === design.id)
+  const isBookmarkedState = isBookmarked ?? prefetchedIsBookmarked
   const isBookmarkPending = createBookmark.isPending || deleteBookmark.isPending
-  const isStarredState = isStarred || (design && createStar.variables === design.id)
+  const isStarredState = isStarred ?? prefetchedIsStarred
   const isStarPending = createStar.isPending || deleteStar.isPending
   
   const handleBookmarkClick = useCallback(() => {
