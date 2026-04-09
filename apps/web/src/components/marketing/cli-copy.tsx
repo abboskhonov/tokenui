@@ -11,14 +11,16 @@ interface CLICopyProps {
 }
 
 /**
- * CLICopy - A CLI command copy button with visual feedback
- * 
+ * CLICopy - Terminal-style input field for CLI commands
+ * Matches the supermemory.ai hero style: defined border, rounded-lg, input-like
+ * Width stays consistent between states - no flickering on theme change
+ *
  * @example
  * <CLICopy command="npx tokenui.sh add button" />
  */
-export const CLICopy = memo(function CLICopy({ 
-  command = "npx tokenui.sh add <skill>", 
-  className 
+export const CLICopy = memo(function CLICopy({
+  command = "npx tokenui.sh add <skill>",
+  className
 }: CLICopyProps) {
   const [copied, setCopied] = useState(false);
 
@@ -26,7 +28,7 @@ export const CLICopy = memo(function CLICopy({
     try {
       await navigator.clipboard.writeText(command);
       setCopied(true);
-      
+
       const timer = setTimeout(() => setCopied(false), 2000);
       return () => clearTimeout(timer);
     } catch (err) {
@@ -38,20 +40,35 @@ export const CLICopy = memo(function CLICopy({
     <button
       onClick={handleCopy}
       className={cn(
-        "group inline-flex items-center gap-2.5 rounded-lg border border-border",
-        "bg-muted/50 px-4 py-2.5 font-mono text-sm text-muted-foreground",
-        "hover:border-foreground/30 hover:bg-muted hover:text-foreground",
+        "group inline-flex items-center gap-2 rounded-lg",
+        "border border-input bg-background",
+        "px-4 py-3 font-mono text-sm",
+        "hover:border-foreground/20 hover:bg-muted/30",
+        "focus:outline-none",
         className
       )}
       aria-label={`Copy command: ${command}`}
     >
-      <span className="text-muted-foreground/60">$</span>
-      <span>{command}</span>
-      <HugeiconsIcon
-        icon={copied ? Tick02Icon : Copy01Icon}
-        className={cn("ml-1 size-4", copied && "text-green-500")}
-        aria-hidden="true"
-      />
+      {copied ? (
+        // Copied state
+        <>
+          <HugeiconsIcon icon={Tick02Icon} className="size-4 text-green-500" />
+          <span className="text-foreground/70">Copied!</span>
+        </>
+      ) : (
+        // Default state
+        <>
+          <span className="text-muted-foreground/60 select-none">$</span>
+          <span className="text-foreground/90 tracking-tight">{command}</span>
+          <span className="ml-2 flex items-center">
+            <HugeiconsIcon
+              icon={Copy01Icon}
+              className="size-4 text-muted-foreground/50 group-hover:text-muted-foreground"
+              aria-hidden="true"
+            />
+          </span>
+        </>
+      )}
     </button>
   );
 });

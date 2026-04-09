@@ -162,13 +162,11 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
 
         <div className="relative z-10 pt-12 md:pt-16">
           <div className="max-w-2xl">
-            <h1 className="text-4xl font-medium leading-tight tracking-tight text-foreground md:text-5xl">
-              The design layer
-              <br />
-              <span className="text-muted-foreground">for your coding agent</span>
+            <h1 className="text-4xl font-medium leading-[1.15] tracking-tight text-foreground md:text-5xl">
+              The design layer for your coding agent
             </h1>
             <p className="mt-4 text-lg text-muted-foreground">
-              A CLI tool that applies a consistent, beautiful design layer on top of AI-generated code.
+              One command. Beautiful UI.
             </p>
           </div>
 
@@ -176,7 +174,7 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
             <CLICopy command="npx tokenui.sh add <skill>" />
           </div>
 
-          <section className="mt-16 md:mt-20">
+          <section id="skills-section" className="mt-16 md:mt-20">
             <div className="mb-6 flex items-center gap-2">
               <span className="text-sm font-medium text-muted-foreground">Skills Leaderboard</span>
             </div>
@@ -230,7 +228,7 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
             </div>
 
             {/* Sort Tabs (Newest, Trending, Most Starred, Most Viewed) */}
-            <div className="mb-6 flex items-center gap-6 text-sm border-b border-border overflow-x-auto custom-scrollbar">
+            <div className="mb-6 flex items-center gap-6 text-sm border-b border-border overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <button
                 onClick={() => setSortBy("newest")}
                 className={cn(
