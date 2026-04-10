@@ -324,75 +324,95 @@ export function PublishPage() {
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}
-      <header className="h-14 border-b flex items-center justify-between px-4 shrink-0">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8"
-            onClick={() => step === 1 ? navigate({ to: "/studio" }) : setStep(1)}
-          >
-            <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-          </Button>
-          <span className="text-sm font-medium text-muted-foreground">
-            {isEditing ? "Edit Draft" : "New Skill"}
-            {step === 2 && " - Info"}
-          </span>
-        </div>
+      <header className="sticky top-0 z-50 h-12 border-b border-border bg-background/95 backdrop-blur-xl">
+        <div className="mx-auto h-full max-w-full px-4 flex items-center justify-between">
+          {/* Left: Back button and title */}
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 gap-1.5 px-2 -ml-1"
+              onClick={() => step === 1 ? navigate({ to: "/studio" }) : setStep(1)}
+            >
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+              <span className="text-sm">Back</span>
+            </Button>
+            <span className="text-sm font-medium">
+              {isEditing ? "Edit Draft" : "New Skill"}
+              {step === 2 && " - Info"}
+            </span>
+          </div>
 
-        <div className="flex items-center gap-2">
-          {step === 1 ? (
-            <>
-              {!isEditing && (
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2">
+            {step === 1 ? (
+              <>
+                {!isEditing && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="h-8 gap-1.5 text-xs"
+                    onClick={saveDraft}
+                    disabled={isDraftSaving || createDesign.isPending}
+                  >
+                    <HugeiconsIcon icon={SaveIcon} className="size-3.5" />
+                    {isDraftSaving ? "Saving..." : "Save Draft"}
+                  </Button>
+                )}
+                {isEditing && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="h-8 gap-1.5 text-xs"
+                    onClick={updateDraft}
+                    disabled={updateDesign.isPending}
+                  >
+                    <HugeiconsIcon icon={SaveIcon} className="size-3.5" />
+                    {updateDesign.isPending ? "Saving..." : "Update Draft"}
+                  </Button>
+                )}
                 <Button 
-                  variant="outline" 
-                  className="gap-2"
-                  onClick={saveDraft}
-                  disabled={isDraftSaving || createDesign.isPending}
+                  size="sm"
+                  className="h-8 gap-1.5 text-xs"
+                  onClick={() => setStep(2)}
                 >
-                  <HugeiconsIcon icon={SaveIcon} className="size-4" />
-                  {isDraftSaving ? "Saving..." : "Save Draft"}
+                  Continue
+                  <HugeiconsIcon icon={ArrowRight01Icon} className="size-3.5" />
                 </Button>
-              )}
-              {isEditing && (
+              </>
+            ) : (
+              <>
                 <Button 
-                  variant="outline" 
-                  className="gap-2"
-                  onClick={updateDraft}
-                  disabled={updateDesign.isPending}
+                  variant="ghost" 
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={() => setStep(1)}
                 >
-                  <HugeiconsIcon icon={SaveIcon} className="size-4" />
-                  {updateDesign.isPending ? "Saving..." : "Update Draft"}
+                  Back
                 </Button>
-              )}
-              <Button className="gap-2" onClick={() => setStep(2)}>
-                Continue
-                <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" />
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="ghost" onClick={() => setStep(1)}>Back</Button>
-              <Button 
-                className="gap-2" 
-                onClick={handleSubmit}
-                disabled={createDesign.isPending || updateDesign.isPending}
-              >
-                <HugeiconsIcon icon={isEditing ? Tick02Icon : Add01Icon} className="size-4" />
-                {createDesign.isPending || updateDesign.isPending 
-                  ? "Publishing..." 
-                  : "Publish"
-                }
-              </Button>
-            </>
-          )}
+                <Button 
+                  size="sm"
+                  className="h-8 gap-1.5 text-xs"
+                  onClick={handleSubmit}
+                  disabled={createDesign.isPending || updateDesign.isPending}
+                >
+                  <HugeiconsIcon icon={isEditing ? Tick02Icon : Add01Icon} className="size-3.5" />
+                  {createDesign.isPending || updateDesign.isPending 
+                    ? "Publishing..." 
+                    : "Publish"
+                  }
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
       {/* Step 1: Code Editor */}
       {step === 1 && (
-        <div className="flex-1 flex overflow-hidden">
-          <div className="w-56 border-r bg-muted/30">
+        <div className="flex-1 flex overflow-hidden bg-background">
+          {/* File Tree Sidebar */}
+          <div className="w-60 border-r border-border bg-muted/30 flex flex-col overflow-hidden">
             <FileTree
               files={files}
               activePath={activeFile}
@@ -401,20 +421,26 @@ export function PublishPage() {
             />
           </div>
 
-          <div className="flex-1 flex flex-col">
-            <div className="px-3 py-2 border-b bg-muted/50 text-xs font-medium flex items-center gap-2">
-              <HugeiconsIcon icon={File01Icon} className="size-3.5" />
-              {activeFile}
+          {/* Code Editor */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* File path header - matches FileTree header height */}
+            <div className="p-3 border-b border-border bg-muted/50 flex items-center shrink-0">
+              <HugeiconsIcon icon={File01Icon} className="size-3.5 text-muted-foreground mr-2" />
+              <span className="text-xs font-medium text-muted-foreground font-mono">{activeFile}</span>
             </div>
-            <CodeEditor
-              value={activeContent}
-              onChange={handleFileChange}
-              language={getLanguageFromFilename(activeFile)}
-              placeholder={activeFile === "SKILL.md" 
-                ? "---\nname: my-skill\ndescription: Describe your skill here...\n---" 
-                : "Enter file content..."
-              }
-            />
+            
+            {/* Editor content */}
+            <div className="flex-1 overflow-auto bg-background">
+              <CodeEditor
+                value={activeContent}
+                onChange={handleFileChange}
+                language={getLanguageFromFilename(activeFile)}
+                placeholder={activeFile === "SKILL.md" 
+                  ? "---\nname: my-skill\ndescription: Describe your skill here...\n---" 
+                  : "Enter file content..."
+                }
+              />
+            </div>
           </div>
         </div>
       )}

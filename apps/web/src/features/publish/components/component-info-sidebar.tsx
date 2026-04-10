@@ -56,7 +56,7 @@ export function ComponentInfoSidebar({
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder='e.g. "Button"'
+            placeholder='e.g. "Modal Dialog"'
             className="h-9"
           />
         </div>
@@ -69,7 +69,7 @@ export function ComponentInfoSidebar({
           <Input
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
-            placeholder='e.g. "button"'
+            placeholder='e.g. "modal-dialog"'
             className="h-9"
           />
           <p className="text-xs text-muted-foreground">
@@ -85,7 +85,7 @@ export function ComponentInfoSidebar({
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="What does this component do?"
+            placeholder="Describe what this skill does and how it helps AI agents..."
             className="w-full h-20 p-2.5 rounded-md border bg-transparent text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>

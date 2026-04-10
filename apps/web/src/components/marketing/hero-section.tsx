@@ -168,6 +168,9 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
             <p className="mt-4 text-lg text-muted-foreground">
               One command. Beautiful UI.
             </p>
+            <p className="mt-3 text-base text-muted-foreground/80 max-w-xl">
+              Drop-in design skills for your agent. No setup, no configuration—just describe what you need and ship production-ready components in seconds.
+            </p>
           </div>
 
           <div className="mt-8">

@@ -51,6 +51,8 @@ app.use("/api/*", standardRateLimiter)
 
 // Cache middleware for public routes (applied after rate limiting)
 app.use("/api/designs", createCacheMiddleware(60))
+// Cache individual design detail pages for 5 minutes (they don't change often)
+app.use("/api/designs/*/*", createCacheMiddleware(300))
 app.use("/api/users/*", createCacheMiddleware(60))
 
 // Mount routes

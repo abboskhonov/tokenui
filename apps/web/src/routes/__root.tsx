@@ -14,6 +14,7 @@ import { QueryProvider } from "@/lib/query-provider"
 import { UserProvider } from "@/lib/user-context"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
+import { queryClient } from "@/router"
 
 export const Route = createRootRoute({
   head: () => ({
@@ -50,7 +51,7 @@ function RootComponent() {
 
   return (
     <UserProvider user={user}>
-      <QueryProvider>
+      <QueryProvider queryClient={queryClient}>
         <ThemeProvider>
           <RootDocument>
             <Outlet />

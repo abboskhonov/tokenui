@@ -451,6 +451,7 @@ app.get("/:username/:slug", async (c) => {
   }
 
   try {
+    // Fetch design + user join first (needed for authorization check)
     const [designRecord] = await db
       .select({
         id: design.id,
@@ -485,54 +486,42 @@ app.get("/:username/:slug", async (c) => {
       return notFound(c, "Design")
     }
 
-    const session = await auth.api.getSession({
+    // Check authorization
+    const sessionPromise = auth.api.getSession({
       headers: c.req.raw.headers,
     })
+
+    // Run counts in parallel with session check
+    const [session, starCountResult, downloadCountResult] = await Promise.all([
+      sessionPromise,
+      db.select({ count: count() }).from(star).where(eq(star.designId, designRecord.id)),
+      db.select({ count: count() }).from(designDownload).where(eq(designDownload.designId, designRecord.id)),
+    ])
 
     if (designRecord.status !== "approved" && (!session || session.user.id !== designRecord.userId)) {
       return forbidden(c)
     }
 
-    // Get star count
-    const [starCountResult] = await db
-      .select({ count: count() })
-      .from(star)
-      .where(eq(star.designId, designRecord.id))
-
     const starCount = Number(starCountResult?.count || 0)
-
-    // Get download count
-    const [downloadCountResult] = await db
-      .select({ count: count() })
-      .from(designDownload)
-      .where(eq(designDownload.designId, designRecord.id))
-
     const downloadCount = Number(downloadCountResult?.count || 0)
 
-    // Check if current user has starred (if logged in)
+    // Check if current user has starred/bookmarked (only if logged in)
     let isStarred = false
     let isBookmarked = false
 
     if (session) {
-      const [existingStar] = await db
-        .select()
-        .from(star)
-        .where(and(
+      const [starResult, bookmarkResult] = await Promise.all([
+        db.select().from(star).where(and(
           eq(star.userId, session.user.id),
           eq(star.designId, designRecord.id)
-        ))
-        .limit(1)
-      isStarred = !!existingStar
-
-      const [existingBookmark] = await db
-        .select()
-        .from(bookmark)
-        .where(and(
+        )).limit(1),
+        db.select().from(bookmark).where(and(
           eq(bookmark.userId, session.user.id),
           eq(bookmark.designId, designRecord.id)
-        ))
-        .limit(1)
-      isBookmarked = !!existingBookmark
+        )).limit(1),
+      ])
+      isStarred = !!starResult[0]
+      isBookmarked = !!bookmarkResult[0]
     }
 
     // Parse files JSON before returning

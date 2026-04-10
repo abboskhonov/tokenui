@@ -35,7 +35,7 @@ export function PreviewArea({
       <div className="h-12 border-b flex items-center justify-between px-4 bg-background/50">
         <div className="flex items-center gap-2 text-sm font-medium">
           <HugeiconsIcon icon={CodeIcon} className="size-4 text-muted-foreground" />
-          Component Preview
+          Preview
         </div>
         <div className="flex items-center gap-2">
           {/* Device Toggle */}
@@ -87,7 +87,7 @@ export function PreviewArea({
             onClick={onToggleEditor}
           >
             <HugeiconsIcon icon={CodeIcon} className="size-3.5" />
-            {isEditorOpen ? "Hide Code" : "Edit Demo"}
+            {isEditorOpen ? "Hide Code" : "Edit HTML"}
           </Button>
         </div>
       </div>

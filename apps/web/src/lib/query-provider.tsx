@@ -2,8 +2,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { useState } from "react"
 
-export function QueryProvider({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() =>
+interface QueryProviderProps {
+  children: React.ReactNode
+  queryClient?: QueryClient
+}
+
+export function QueryProvider({ children, queryClient: externalQueryClient }: QueryProviderProps) {
+  const [internalQueryClient] = useState(() =>
     new QueryClient({
       defaultOptions: {
         queries: {
@@ -20,6 +25,8 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
       },
     })
   )
+
+  const queryClient = externalQueryClient ?? internalQueryClient
 
   return (
     <QueryClientProvider client={queryClient}>

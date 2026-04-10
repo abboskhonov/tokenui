@@ -13,6 +13,8 @@ import {
   SkillNotFound,
 } from "@/features/design-detail/components"
 import type { Design } from "@/lib/types/design"
+import { api } from "@/lib/api/client"
+import { queryClient } from "@/router"
 
 type TabType = "preview" | "code"
 
@@ -28,6 +30,23 @@ function generatePageTitle(design: Design | undefined, params: { username: strin
   return `${formattedSlug} by ${params.username} - tokenui`
 }
 
+// Prefetch design data before navigation completes
+async function prefetchDesign(username: string, slug: string) {
+  const queryKey = designKeys.detail(username, slug)
+  
+  // Only prefetch if not already in cache
+  if (!queryClient.getQueryData(queryKey)) {
+    await queryClient.prefetchQuery({
+      queryKey,
+      queryFn: async () => {
+        const response = await api.get<{ design: Design }>(`/api/designs/${username}/${slug}`)
+        return response.design
+      },
+      staleTime: 1000 * 60 * 2, // 2 minutes
+    })
+  }
+}
+
 export const Route = createFileRoute("/s/$username/$designSlug")({
   component: SkillDetailPage,
   head: ({ params }) => ({
@@ -37,6 +56,12 @@ export const Route = createFileRoute("/s/$username/$designSlug")({
       },
     ],
   }),
+  // Prefetch design data during navigation for instant page load
+  loader: async ({ params }) => {
+    const { username, designSlug } = params
+    await prefetchDesign(username, designSlug)
+    return { prefetched: true }
+  },
   errorComponent: () => <SkillDetailError />,
   notFoundComponent: () => <SkillNotFound />,
 })

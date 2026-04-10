@@ -320,8 +320,8 @@ export function FileTree({ files, activePath, onSelect, onFilesChange }: FileTre
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header with two icons */}
-      <div className="flex items-center justify-between p-3 border-b">
+      {/* Header - matches code-view header styling */}
+      <div className="flex items-center justify-between p-3 border-b border-border">
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Files</span>
         <div className="flex items-center gap-1">
           <button
