@@ -1,31 +1,15 @@
 "use client"
 
-import { useState } from "react"
-import { useNavigate } from "@tanstack/react-router"
+import { Link } from "@tanstack/react-router"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { GithubIcon, GoogleIcon } from "@hugeicons/core-free-icons"
-import { useLogin, useSignInWithGitHub, useSignInWithGoogle } from "@/lib/queries/auth"
+import { GithubIcon, GoogleIcon, CommandLineIcon } from "@hugeicons/core-free-icons"
+import { useSignInWithGitHub, useSignInWithGoogle } from "@/lib/queries/auth"
 
 export function LoginPage() {
-  const navigate = useNavigate()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  
-  const login = useLogin()
   const signInWithGitHub = useSignInWithGitHub()
   const signInWithGoogle = useSignInWithGoogle()
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    try {
-      await login.mutateAsync({ email, password })
-      navigate({ to: "/" })
-    } catch (error) {
-      // Error handled by mutation
-    }
-  }
 
   const handleGitHubSignIn = async () => {
     await signInWithGitHub.mutateAsync()
@@ -36,98 +20,60 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
-          <p className="text-sm text-muted-foreground">
-            Sign in to your account to continue
-          </p>
-        </div>
-
-        {/* Social Login */}
-        <div className="space-y-3">
-          <Button
-            variant="outline"
-            className="w-full h-10 gap-2"
-            onClick={handleGitHubSignIn}
-            disabled={signInWithGitHub.isPending}
-          >
-            <HugeiconsIcon icon={GithubIcon} className="size-4" />
-            Continue with GitHub
-          </Button>
-          
-          <Button
-            variant="outline"
-            className="w-full h-10 gap-2"
-            onClick={handleGoogleSignIn}
-            disabled={signInWithGoogle.isPending}
-          >
-            <HugeiconsIcon icon={GoogleIcon} className="size-4" />
-            Continue with Google
-          </Button>
-        </div>
-
-        {/* Divider */}
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-              Or continue with
-            </span>
-          </div>
-        </div>
-
-        {/* Email/Password Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="h-10"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="h-10"
-            />
-          </div>
-
-          {login.error && (
-            <p className="text-sm text-destructive">
-              {login.error instanceof Error ? login.error.message : "Login failed"}
-            </p>
-          )}
-
-          <Button
-            type="submit"
-            className="w-full h-10"
-            disabled={login.isPending}
-          >
-            {login.isPending ? "Signing in..." : "Sign in"}
-          </Button>
-        </form>
-
-        {/* Sign Up Link */}
-        <p className="text-center text-sm text-muted-foreground">
-          Don't have an account?{" "}
-          <a href="/signup" className="text-foreground hover:underline">
-            Sign up
-          </a>
-        </p>
+    <div className="relative min-h-screen bg-background">
+      {/* Background gradient */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-1/2 top-0 h-[600px] w-[800px] -translate-x-1/2 bg-[radial-gradient(circle_at_center,var(--brand)/6%,transparent_70%)]" style={{ willChange: "transform" }} />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
       </div>
+
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
+        <div className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-foreground text-background">
+              <HugeiconsIcon icon={CommandLineIcon} className="size-4" />
+            </div>
+            <span className="text-base font-semibold text-foreground tracking-tight">
+              tokenui
+            </span>
+          </Link>
+        </div>
+      </header>
+
+      {/* Main content */}
+      <main className="relative z-10 flex min-h-screen items-center justify-center px-4 pt-16">
+        <Card className="w-full max-w-sm">
+          <CardHeader className="space-y-1 text-center">
+            <CardTitle className="text-xl font-semibold tracking-tight">Welcome back</CardTitle>
+            <CardDescription>
+              Sign in to continue to tokenui
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="space-y-3">
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              onClick={handleGitHubSignIn}
+              disabled={signInWithGitHub.isPending}
+            >
+              <HugeiconsIcon icon={GithubIcon} className="size-4" />
+              Continue with GitHub
+            </Button>
+
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              onClick={handleGoogleSignIn}
+              disabled={signInWithGoogle.isPending}
+            >
+              <HugeiconsIcon icon={GoogleIcon} className="size-4" />
+              Continue with Google
+            </Button>
+          </CardContent>
+        </Card>
+      </main>
     </div>
   )
 }
