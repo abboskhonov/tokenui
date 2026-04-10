@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
+import { useEffect, useState } from "react"
 
 import appCss from "../styles.css?url"
 
@@ -15,6 +16,7 @@ import { UserProvider } from "@/lib/user-context"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { queryClient } from "@/router"
+import { useSession } from "@/lib/queries/auth"
 
 export const Route = createRootRoute({
   head: () => ({
@@ -52,12 +54,39 @@ function RootComponent() {
   return (
     <UserProvider user={user}>
       <QueryProvider queryClient={queryClient}>
-        <ThemeProvider>
-          <RootDocument>
-            <Outlet />
-          </RootDocument>
-        </ThemeProvider>
+        <SessionHydrator initialUser={user}>
+          <ThemeProvider>
+            <RootDocument>
+              <Outlet />
+            </RootDocument>
+          </ThemeProvider>
+        </SessionHydrator>
       </QueryProvider>
+    </UserProvider>
+  )
+}
+
+// This component runs inside QueryProvider to fetch client-side session
+function SessionHydrator({ 
+  children, 
+  initialUser 
+}: { 
+  children: React.ReactNode
+  initialUser: any 
+}) {
+  const { data: session } = useSession()
+  const [user, setUser] = useState(initialUser)
+  
+  useEffect(() => {
+    // If client session is different from server user, update it
+    if (session?.user && JSON.stringify(session.user) !== JSON.stringify(initialUser)) {
+      setUser(session.user)
+    }
+  }, [session, initialUser])
+  
+  return (
+    <UserProvider user={user}>
+      {children}
     </UserProvider>
   )
 }
