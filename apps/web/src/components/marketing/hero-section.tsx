@@ -151,16 +151,24 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
 
   return (
     <div className="relative min-h-screen bg-background">
+      {/* Vertical column lines - span entire page including navbar */}
+      <div className="pointer-events-none fixed inset-0 z-[100] hidden lg:block">
+        <div className="mx-auto max-w-[1600px] h-full px-6 md:px-12 lg:px-16 xl:px-20 relative">
+          <div className="absolute left-0 top-0 bottom-0 w-px bg-border/50" />
+          <div className="absolute right-0 top-0 bottom-0 w-px bg-border/50" />
+        </div>
+      </div>
+
       {/* Navigation at root level - before main content */}
       <Navigation />
 
-      <main className="relative z-10 mx-auto max-w-7xl px-6 pt-[72px]">
+      <main className="relative z-10 mx-auto w-full pt-[72px]">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-1/2 top-0 h-[600px] w-[800px] -translate-x-1/2 bg-[radial-gradient(circle_at_center,var(--brand)/6%,transparent_70%)]" style={{ willChange: "transform" }} />
           <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         </div>
 
-        <div className="relative z-10 pt-12 md:pt-20">
+        <div className="relative z-10 mx-auto max-w-[1600px] px-6 md:px-12 lg:px-16 xl:px-20 pt-12 md:pt-20">
           {/* Two Column Hero */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start mb-16">
             {/* Left Column - Large Headline */}
@@ -187,56 +195,60 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
               <span className="text-sm font-medium text-muted-foreground">Skills Leaderboard</span>
             </div>
 
-            <div className="mb-6 flex items-center gap-4 border-b border-border pb-4">
-              <div className="flex flex-1 items-center gap-3">
-                <HugeiconsIcon icon={Search01Icon} className="size-5 text-muted-foreground" />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  placeholder="Search all skills..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                {/* Category Dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger render={
-                    <Button variant="ghost" size="sm" className="gap-2 h-8 text-sm text-muted-foreground hover:text-foreground">
-                      <span className="capitalize">{activeTab === "all" ? "All" : activeTab}</span>
-                      <span className="text-xs text-muted-foreground/70">({getCategoryCount(activeTab)})</span>
-                      <HugeiconsIcon icon={ArrowRight01Icon} className="size-3 rotate-90" />
-                    </Button>
-                  } />
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem 
-                      className="gap-2 text-sm"
-                      onClick={() => setActiveTab("all")}
-                    >
-                      <span>All</span>
-                      <span className="text-xs text-muted-foreground ml-auto">({getCategoryCount("all")})</span>
-                    </DropdownMenuItem>
-                    {designCategories.map((cat) => (
+            {/* Full-width search bar with border */}
+            <div className="relative w-screen left-1/2 -translate-x-1/2 border-b border-border">
+              <div className="mx-auto max-w-[1600px] flex items-center gap-4 pb-4 px-6 md:px-12 lg:px-16 xl:px-20">
+                <div className="flex flex-1 items-center gap-3">
+                  <HugeiconsIcon icon={Search01Icon} className="size-5 text-muted-foreground" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Search all skills..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  {/* Category Dropdown */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger render={
+                      <Button variant="ghost" size="sm" className="gap-2 h-8 text-sm text-muted-foreground hover:text-foreground">
+                        <span className="capitalize">{activeTab === "all" ? "All" : activeTab}</span>
+                        <span className="text-xs text-muted-foreground/70">({getCategoryCount(activeTab)})</span>
+                        <HugeiconsIcon icon={ArrowRight01Icon} className="size-3 rotate-90" />
+                      </Button>
+                    } />
+                    <DropdownMenuContent align="end" className="w-48">
                       <DropdownMenuItem 
-                        key={cat.name}
                         className="gap-2 text-sm"
-                        onClick={() => setActiveTab(cat.name)}
+                        onClick={() => setActiveTab("all")}
                       >
-                        <span>{cat.name}</span>
-                        <span className="text-xs text-muted-foreground ml-auto">({getCategoryCount(cat.name)})</span>
+                        <span>All</span>
+                        <span className="text-xs text-muted-foreground ml-auto">({getCategoryCount("all")})</span>
                       </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <kbd className="flex h-8 w-8 items-center justify-center rounded border border-border text-sm text-muted-foreground">
-                  /
-                </kbd>
+                      {designCategories.map((cat) => (
+                        <DropdownMenuItem 
+                          key={cat.name}
+                          className="gap-2 text-sm"
+                          onClick={() => setActiveTab(cat.name)}
+                        >
+                          <span>{cat.name}</span>
+                          <span className="text-xs text-muted-foreground ml-auto">({getCategoryCount(cat.name)})</span>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <kbd className="flex h-8 w-8 items-center justify-center rounded border border-border text-sm text-muted-foreground">
+                    /
+                  </kbd>
+                </div>
               </div>
             </div>
 
-            {/* Sort Tabs (Newest, Trending, Most Starred, Most Viewed) */}
-            <div className="mb-6 flex items-center gap-6 text-sm border-b border-border overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {/* Full-width tabs with border */}
+            <div className="relative w-screen left-1/2 -translate-x-1/2 mt-4 border-b border-border">
+              <div className="mx-auto max-w-[1600px] flex items-center gap-6 text-sm overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-6 md:px-12 lg:px-16 xl:px-20">
               <button
                 onClick={() => setSortBy("newest")}
                 className={cn(
@@ -292,8 +304,10 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
               >
                 <span>Top Contributors</span>
               </button>
+              </div>
             </div>
             
+            <div className="mt-4">
             {sortBy === "contributors" ? (
               <ContributorsView />
             ) : isLoadingDesigns ? (
@@ -327,6 +341,7 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
                 )}
               </>
             )}
+            </div>
           </section>
         </div>
       </main>

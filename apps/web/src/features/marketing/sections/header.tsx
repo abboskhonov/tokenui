@@ -142,7 +142,7 @@ function UserMenu() {
 export function Header() {
   return (
     <header className="sticky top-0 z-50 bg-background border-b border-border w-full">
-      <div className="mx-auto flex max-w-7xl items-center justify-between py-3 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-[1600px] flex items-center justify-between py-3 px-6 md:px-12 lg:px-16 xl:px-20">
         {/* Left: Logo */}
         <Link to="/" className="flex items-center gap-2">
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-foreground text-background">

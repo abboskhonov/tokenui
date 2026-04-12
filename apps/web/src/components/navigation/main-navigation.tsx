@@ -13,32 +13,34 @@ import { cn } from "@/lib/utils";
 export const Navigation = memo(function Navigation() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50 supports-backdrop-filter:backdrop-blur-xl">
-      <nav className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
-        {/* Left Side - Logo + Navigation */}
-        <div className="flex items-center gap-6">
-          <Link to="/" className="flex items-center gap-2">
-            <img
-              src="/logo.webp"
-              alt="TokenUI"
-              className="h-7 w-7 rounded-lg object-cover"
-            />
-            <span className="text-lg font-semibold tracking-tight text-foreground">
-              tokenui
-            </span>
-          </Link>
+      <div className="mx-auto max-w-[1600px] px-6 md:px-12 lg:px-16 xl:px-20">
+        <nav className="relative z-10 flex items-center justify-between py-3">
+          {/* Left Side - Logo + Navigation */}
+          <div className="flex items-center gap-6">
+            <Link to="/" className="flex items-center gap-2">
+              <img
+                src="/logo.webp"
+                alt="TokenUI"
+                className="h-7 w-7 rounded-lg object-cover"
+              />
+              <span className="text-lg font-semibold tracking-tight text-foreground">
+                tokenui
+              </span>
+            </Link>
 
-          {/* Navigation Links - Hidden on mobile */}
-          <div className="hidden md:flex items-center gap-1">
-            <NavLink to="/docs">Docs</NavLink>
+            {/* Navigation Links - Hidden on mobile */}
+            <div className="hidden md:flex items-center gap-1">
+              <NavLink to="/docs">Docs</NavLink>
+            </div>
           </div>
-        </div>
 
-        {/* Right Side Actions */}
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <UserMenu />
-        </div>
-      </nav>
+          {/* Right Side Actions */}
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <UserMenu />
+          </div>
+        </nav>
+      </div>
     </header>
   );
 });
