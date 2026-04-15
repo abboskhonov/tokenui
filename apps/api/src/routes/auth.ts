@@ -4,6 +4,8 @@ import type { AuthContext } from "../types"
 
 const app = new Hono<AuthContext>()
 
+const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000"
+
 // Better Auth - Mount all auth routes
 app.all("/*", async (c) => {
   const url = new URL(c.req.url)
@@ -16,7 +18,7 @@ app.all("/*", async (c) => {
 
     if (!hasError && (response.status === 200 || response.status === 302)) {
       const headers = new Headers(response.headers)
-      headers.set("Location", "http://localhost:3000")
+      headers.set("Location", frontendUrl)
 
       return new Response(null, {
         status: 302,
