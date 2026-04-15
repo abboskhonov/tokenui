@@ -23,5 +23,6 @@ tests
 # Documentation
 README.md
 
-# Local scripts
+# Local scripts (but NOT start.sh - needed for Railway)
 src/scripts
+!start.sh

@@ -1,10 +1,7 @@
 # Railway Deployment Configuration
 
-[build]
-builder = "nixpacks"
-
 [deploy]
-startCommand = "bun run src/index.ts"
+startCommand = "./start.sh"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
