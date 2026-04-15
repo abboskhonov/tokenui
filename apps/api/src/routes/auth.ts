@@ -4,10 +4,14 @@ import type { AuthContext } from "../types"
 
 const app = new Hono<AuthContext>()
 
-const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000"
-
-console.log("[Auth Routes] FRONTEND_URL loaded:", frontendUrl)
-console.log("[Auth Routes] process.env.FRONTEND_URL:", process.env.FRONTEND_URL)
+// Read env var at request time, not module load time
+function getFrontendUrl(): string {
+  const url = process.env.FRONTEND_URL
+  if (!url) {
+    console.error("[Auth] FRONTEND_URL not set! Falling back to localhost")
+  }
+  return url || "http://localhost:3000"
+}
 
 // Better Auth - Mount all auth routes
 app.all("/*", async (c) => {
@@ -15,6 +19,7 @@ app.all("/*", async (c) => {
 
   // Handle OAuth callbacks specially to redirect to frontend
   if (url.pathname.includes("/callback/")) {
+    const frontendUrl = getFrontendUrl()
     console.log("[Auth Callback] FRONTEND_URL:", frontendUrl)
     console.log("[Auth Callback] Request URL:", c.req.url)
     

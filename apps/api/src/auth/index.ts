@@ -7,6 +7,10 @@ const isProduction = process.env.NODE_ENV === "production"
 const apiBaseUrl = process.env.API_BASE_URL || "http://localhost:3001"
 const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000"
 
+console.log("[Auth Config] NODE_ENV:", process.env.NODE_ENV)
+console.log("[Auth Config] API_BASE_URL:", apiBaseUrl)
+console.log("[Auth Config] FRONTEND_URL:", frontendUrl)
+
 // Parse trusted origins from environment or use defaults
 const trustedOriginsEnv = process.env.TRUSTED_ORIGINS
 const trustedOrigins = trustedOriginsEnv
