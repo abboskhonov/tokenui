@@ -2,14 +2,20 @@ import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { db } from "../db"
 
-// Environment-based configuration
-const isProduction = process.env.NODE_ENV === "production"
-const apiBaseUrl = process.env.API_BASE_URL || "http://localhost:3001"
-const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000"
+// Lazy getter for env vars to ensure they're read fresh
+function getApiBaseUrl(): string {
+  const url = process.env.API_BASE_URL
+  console.log("[Auth Config] Reading API_BASE_URL:", url)
+  return url || "http://localhost:3001"
+}
 
-console.log("[Auth Config] NODE_ENV:", process.env.NODE_ENV)
-console.log("[Auth Config] API_BASE_URL:", apiBaseUrl)
-console.log("[Auth Config] FRONTEND_URL:", frontendUrl)
+function getFrontendUrl(): string {
+  const url = process.env.FRONTEND_URL
+  console.log("[Auth Config] Reading FRONTEND_URL:", url)
+  return url || "http://localhost:3000"
+}
+
+const isProduction = process.env.NODE_ENV === "production"
 
 // Parse trusted origins from environment or use defaults
 const trustedOriginsEnv = process.env.TRUSTED_ORIGINS
@@ -24,11 +30,14 @@ const trustedOrigins = trustedOriginsEnv
     ]
 
 // Add production domains if in production
-if (isProduction && process.env.FRONTEND_URL) {
-  if (!trustedOrigins.includes(process.env.FRONTEND_URL)) {
-    trustedOrigins.push(process.env.FRONTEND_URL)
+const frontendUrl = getFrontendUrl()
+if (isProduction && frontendUrl) {
+  if (!trustedOrigins.includes(frontendUrl)) {
+    trustedOrigins.push(frontendUrl)
   }
 }
+
+const apiBaseUrl = getApiBaseUrl()
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -140,11 +149,13 @@ export async function handleAuthRedirect(request: Request): Promise<Response> {
 
     // If successful (not an error), redirect to frontend
     if (response.status === 200 || response.status === 302) {
+      const redirectUrl = getFrontendUrl()
+      console.log("[handleAuthRedirect] Redirecting to:", redirectUrl)
       // Redirect to frontend
       return new Response(null, {
         status: 302,
         headers: {
-          Location: frontendUrl,
+          Location: redirectUrl,
         },
       })
     }

@@ -13,6 +13,21 @@ function getFrontendUrl(): string {
   return url || "http://localhost:3000"
 }
 
+// Debug endpoint to check env vars
+app.get("/debug-env", (c) => {
+  return c.json({
+    FRONTEND_URL: process.env.FRONTEND_URL || "NOT SET",
+    API_BASE_URL: process.env.API_BASE_URL || "NOT SET",
+    NODE_ENV: process.env.NODE_ENV || "NOT SET",
+    allEnvVars: Object.keys(process.env).filter(k => 
+      !k.includes('SECRET') && 
+      !k.includes('PASSWORD') && 
+      !k.includes('KEY') &&
+      !k.includes('TOKEN')
+    ),
+  })
+})
+
 // Better Auth - Mount all auth routes
 app.all("/*", async (c) => {
   const url = new URL(c.req.url)
