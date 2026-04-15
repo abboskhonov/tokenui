@@ -29,6 +29,9 @@ config()
 // Create Hono app with auth context
 const app = new Hono<AuthContext>()
 
+// Root health check for Railway (before any middleware)
+app.get("/", (c) => c.json({ status: "ok" }))
+
 // Global middleware
 app.use("*", corsConfig)
 app.use("*", authMiddleware)
