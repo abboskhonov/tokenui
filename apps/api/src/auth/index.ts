@@ -146,17 +146,23 @@ export async function handleAuthRedirect(request: Request): Promise<Response> {
   if (url.pathname.includes("/callback/")) {
     // Process the callback
     const response = await auth.handler(request)
+    
+    console.log("[handleAuthRedirect] Response status:", response.status)
+    console.log("[handleAuthRedirect] Set-Cookie header:", response.headers.get("set-cookie"))
 
     // If successful (not an error), redirect to frontend
     if (response.status === 200 || response.status === 302) {
       const redirectUrl = getFrontendUrl()
       console.log("[handleAuthRedirect] Redirecting to:", redirectUrl)
-      // Redirect to frontend
+      
+      // Copy all headers from original response to preserve cookies
+      const headers = new Headers(response.headers)
+      headers.set("Location", redirectUrl)
+      
+      // Redirect to frontend WITH cookies
       return new Response(null, {
         status: 302,
-        headers: {
-          Location: redirectUrl,
-        },
+        headers: headers,
       })
     }
 
