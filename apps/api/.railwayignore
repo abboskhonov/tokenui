@@ -1,0 +1,27 @@
+# Git
+.git
+.gitignore
+
+# Development
+.env
+.env.example
+node_modules
+*.log
+
+# Cloudflare Workers (not needed for Railway)
+wrangler.toml
+wrangler.jsonc
+
+# Database
+.drizzle
+
+# Tests
+tests
+*.test.ts
+*.spec.ts
+
+# Documentation
+README.md
+
+# Local scripts
+src/scripts

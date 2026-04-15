@@ -1,0 +1,7 @@
+{
+  "$schema": "https://railpack.com/schema.json",
+  "name": "api",
+  "start": {
+    "cmd": "bun run start"
+  }
+}
