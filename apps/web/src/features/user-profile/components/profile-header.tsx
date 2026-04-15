@@ -10,23 +10,22 @@ interface ProfileHeaderProps {
 export function ProfileHeader({ username }: ProfileHeaderProps) {
   return (
     <header className="sticky top-0 z-50 h-14 border-b border-border bg-background/95 backdrop-blur-xl">
-      <div className="mx-auto h-full max-w-7xl px-6 flex items-center justify-between">
-        {/* Left: Back + Breadcrumb */}
-        <div className="flex items-center gap-4">
+      <div className="mx-auto h-full max-w-7xl px-6 flex items-center">
+        {/* Left: Back to Home */}
+        <div className="flex items-center flex-1">
           <Link to="/">
-            <Button variant="ghost" size="icon" className="h-8 w-8 -ml-2">
+            <Button variant="ghost" size="sm" className="gap-2 -ml-2 px-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
               <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+              Home
             </Button>
           </Link>
-          
-          <div className="flex items-center gap-2 text-sm">
-            <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
-              Home
-            </Link>
-            <span className="text-muted-foreground">/</span>
-            <span className="font-medium">@{username}</span>
-          </div>
         </div>
+
+        {/* Center: Username */}
+        <div className="text-sm font-medium">@{username}</div>
+
+        {/* Right: Empty for balance */}
+        <div className="flex-1" />
       </div>
     </header>
   )
