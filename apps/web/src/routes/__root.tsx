@@ -111,9 +111,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             `,
           }}
         />
-        {/* Cloudflare Web Analytics */}
-        <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "f8a26a6e1ffe4a04b8d5030717d0bf63"}' />
-        {/* End Cloudflare Web Analytics */}
+        <Scripts />
       </head>
       <body>
         {children}
@@ -129,7 +127,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             },
           ]}
         />
-        <Scripts />
+        {/* Cloudflare Web Analytics - placed before closing body tag as per CF docs */}
+        <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "f8a26a6e1ffe4a04b8d5030717d0bf63"}' />
       </body>
     </html>
   )
