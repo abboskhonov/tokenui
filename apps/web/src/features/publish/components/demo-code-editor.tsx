@@ -22,7 +22,10 @@ export function DemoCodeEditor({
   onClose,
 }: DemoCodeEditorProps) {
   return (
-    <div className="absolute inset-0 bg-background/95 backdrop-blur-sm flex flex-col z-50">
+    <div 
+      className="absolute inset-0 bg-background/95 backdrop-blur-sm flex flex-col z-50"
+      style={{ pointerEvents: 'auto' }}
+    >
       <div className="flex items-center justify-between px-4 py-2 border-b">
         <span className="text-sm font-medium">Demo Code Editor</span>
         <div className="flex items-center gap-2">

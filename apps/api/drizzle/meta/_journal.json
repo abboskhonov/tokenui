@@ -92,6 +92,13 @@
       "when": 1776014558294,
       "tag": "0012_watery_bloodstrike",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1776320111484,
+      "tag": "0013_gigantic_gauntlet",
+      "breakpoints": true
     }
   ]
 }

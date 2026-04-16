@@ -73,7 +73,8 @@ export const design = pgTable("design", {
   description: text("description"),
   category: text("category").notNull(),
   content: text("content").notNull(), // The skill/prompt content (main SKILL.md)
-  demoUrl: text("demo_url"),
+  demoUrl: text("demo_url"), // Deprecated: keeping for backward compatibility
+  demoHtml: text("demo_html"), // Raw HTML content for preview (NEW)
   thumbnailUrl: text("thumbnail_url"),
   // Status: draft, pending, approved, rejected
   status: text("status").notNull().default("draft"),

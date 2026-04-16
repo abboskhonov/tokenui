@@ -1,34 +1,39 @@
 import { HugeiconsIcon } from "@hugeicons/react"
 import { File01Icon } from "@hugeicons/core-free-icons"
 import { cn } from "@/lib/utils"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import type { Design } from "@/lib/types/design"
 
 interface PreviewContentProps {
   design: Design
-  demoUrl: string | null
   previewTheme: "light" | "dark"
 }
 
 export function PreviewContent({
   design,
-  demoUrl,
   previewTheme,
 }: PreviewContentProps) {
   const [isLoading, setIsLoading] = useState(true)
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
-  // Prefetch the demo URL as soon as component mounts
-  useEffect(() => {
-    if (demoUrl) {
-      const link = document.createElement("link")
-      link.rel = "prefetch"
-      link.href = demoUrl
-      link.as = "document"
-      document.head.appendChild(link)
+  // Create blob URL from demoHtml content (NEW: use demoHtml directly)
+  const demoUrl = useMemo(() => {
+    if (design.demoHtml) {
+      const blob = new Blob([design.demoHtml], { type: "text/html" })
+      return URL.createObjectURL(blob)
+    }
+    // Fallback: use old demoUrl for backward compatibility
+    if (design.demoUrl) {
+      return design.demoUrl
+    }
+    return null
+  }, [design.demoHtml, design.demoUrl])
 
-      return () => {
-        document.head.removeChild(link)
+  // Cleanup blob URL on unmount
+  useEffect(() => {
+    return () => {
+      if (demoUrl && demoUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(demoUrl)
       }
     }
   }, [demoUrl])

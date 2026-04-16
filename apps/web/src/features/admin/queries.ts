@@ -73,6 +73,7 @@ export interface AdminDesign {
   userId: string
   author: string
   thumbnailUrl: string | null
+  demoHtml: string | null // NEW
 }
 
 // Pagination response type
@@ -109,7 +110,8 @@ export interface PendingDesign {
   category: string
   content: string
   thumbnailUrl: string | null
-  demoUrl: string | null
+  demoUrl: string | null // Deprecated
+  demoHtml: string | null // NEW
   createdAt: string
   userId: string
   author: string

@@ -197,7 +197,6 @@ function SkillDetailPage() {
           {activeTab === "preview" ? (
             <PreviewContent
               design={displayDesign}
-              demoUrl={displayDesign.demoUrl}
               previewTheme={previewTheme}
             />
           ) : isFilesLoading ? (

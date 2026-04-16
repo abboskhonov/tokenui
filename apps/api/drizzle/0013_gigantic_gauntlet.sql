@@ -1,0 +1,1 @@
+ALTER TABLE "design" ADD COLUMN "demo_html" text;

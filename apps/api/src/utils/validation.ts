@@ -8,6 +8,7 @@ export const createDesignSchema = z.object({
   category: z.string().min(1, "Category is required").max(50, "Category too long"),
   content: z.string().min(1, "Content is required").max(100000, "Content too large (max 100KB)"),
   demoUrl: z.string().url("Invalid demo URL").max(500, "Demo URL too long").optional().nullable(),
+  demoHtml: z.string().max(1000000, "HTML content too large (max 1MB)").optional().nullable(), // NEW: Raw HTML content
   thumbnailUrl: z.string().url("Invalid thumbnail URL").max(500, "Thumbnail URL too long").optional().nullable(),
   status: z.enum(["draft", "pending", "approved", "rejected"]).default("draft"),
   files: z.array(z.object({

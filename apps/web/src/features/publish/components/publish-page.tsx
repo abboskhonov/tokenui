@@ -12,7 +12,7 @@ import {
   Tick02Icon,
   SaveIcon,
 } from "@hugeicons/core-free-icons"
-import { useCreateDesign, uploadImage, uploadHtml } from "@/lib/queries/designs"
+import { useCreateDesign, uploadImage } from "@/lib/queries/designs"
 import { compressImage, formatFileSize, type CompressionResult } from "@/lib/image-compression"
 import { useStudioDesign, useUpdateStudioDesign } from "@/features/studio"
 import type { CreateDesignData } from "@/lib/types/design"
@@ -129,9 +129,11 @@ export function PublishPage() {
       setCategory(existingDesign.category)
       setThumbnailUrl(existingDesign.thumbnailUrl || "")
       
-      // Load existing demo HTML if available
-      if (existingDesign.demoUrl) {
-        // Fetch existing HTML content
+      // Load existing demo HTML if available (NEW: use demoHtml field directly)
+      if (existingDesign.demoHtml) {
+        setDemoCode(existingDesign.demoHtml)
+      } else if (existingDesign.demoUrl) {
+        // Fallback: fetch from old demoUrl for backward compatibility
         fetch(existingDesign.demoUrl)
           .then(res => res.text())
           .then(html => setDemoCode(html))
@@ -227,16 +229,10 @@ export function PublishPage() {
     
     setIsDraftSaving(true)
     
-    // Upload demo HTML if provided
-    let demoUrl: string | undefined
-    if (demoCode.trim() && demoCode !== DEFAULT_DEMO_HTML) {
-      try {
-        const result = await uploadHtml(demoCode)
-        demoUrl = result.url
-      } catch {
-        console.log("Failed to upload demo HTML")
-      }
-    }
+    // Include demo HTML if provided and not default
+    const demoHtml = demoCode.trim() && demoCode !== DEFAULT_DEMO_HTML 
+      ? demoCode.trim() 
+      : undefined
     
     const data: CreateDesignData = {
       name: name || "Untitled",
@@ -244,7 +240,7 @@ export function PublishPage() {
       description: description || undefined,
       category: category || "uncategorized",
       content: skillContent || DEFAULT_SKILL_MD,
-      demoUrl,
+      demoHtml,
       thumbnailUrl: thumbnailUrl || undefined,
       status: "draft",
       files,
@@ -269,17 +265,10 @@ export function PublishPage() {
     
     const skillContent = getFileContent(files, "SKILL.md")
     
-    // Upload demo HTML if it's different from the existing one
-    let demoUrl: string | undefined = existingDesign.demoUrl || undefined
-    if (demoCode.trim() && demoCode !== DEFAULT_DEMO_HTML) {
-      // Only re-upload if content changed
-      try {
-        const result = await uploadHtml(demoCode)
-        demoUrl = result.url
-      } catch {
-        console.log("Failed to upload demo HTML, keeping existing")
-      }
-    }
+    // Include demo HTML if provided and not default
+    const demoHtml = demoCode.trim() && demoCode !== DEFAULT_DEMO_HTML 
+      ? demoCode.trim() 
+      : undefined
     
     const data: Partial<CreateDesignData> = {
       name: name || "Untitled",
@@ -287,7 +276,7 @@ export function PublishPage() {
       description: description || undefined,
       category: category || "uncategorized",
       content: skillContent || DEFAULT_SKILL_MD,
-      demoUrl,
+      demoHtml,
       thumbnailUrl: thumbnailUrl || undefined,
       status: "draft",
       files,
@@ -313,16 +302,10 @@ export function PublishPage() {
       return
     }
 
-    // Upload demo HTML if provided or use existing
-    let demoUrl: string | undefined = existingDesign?.demoUrl || undefined
-    if (demoCode.trim() && demoCode !== DEFAULT_DEMO_HTML) {
-      try {
-        const result = await uploadHtml(demoCode)
-        demoUrl = result.url
-      } catch {
-        console.log("Failed to upload demo HTML")
-      }
-    }
+    // Include demo HTML if provided and not default
+    const demoHtml = demoCode.trim() && demoCode !== DEFAULT_DEMO_HTML 
+      ? demoCode.trim() 
+      : undefined
 
     const data: CreateDesignData = {
       name: name.trim(),
@@ -330,7 +313,7 @@ export function PublishPage() {
       description: description.trim() || undefined,
       category,
       content: skillContent,
-      demoUrl,
+      demoHtml,
       thumbnailUrl: thumbnailUrl || undefined,
       status: "pending",
       files,

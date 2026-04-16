@@ -31,6 +31,33 @@ export function CodeEditor({
     return Prism.highlight(code, lang, language)
   }
 
+  // Handle paste explicitly to ensure it works in all browsers
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    const pastedText = e.clipboardData.getData('text')
+    if (pastedText) {
+      // Get the textarea element from the Editor component
+      const textarea = (e.target as HTMLElement).querySelector('textarea') as HTMLTextAreaElement | null
+      if (!textarea) {
+        // Fallback: just append if we can't find the textarea
+        onChange(value + pastedText)
+        return
+      }
+      
+      const start = textarea.selectionStart || 0
+      const end = textarea.selectionEnd || 0
+      
+      // Insert pasted text at cursor position
+      const newValue = value.substring(0, start) + pastedText + value.substring(end)
+      onChange(newValue)
+      
+      // Restore cursor position after paste
+      setTimeout(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + pastedText.length
+      }, 0)
+    }
+  }
+
   return (
     <div className="font-mono text-sm">
       <Editor
@@ -41,6 +68,7 @@ export function CodeEditor({
         className="min-h-full"
         textareaClassName="focus:outline-none"
         placeholder={placeholder}
+        onPaste={handlePaste}
         style={{
           fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
           fontSize: '13px',

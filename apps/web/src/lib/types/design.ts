@@ -9,7 +9,8 @@ export interface Design {
   description: string | null
   category: string
   content: string // HTML content for preview (always included)
-  demoUrl: string | null
+  demoUrl: string | null // Deprecated: keeping for backward compatibility
+  demoHtml: string | null // NEW: Raw HTML content for preview
   thumbnailUrl: string | null
   status: "draft" | "pending" | "approved" | "rejected"
   reviewMessage: string | null
@@ -35,7 +36,8 @@ export interface CreateDesignData {
   description?: string
   category: string
   content: string
-  demoUrl?: string
+  demoUrl?: string // Deprecated
+  demoHtml?: string // NEW: Raw HTML content for preview
   thumbnailUrl?: string
   status?: "draft" | "pending" | "approved"
   files?: FileNode[] // Additional files for multi-file skills

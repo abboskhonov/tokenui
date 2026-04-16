@@ -91,6 +91,7 @@ app.post("/", validateBody(createDesignSchema), async (c) => {
         category: body.category || "uncategorized",
         content: body.content?.trim() || "",
         demoUrl: body.demoUrl?.trim() || null,
+        demoHtml: body.demoHtml?.trim() || null, // NEW: Store HTML content directly
         thumbnailUrl: body.thumbnailUrl?.trim() || null,
         status: body.status ?? "draft",
         files: body.files ? JSON.stringify(body.files) : null,
@@ -474,6 +475,7 @@ app.get("/:username/:slug", async (c) => {
         d.category,
         d.content,
         d.demo_url as "demoUrl",
+        d.demo_html as "demoHtml",
         d.thumbnail_url as "thumbnailUrl",
         d.status,
         d.view_count as "viewCount",
@@ -534,6 +536,7 @@ app.get("/:username/:slug", async (c) => {
       category: row.category as string,
       content: row.content as string, // Included for preview
       demoUrl: row.demoUrl as string | null,
+      demoHtml: row.demoHtml as string | null, // NEW
       thumbnailUrl: row.thumbnailUrl as string | null,
       status: row.status as string,
       viewCount: Number(row.viewCount || 0),
@@ -767,6 +770,7 @@ app.put("/:id", validateBody(updateDesignSchema), async (c) => {
         category: body.category || existingDesign.category,
         content: body.content || existingDesign.content,
         demoUrl: body.demoUrl !== undefined ? body.demoUrl : existingDesign.demoUrl,
+        demoHtml: body.demoHtml !== undefined ? body.demoHtml?.trim() || null : existingDesign.demoHtml, // NEW
         thumbnailUrl: body.thumbnailUrl !== undefined ? body.thumbnailUrl : existingDesign.thumbnailUrl,
         status: body.status !== undefined ? body.status : existingDesign.status,
         files: body.files !== undefined ? (body.files ? JSON.stringify(body.files) : null) : existingDesign.files,
