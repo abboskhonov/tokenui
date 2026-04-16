@@ -64,7 +64,7 @@ export function StudioPage() {
     <div className="min-h-screen bg-background">
       <Navigation />
 
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-[1600px] px-6 md:px-12 lg:px-16 xl:px-20 py-8">
         {/* Stats - shows skeleton while loading */}
         <StudioStats 
           designs={designs} 

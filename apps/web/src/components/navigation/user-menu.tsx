@@ -29,7 +29,7 @@ import {
  * UserMenu - Displays user avatar dropdown with profile, settings, logout
  */
 export const UserMenu = memo(function UserMenu() {
-  const { user } = useUser();
+  const { user, isLoading } = useUser();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -42,6 +42,13 @@ export const UserMenu = memo(function UserMenu() {
     const username = user?.username || user?.email?.split("@")[0] || "user";
     navigate({ to: "/u/$username", params: { username } });
   }, [user, navigate]);
+
+  // Show skeleton while loading to prevent flash of "Sign in" button
+  if (isLoading) {
+    return (
+      <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+    );
+  }
 
   if (!user) {
     return (

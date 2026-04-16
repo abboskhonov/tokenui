@@ -33,16 +33,6 @@ interface SkillDetail {
   updatedAt: string;
 }
 
-// Additional agent configurations (optional installs)
-const ADDITIONAL_AGENTS = [
-  { id: 'claude-code', name: 'Claude Code', localPath: '.claude/skills' },
-  { id: 'cursor', name: 'Cursor', localPath: '.cursor/skills' },
-  { id: 'cline', name: 'Cline', localPath: '.cline/skills' },
-  { id: 'windsurf', name: 'Windsurf', localPath: '.windsurf/skills' },
-  { id: 'continue', name: 'Continue', localPath: '.continue/skills' },
-  { id: 'github-copilot', name: 'GitHub Copilot', localPath: '.copilot/skills' },
-];
-
 // Sanitize skill name for safe file system usage
 function sanitizeSkillName(name: string): string {
   return name
@@ -155,13 +145,7 @@ export async function addCommand(identifier: string) {
       || (response as { skill?: SkillDetail; design?: SkillDetail }).design;
 
     if (!skill) {
-      spinner.stop(c.red(`Skill "${owner ? owner + '/' : ''}${slug}" not found`));
-      console.log();
-      if (owner) {
-        console.log(c.gray(`Tip: Make sure "${owner}" is the correct username and "${slug}" is the skill slug`));
-      }
-      console.log(c.gray('Run "tasteui list" to see available skills and their owners'));
-      return;
+      throw new Error('Skill not found');
     }
 
     // Extract author info (could be string or object from different endpoints)
@@ -180,45 +164,12 @@ export async function addCommand(identifier: string) {
     console.log(`  ${c.gray('Description:')} ${skill.description || 'No description'}`);
     console.log();
 
-    // Always install to .agents/skills first (default)
-    console.log(c.gray('✓ Will install to:'), c.cyan('./.agents/skills/'));
-    console.log();
-
-    // Ask for additional agents (optional)
-    const additionalAgentsResult = await p.multiselect({
-      message: 'Also install to additional agents (optional):',
-      options: ADDITIONAL_AGENTS.map(agent => ({
-        value: agent.id,
-        label: agent.name,
-        hint: `./${agent.localPath}`,
-      })),
-      required: false,
-    });
-
-    if (p.isCancel(additionalAgentsResult)) {
-      p.outro(c.gray('Installation cancelled'));
-      return;
-    }
-
-    // Handle empty array (no additional agents selected)
-    const additionalAgents = Array.isArray(additionalAgentsResult) ? additionalAgentsResult : [];
-    const additionalCount = additionalAgents.length;
-    const totalLocations = 1 + additionalCount;
-    
-    console.log();
-    console.log(c.bold('Installation Summary:'));
-    console.log(`  ${c.gray('Skill:')} ${skill.name}`);
-    console.log(`  ${c.gray('Files:')} ${skill.files && skill.files.length > 0 ? countFiles(skill.files) + 1 : 1} file(s)`);
-    console.log(`  ${c.gray('Primary:')} ./.agents/skills/`);
-    if (additionalCount > 0) {
-      console.log(`  ${c.gray('Additional:')} ${additionalAgents.map(id => 
-        ADDITIONAL_AGENTS.find(a => a.id === id)?.name
-      ).join(', ')}`);
-    }
+    // Install to .agents/skills (universal location)
+    console.log(c.gray('Will install to:'), c.cyan('./.agents/skills/'));
     console.log();
 
     const shouldInstall = await p.confirm({
-      message: `Install to ${totalLocations} location(s)?`,
+      message: 'Install this skill?',
       initialValue: true,
     });
 
@@ -234,63 +185,53 @@ export async function addCommand(identifier: string) {
     const skillName = sanitizeSkillName(skill.name);
     const installedPaths: string[] = [];
 
-    // Always install to .agents/skills (primary)
-    const primaryDir = join(process.cwd(), '.agents', 'skills', skillName);
-    if (!existsSync(primaryDir)) {
-      mkdirSync(primaryDir, { recursive: true });
+    // Install to .agents/skills (universal location for all agents)
+    const installDir = join(process.cwd(), '.agents', 'skills', skillName);
+    if (!existsSync(installDir)) {
+      mkdirSync(installDir, { recursive: true });
     }
 
     // Write the main SKILL.md
-    writeFileSync(join(primaryDir, 'SKILL.md'), skill.content, 'utf-8');
-    installedPaths.push(join(primaryDir, 'SKILL.md'));
+    writeFileSync(join(installDir, 'SKILL.md'), skill.content, 'utf-8');
+    installedPaths.push(join(installDir, 'SKILL.md'));
 
     // Write additional files from the file tree
     if (skill.files && skill.files.length > 0) {
-      writeFileTree(primaryDir, skill.files, installedPaths);
-    }
-
-    // Install to additional selected agents
-    if (additionalAgents.length > 0) {
-      for (const agentId of additionalAgents) {
-        const agent = ADDITIONAL_AGENTS.find(a => a.id === agentId);
-        if (!agent) continue;
-
-        const agentDir = join(process.cwd(), agent.localPath, skillName);
-
-        if (!existsSync(agentDir)) {
-          mkdirSync(agentDir, { recursive: true });
-        }
-
-        // Write the SKILL.md file
-        writeFileSync(join(agentDir, 'SKILL.md'), skill.content, 'utf-8');
-
-        // Write additional files
-        if (skill.files && skill.files.length > 0) {
-          writeFileTree(agentDir, skill.files, installedPaths);
-        }
-      }
+      writeFileTree(installDir, skill.files, installedPaths);
     }
 
     const fileCount = skill.files ? countFiles(skill.files) : 0;
-    installSpinner.stop(c.green(`Installed ${fileCount + 1} file(s) to ${1 + additionalAgents.length} location(s)!`));
-    console.log();
-    
-    // Show installed locations (not every file)
-    console.log(c.bold('Installed to:'));
-    console.log(`  ${c.cyan('✓')} ./.agents/skills/${skillName}/`);
-    for (const agentId of additionalAgents) {
-      const agent = ADDITIONAL_AGENTS.find(a => a.id === agentId);
-      if (agent) {
-        console.log(`  ${c.cyan('✓')} ./${agent.localPath}/${skillName}/`);
-      }
-    }
+    installSpinner.stop(c.green(`Installed ${fileCount + 1} file(s) to ./.agents/skills/${skillName}/`));
     console.log();
     
     p.note(`The skill is now available in your coding agents!`, 'Success');
 
   } catch (error) {
-    spinner.stop(c.red(`Failed: ${error instanceof Error ? error.message : 'Unknown error'}`));
-    console.log();
-    console.log(c.gray('Make sure your API is running at:'), c.cyan(apiUrl));
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Handle specific error cases with helpful messages
+    if (errorMessage === 'Skill not found') {
+      spinner.stop(c.red(`Skill "${owner ? owner + '/' : ''}${slug}" not found`));
+      console.log();
+      if (owner) {
+        console.log(c.gray(`Make sure "${owner}" is the correct username and "${slug}" is the skill slug`));
+      } else {
+        console.log(c.gray('Tip: Try using the full identifier format: "owner/slug"'));
+      }
+      console.log();
+      console.log(c.gray('Run "tasteui list" to see available skills'));
+    } else if (errorMessage.includes('Authentication required')) {
+      spinner.stop(c.red(`Failed: ${errorMessage}`));
+      console.log();
+      console.log(c.gray('Run "tasteui login" to authenticate'));
+    } else if (errorMessage.includes('fetch failed') || errorMessage.includes('ECONNREFUSED')) {
+      spinner.stop(c.red('Failed: Could not connect to API'));
+      console.log();
+      console.log(c.gray('Make sure your API is running at:'), c.cyan(apiUrl));
+    } else {
+      spinner.stop(c.red(`Failed: ${errorMessage}`));
+      console.log();
+      console.log(c.gray('Make sure your API is running at:'), c.cyan(apiUrl));
+    }
   }
 }

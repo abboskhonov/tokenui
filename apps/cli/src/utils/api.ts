@@ -20,6 +20,21 @@ export async function makeApiRequest(
 
   if (!response.ok) {
     const errorText = await response.text();
+    
+    // Provide user-friendly error messages for common cases
+    if (response.status === 404) {
+      throw new Error('Skill not found');
+    }
+    if (response.status === 401) {
+      throw new Error('Authentication required - please run "tasteui login"');
+    }
+    if (response.status === 403) {
+      throw new Error('Access denied - you do not have permission to access this skill');
+    }
+    if (response.status >= 500) {
+      throw new Error('Server error - please try again later');
+    }
+    
     throw new Error(`API error (${response.status}): ${errorText}`);
   }
 

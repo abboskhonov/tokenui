@@ -13,7 +13,7 @@ export function ProfileSkeleton({}: ProfileSkeletonProps) {
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
       <header className="sticky top-0 z-50 h-14 border-b border-border bg-background/95 backdrop-blur-xl">
-        <div className="mx-auto h-full max-w-7xl px-6 flex items-center">
+        <div className="mx-auto h-full max-w-[1600px] px-6 md:px-12 lg:px-16 xl:px-20 flex items-center">
           <Link to="/" preload="intent">
             <Button variant="ghost" size="sm" className="h-8 gap-1.5 px-2 -ml-2">
               <HugeiconsIcon icon={ArrowLeftIcon} className="size-4" />
@@ -23,7 +23,7 @@ export function ProfileSkeleton({}: ProfileSkeletonProps) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-6 py-4">
+      <main className="mx-auto max-w-[1600px] px-6 md:px-12 lg:px-16 xl:px-20 py-4">
         {/* Profile Info Skeleton */}
         <div className="flex items-start gap-6 py-6">
           {/* Avatar Skeleton */}

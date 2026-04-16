@@ -9,8 +9,8 @@ export function DocsLayout() {
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
       
-      {/* Match header width exactly: max-w-7xl with px-6 padding */}
-      <div className="mx-auto max-w-7xl px-6 py-8 pt-6">
+      {/* Match header width exactly */}
+      <div className="mx-auto max-w-[1600px] px-6 md:px-12 lg:px-16 xl:px-20 py-8 pt-6">
         <div className="flex gap-8">
           {/* Left Sidebar - Fixed width */}
           <aside className="w-[200px] shrink-0 hidden md:block">

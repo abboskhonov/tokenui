@@ -9,7 +9,11 @@ interface Skill {
   name: string;
   description: string;
   slug: string;
-  author: string;
+  author: {
+    name: string | null;
+    username: string | null;
+    image: string | null;
+  };
 }
 
 export async function listCommand() {
@@ -26,11 +30,11 @@ export async function listCommand() {
 
   try {
     // Public endpoint - no auth required, but pass token if available
-    const response = await makeApiRequest(`${apiUrl}/api/skills`, config.token);
+    const response = await makeApiRequest(`${apiUrl}/api/designs`, config.token);
     spinner.stop(c.green('Skills fetched successfully!'));
     
-    // API returns { skills: [...] }
-    const skills = (response as { skills?: Skill[] }).skills || [];
+    // API returns { designs: [...] }
+    const skills = (response as { designs?: Skill[] }).designs || [];
     
     if (skills.length === 0) {
       console.log();
@@ -42,8 +46,8 @@ export async function listCommand() {
     // Create options for the select prompt - show owner/slug format
     const options = skills.map((skill) => ({
       value: skill.id,
-      label: `${skill.author}/${skill.slug}`,
-      hint: `${skill.name} — ${skill.description.slice(0, 35)}${skill.description.length > 35 ? '...' : ''}`,
+      label: `${skill.author.username || 'unknown'}/${skill.slug}`,
+      hint: `${skill.name} — ${skill.description?.slice(0, 35) || ''}${skill.description && skill.description.length > 35 ? '...' : ''}`,
     }));
 
     console.log();
@@ -63,13 +67,14 @@ export async function listCommand() {
     const selectedSkill = skills.find(s => s.id === selectedSkillId);
     
     if (selectedSkill) {
+      const authorUsername = selectedSkill.author.username || 'unknown';
       console.log();
       p.note(
         `${c.bold(selectedSkill.name)}\n` +
-        `${c.gray('Author:')} ${selectedSkill.author}\n` +
+        `${c.gray('Author:')} ${authorUsername}\n` +
         `${c.gray('Slug:')} ${selectedSkill.slug}\n` +
-        `${c.gray('Install:')} tokenui add ${selectedSkill.author}/${selectedSkill.slug}\n\n` +
-        `${selectedSkill.description}`,
+        `${c.gray('Install:')} tasteui add ${authorUsername}/${selectedSkill.slug}\n\n` +
+        `${selectedSkill.description || 'No description'}`,
         'Selected Skill'
       );
     }

@@ -58,7 +58,7 @@ function UserProfilePage() {
     <div className="min-h-screen bg-background text-foreground">
       <ProfileHeader username={username} />
 
-      <main className="mx-auto max-w-7xl px-6 py-4">
+      <main className="mx-auto max-w-[1600px] px-6 md:px-12 lg:px-16 xl:px-20 py-4">
         <ProfileInfo user={user} username={username} stats={stats} />
 
         {/* Tabs & Search */}

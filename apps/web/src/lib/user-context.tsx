@@ -3,19 +3,22 @@ import type { SessionUser } from "@/lib/api/auth-server"
 
 interface UserContextType {
   user: SessionUser | null
+  isLoading: boolean
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
 export function UserProvider({ 
   children, 
-  user 
+  user,
+  isLoading = false
 }: { 
   children: ReactNode
   user: SessionUser | null 
+  isLoading?: boolean
 }) {
   return (
-    <UserContext.Provider value={{ user }}>
+    <UserContext.Provider value={{ user, isLoading }}>
       {children}
     </UserContext.Provider>
   )

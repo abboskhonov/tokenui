@@ -10,7 +10,7 @@ interface ProfileHeaderProps {
 export function ProfileHeader({ username }: ProfileHeaderProps) {
   return (
     <header className="sticky top-0 z-50 h-14 border-b border-border bg-background/95 backdrop-blur-xl">
-      <div className="mx-auto h-full max-w-7xl px-6 flex items-center">
+      <div className="mx-auto h-full max-w-[1600px] px-6 md:px-12 lg:px-16 xl:px-20 flex items-center">
         {/* Left: Back to Home */}
         <div className="flex items-center flex-1">
           <Link to="/">

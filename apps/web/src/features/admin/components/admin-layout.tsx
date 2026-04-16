@@ -16,7 +16,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       <AdminSidebar user={user} />
       <SidebarInset className="bg-background">
         <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-[1600px] px-6 md:px-12 lg:px-16 xl:px-20">
             {children}
           </div>
         </main>

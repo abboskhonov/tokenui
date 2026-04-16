@@ -154,8 +154,8 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
       {/* Vertical column lines - span entire page including navbar */}
       <div className="pointer-events-none fixed inset-0 z-[100] hidden lg:block">
         <div className="mx-auto max-w-[1600px] h-full px-6 md:px-12 lg:px-16 xl:px-20 relative">
-          <div className="absolute left-0 top-0 bottom-0 w-px bg-border/50" />
-          <div className="absolute right-0 top-0 bottom-0 w-px bg-border/50" />
+          <div className="absolute left-0 top-0 bottom-0 w-[1.5px] bg-border/60" />
+          <div className="absolute right-0 top-0 bottom-0 w-[1.5px] bg-border/60" />
         </div>
       </div>
 
@@ -165,7 +165,7 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
       <main className="relative z-10 mx-auto w-full pt-[72px]">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-1/2 top-0 h-[600px] w-[800px] -translate-x-1/2 bg-[radial-gradient(circle_at_center,var(--brand)/6%,transparent_70%)]" style={{ willChange: "transform" }} />
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-border/80 to-transparent" />
         </div>
 
         <div className="relative z-10 mx-auto max-w-[1600px] px-6 md:px-12 lg:px-16 xl:px-20 pt-12 md:pt-20">
@@ -186,7 +186,7 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
               <p className="text-base text-muted-foreground leading-relaxed mb-6 max-w-md">
                 Drop-in design skills for your coding agent. No setup, no configuration — just describe what you need and ship production-ready components in seconds.
               </p>
-              <CLICopy command="npx tasteui.dev add <skill>" />
+              <CLICopy />
             </div>
           </div>
 

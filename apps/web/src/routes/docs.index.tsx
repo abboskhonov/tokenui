@@ -1,218 +1,147 @@
 "use client"
 
 import { createFileRoute } from "@tanstack/react-router"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { 
-  Download04Icon, 
-  CodeIcon, 
-  Share01Icon,
-  ColorsIcon,
-  Layers01Icon,
-  ZapIcon
-} from "@hugeicons/core-free-icons"
+import { DocsPage } from "@/features/docs/components/doc-page"
+import { CodeBlock } from "@/features/docs/components/code-block"
+import { Section, Heading, Paragraph, Step, List } from "@/features/docs/components/typography"
+import type { TOCItem } from "@/features/docs/components/table-of-contents"
 
-function FeatureCard({ 
-  icon, 
-  title, 
-  description 
-}: { 
-  icon: React.ReactNode
-  title: string
-  description: string 
-}) {
+const tocItems: TOCItem[] = [
+  { id: "the-problem", text: "The Problem", level: 2 },
+  { id: "the-fix", text: "The Fix", level: 2 },
+  { id: "how-it-works", text: "How it works", level: 2 },
+  { id: "why-skills", text: "Why SKILL.md?", level: 2 },
+  { id: "quick-start", text: "Quick Start", level: 2 },
+]
+
+function IntroductionPage() {
   return (
-    <div className="rounded-lg border border-border bg-card p-6">
-      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-        {icon}
-      </div>
-      <h3 className="mb-2 font-medium">{title}</h3>
-      <p className="text-sm text-muted-foreground">{description}</p>
-    </div>
-  )
-}
+    <DocsPage
+      title="Documentation"
+      description="TasteUI is a collection of design system inspirations from popular websites. Drop one in, let AI agents build matching UI."
+      breadcrumbItems={[
+        { label: "Docs" }
+      ]}
+      tocItems={tocItems}
+    >
+      <Section id="the-problem">
+        <Heading id="the-problem">The Problem: AI builds "nice" but not "yours"</Heading>
+        <Paragraph>
+          Tell any AI agent to "build me a landing page" and you already know what you'll get. 
+          Rounded cards. A purple-blue gradient. A centered hero. A "Get Started" button. 
+          It works. It also looks like everything else.
+        </Paragraph>
+        <Paragraph>
+          The reason is simple. The agent's idea of "good design" is an average of averages. 
+          It has no clue why Vercel uses border instead of shadow, why Linear keeps its letter-spacing so tight, 
+          or why Stripe goes easy on gradients. Even if it did know, cramming all of that into a prompt is borderline impossible.
+        </Paragraph>
+        <Paragraph>
+          So you end up with two bad options:
+        </Paragraph>
+        <List items={[
+          <>Write 40 lines of prompt every time ("use #0070f3 for links, -0.02em letter spacing, 8px border radius, no shadows just 1px borders...") and still get half of it wrong.</>,
+          <>Screenshot a site, paste it, say "make it look like this." The agent copies pixels but misses the system behind them.</>
+        ]} />
+        <Paragraph>
+          Neither scales.
+        </Paragraph>
+      </Section>
 
-function CodeBlock({ 
-  command, 
-  description 
-}: { 
-  command: string
-  description?: string 
-}) {
-  return (
-    <div className="my-4">
-      {description && (
-        <p className="mb-2 text-sm text-muted-foreground">{description}</p>
-      )}
-      <div className="rounded-lg bg-muted p-4">
-        <code className="text-sm font-mono">{command}</code>
-      </div>
-    </div>
-  )
-}
+      <Section id="the-fix">
+        <Heading id="the-fix">The Fix: Design Skills</Heading>
+        <Paragraph>
+          A skill is a markdown file that describes a design system semantically. 
+          It is not a token list. Not a Figma export. Not a component library. 
+          Picture a document where an experienced designer explains a brand's visual language 
+          to a developer who's seeing it for the first time. That's what it reads like.
+        </Paragraph>
+        <Paragraph>
+          Here's what goes inside:
+        </Paragraph>
+        <List items={[
+          <><strong>Visual theme and atmosphere</strong> — tells the agent what the brand looks like and why. The philosophy behind the aesthetic. Sentences like "Minimalism as engineering principle." The agent gets intent, not just instructions.</>,
+          <><strong>Color palette and roles</strong> — gives every color a hex value and a job. "#ff5b4f, ship red, used for the production deploy flow because shipping should feel urgent." The name tells you what the color does.</>,
+          <><strong>Typography rules</strong> — font, size, weight, line-height, letter-spacing. But the real value is context: which style goes where, and why. "Display sizes get -2.4px tracking because headlines should feel like minified code."</>,
+          <><strong>Spacing, shadows, motion, components</strong> — every rule, wherever possible, with a reason attached.</>
+        ]} />
+        <Paragraph>
+          Skills keep token, rule, and rationale in the same file. 
+          A token tells you what to use but not where. A rule tells you where but not when to bend it. 
+          The rationale is what lets an agent make the right call when it hits a situation the file never covers.
+        </Paragraph>
+      </Section>
 
-function DocsOverviewContent() {
-  return (
-    <div className="space-y-12">
-      {/* Hero */}
-      <div className="space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight">Documentation</h1>
-        <p className="text-lg text-muted-foreground">
-          Learn how to discover, install, and use design skills with your AI agents. 
-          TasteUI provides a curated collection of UI components and patterns.
-        </p>
-      </div>
+      <Section id="why-skills">
+        <Heading id="why-skills">Why SKILL.md?</Heading>
+        <Paragraph>
+          Because it is the language AI agents speak best. They can read JSON tokens but can't interpret them. 
+          They can't see Figma files. They'll imitate a screenshot but won't systematize it. 
+          Markdown sits in the middle: readable by humans, parseable by machines, easy to version and diff, 
+          and you can drop it in your repo.
+        </Paragraph>
+        <Paragraph>
+          Most teams don't write their own design system from scratch. Most teams say 
+          "make it look like Linear," "give it that Stripe feel," or "keep it close to Apple." 
+          These references are real. They come up constantly.
+        </Paragraph>
+        <Paragraph>
+          TasteUI collects those starting points. Inspiration files based on Vercel, Stripe, Linear, 
+          Apple, Tesla, Notion, Figma, Supabase, and more. All in the same format, all comparable. 
+          Pick one, drop it into your project, tell your agent "use this file as reference." 
+          Building on top of that language with your own content is up to you.
+        </Paragraph>
+        <Paragraph>
+          The goal is not "copy Vercel." It is to give the agent a starting language. 
+          Enough context to escape the generic average and land on a specific aesthetic. 
+          From there you drift, you make it yours, you evolve it.
+        </Paragraph>
+      </Section>
 
-      {/* Quick Start */}
-      <section className="space-y-6">
-        <h2 className="text-2xl font-semibold tracking-tight">Quick Start</h2>
-        <p className="text-muted-foreground">
-          Get started in seconds. No installation required—just use npx to run the CLI directly.
-        </p>
-        
-        <CodeBlock 
-          command="npx tasteui.dev add <skill-name>"
-          description="Add any skill to your project instantly"
-        />
-        
-        <p className="text-muted-foreground">
-          Browse all available skills on the homepage, or search for specific components 
-          like "button", "card", "modal", or "form".
-        </p>
-      </section>
-
-      {/* What are Skills? */}
-      <section className="space-y-6">
-        <h2 className="text-2xl font-semibold tracking-tight">What are Skills?</h2>
-        <p className="text-muted-foreground leading-relaxed">
-          Skills are self-contained UI components, design patterns, and coding conventions 
-          that help you build consistent interfaces. Each skill includes:
-        </p>
-        
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FeatureCard
-            icon={<HugeiconsIcon icon={Layers01Icon} className="size-5" />}
-            title="UI Components"
-            description="Ready-to-use React components with styling, animations, and accessibility built-in."
-          />
-          <FeatureCard
-            icon={<HugeiconsIcon icon={ColorsIcon} className="size-5" />}
-            title="Design Tokens"
-            description="Colors, typography, and spacing scales that ensure visual consistency."
-          />
-          <FeatureCard
-            icon={<HugeiconsIcon icon={CodeIcon} className="size-5" />}
-            title="Code Patterns"
-            description="Best practices and conventions for writing maintainable React code."
-          />
-          <FeatureCard
-            icon={<HugeiconsIcon icon={ZapIcon} className="size-5" />}
-            title="AI-Optimized"
-            description="Structured for AI agents to understand and implement correctly."
-          />
-        </div>
-      </section>
-
-      {/* How it Works */}
-      <section className="space-y-6">
-        <h2 className="text-2xl font-semibold tracking-tight">How It Works</h2>
-        
+      <Section id="how-it-works">
+        <Heading id="how-it-works">How it works</Heading>
         <div className="space-y-6">
-          <div className="flex gap-4">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-foreground text-background text-sm font-medium">
-              1
+          <Step number={1} title="Browse design inspirations">
+            Explore skills from brands that match your aesthetic. 
+            Each skill captures the essence: "Minimalist. Generous whitespace. Purple gradients and weight-300 elegance." 
+            Or "Cinematic dark theme. Signature green accent. Code-forward developer aesthetic."
+          </Step>
+          <Step number={2} title="Install the design system">
+            Run the CLI to add the skill to your project:
+            <div className="mt-3">
+              <CodeBlock code="npx tasteui.dev add jane/striped-minimalism" />
             </div>
-            <div>
-              <h3 className="font-medium">Browse the Gallery</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Explore skills by category or search for specific components. 
-                Preview live examples before installing.
-              </p>
+          </Step>
+          <Step number={3} title="Let AI build matching UI">
+            Tell your AI agent to use the skill:
+            <div className="mt-3">
+              <CodeBlock 
+                code='"Use the jane/striped-minimalism skill to build a pricing page with their signature purple gradients and ultra-light typography."' 
+                filename="Example prompt"
+              />
             </div>
-          </div>
-
-          <div className="flex gap-4">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-foreground text-background text-sm font-medium">
-              2
-            </div>
-            <div>
-              <h3 className="font-medium">Install with CLI</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Use the CLI to add skills to your project. The CLI handles dependencies, 
-                file structure, and configuration automatically.
-              </p>
-              <CodeBlock command="npx tasteui.dev add button" />
-            </div>
-          </div>
-
-          <div className="flex gap-4">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-foreground text-background text-sm font-medium">
-              3
-            </div>
-            <div>
-              <h3 className="font-medium">Use in Your Project</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Import and use components like any other React component. 
-                Customize styling using Tailwind classes or CSS variables.
-              </p>
-            </div>
-          </div>
+          </Step>
         </div>
-      </section>
+      </Section>
 
-      {/* Publishing */}
-      <section className="space-y-6">
-        <h2 className="text-2xl font-semibold tracking-tight">Publishing Designs</h2>
-        <p className="text-muted-foreground">
-          Have a design system or component you want to share? Publish it to the TasteUI gallery 
-          so others can discover and use it.
-        </p>
-        
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FeatureCard
-            icon={<HugeiconsIcon icon={Share01Icon} className="size-5" />}
-            title="Share Your Work"
-            description="Upload screenshots, code, and documentation for your design."
-          />
-          <FeatureCard
-            icon={<HugeiconsIcon icon={Download04Icon} className="size-5" />}
-            title="Track Downloads"
-            description="See how many developers are using your skills."
-          />
-        </div>
-
-        <p className="text-muted-foreground">
-          Click the <strong>Publish</strong> button in the navigation to submit your design. 
-          Fill out the form with your design details, upload a preview screenshot, and submit. 
-          All submissions are reviewed before appearing in the gallery.
-        </p>
-      </section>
-
-      {/* Next Steps */}
-      <section className="space-y-4">
-        <h2 className="text-2xl font-semibold tracking-tight">Next Steps</h2>
-        <div className="flex flex-col gap-2">
-          <a 
-            href="/docs/cli" 
-            className="group flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <span className="font-medium">CLI Reference</span>
-            <span>→</span>
-            <span className="text-sm">Complete command documentation</span>
-          </a>
-          <a 
-            href="/docs/faq" 
-            className="group flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <span className="font-medium">FAQ</span>
-            <span>→</span>
-            <span className="text-sm">Common questions and answers</span>
-          </a>
-        </div>
-      </section>
-    </div>
+      <Section id="quick-start">
+        <Heading id="quick-start">Quick Start</Heading>
+        <Paragraph>
+          No setup required — just run:
+        </Paragraph>
+        <CodeBlock 
+          code="npx tasteui.dev add username/skill-name"
+          filename="Install a design system"
+        />
+        <Paragraph>
+          Skills are saved to <code className="px-1.5 py-0.5 rounded bg-muted text-sm font-mono">./.agents/skills/{'{username}'}/{'{skill-name}'}/SKILL.md</code>. 
+          Your AI agent reads the file and follows the design system instructions.
+        </Paragraph>
+      </Section>
+    </DocsPage>
   )
 }
 
 export const Route = createFileRoute("/docs/")({
-  component: DocsOverviewContent,
+  component: IntroductionPage,
 })

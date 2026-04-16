@@ -53,7 +53,7 @@ function RootComponent() {
   const { user } = Route.useLoaderData()
 
   return (
-    <UserProvider user={user}>
+    <UserProvider user={user} isLoading={false}>
       <QueryProvider queryClient={queryClient}>
         <SessionHydrator initialUser={user}>
           <ThemeProvider>
@@ -75,7 +75,7 @@ function SessionHydrator({
   children: React.ReactNode
   initialUser: any 
 }) {
-  const { data: session } = useSession()
+  const { data: session, isLoading } = useSession()
   const [user, setUser] = useState(initialUser)
   
   useEffect(() => {
@@ -86,7 +86,7 @@ function SessionHydrator({
   }, [session, initialUser])
   
   return (
-    <UserProvider user={user}>
+    <UserProvider user={user} isLoading={isLoading}>
       {children}
     </UserProvider>
   )

@@ -1,4 +1,11 @@
-# TasteUI CLI
+```
+████████╗ █████╗ ███████╗████████╗███████╗██╗   ██╗██╗
+╚══██╔══╝██╔══██╗██╔════╝╚══██╔══╝██╔════╝██║   ██║██║
+   ██║   ███████║███████╗   ██║   █████╗  ██║   ██║██║
+   ██║   ██╔══██║╚════██║   ██║   ██╔══╝  ██║   ██║██║
+   ██║   ██║  ██║███████║   ██║   ███████╗╚██████╔╝██║
+   ╚═╝   ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝ ╚═════╝ ╚═╝
+```
 
 Command-line interface for installing design system skills to your coding agents.
 
@@ -17,11 +24,22 @@ npx tasteui.dev
 # List available design skills
 npx tasteui.dev list
 
-# Install a skill (always to ./.agents/skills/)
-npx tasteui.dev add abboskhonov/claude-design-system
+# Install a skill
+npx tasteui.dev add <owner>/<skill-name>
 
 # Configure API endpoint (optional)
 npx tasteui.dev config
+```
+
+## Quick Start
+
+```bash
+# Browse and install skills interactively
+npx tasteui.dev list
+
+# Or install directly by name
+npx tasteui.dev add jane/minimalism
+npx tasteui.dev add alex/glassmorphism
 ```
 
 ## No Authentication Required
@@ -29,86 +47,51 @@ npx tasteui.dev config
 The CLI works out of the box without any configuration:
 
 - **`tasteui list`** - Browse public design skills (no auth needed)
-- **`tasteui add <owner>/<slug>`** - Install skills (no auth needed)
+- **`tasteui add <owner>/<skill>`** - Install skills (no auth needed)
 
 ## How Installation Works
 
-When you run `tasteui add <owner>/<slug>`, the CLI will:
+When you run `tasteui add <owner>/<skill>`, the CLI will:
 
 1. **Fetch** the skill from the TasteUI API
-2. **Install** to `./.agents/skills/<skill-name>/` (always)
-3. **Optionally** install to additional agent directories
+2. **Install** to `./.agents/skills/<skill-name>/`
 
 ### Installation Flow
 
 ```bash
-$ tasteui add abboskhonov/claude-design-system
+$ tasteui add jane/minimalism
 
-✓ Found: Claude Design System by abboskhonov
+✓ Found: Minimalism by jane
 
 Skill Details:
-  Name: Claude Design System
-  Author: abboskhonov
+  Name: Minimalism
+  Author: jane
   Category: design-system
-  Description: The design system of Claude
+  Description: Clean, minimal design system
 
-✓ Will install to: ./.agents/skills/
+Will install to: ./.agents/skills/
 
-◆ Also install to additional agents (optional):
-│ ☑ Claude Code     → ./.claude/skills/
-│ ☑ Cursor          → ./.cursor/skills/
-│ ☐ Cline           → ./.cline/skills/
-│ ☐ Windsurf        → ./.windsurf/skills/
-│ ☐ Continue        → ./.continue/skills/
-│ ☐ GitHub Copilot  → ./.copilot/skills/
-
-Installation Summary:
-  Skill: Claude Design System
-  Primary: ./.agents/skills/
-  Additional: Claude Code, Cursor
-
-◆ Install to 3 location(s)?
+◆ Install this skill?
 │ ● Yes / ○ No
 
-✓ Installed to 3 location(s)!
+✓ Installed 1 file(s) to ./.agents/skills/minimalism/
 
-Installed to:
-  ✓ ./.agents/skills/claude-design-system/
-  ✓ ./.claude/skills/claude-design-system/
-  ✓ ./.cursor/skills/claude-design-system/
+The skill is now available in your coding agents!
 ```
 
 ## Installation Directory Structure
 
-Skills are always installed **per-project** (no global installation):
+Skills are installed **per-project** in the universal `.agents/skills` folder:
 
 ```
 your-project/
-├── .agents/
-│   └── skills/
-│       └── claude-design-system/
-│           └── SKILL.md          # ← Always installed here
-├── .claude/
-│   └── skills/
-│       └── claude-design-system/
-│           └── SKILL.md          # ← Optional (if selected)
-├── .cursor/
-│   └── skills/
-│       └── claude-design-system/
-│           └── SKILL.md          # ← Optional (if selected)
-└── ...
+└── .agents/
+    └── skills/
+        └── minimalism/
+            └── SKILL.md          # ← Design system documentation
 ```
 
-### Primary Location (Always)
-- **`.agents/skills/<skill-name>/SKILL.md`**
-
-### Optional Locations (User Selects)
-- `.claude/skills/<skill-name>/SKILL.md` - Claude Code
-- `.cursor/skills/<skill-name>/SKILL.md` - Cursor
-- `.cline/skills/<skill-name>/SKILL.md` - Cline
-- `.windsurf/skills/<skill-name>/SKILL.md` - Windsurf
-- `.continue/skills/<skill-name>/SKILL.md` - Continue
-- `.copilot/skills/<skill-name>/SKILL.md` - GitHub Copilot
+This location is recognized by all major AI coding agents (OpenCode, Claude Code, Cursor, etc.)
 
 ## Configuration (Optional)
 
@@ -143,16 +126,15 @@ bun run typecheck  # Type check
 | Command | Description |
 |---------|-------------|
 | `list` | Browse public design skills with interactive selection |
-| `add <owner>/<slug>` | Install a skill to `.agents/skills/` + optional agents |
+| `add <owner>/<skill>` | Install a skill to `.agents/skills/` |
 | `config` | Configure API endpoint and optional settings |
 | `--help` | Show help message |
 | `--version` | Show version number |
 
 ## Key Features
 
-- ✅ **Always project-only** - No global installation
-- ✅ **Primary to `.agents/skills/`** - Default location for OpenCode
-- ✅ **Multi-agent support** - Optional install to Claude, Cursor, Cline, Windsurf, etc.
+- ✅ **Universal location** - Installs to `.agents/skills/` (works with all agents)
+- ✅ **Project-only** - No global installation
 - ✅ **GitHub-style format** - `owner/slug` identifier
 - ✅ **No auth required** - Works out of the box
 - ✅ **Interactive prompts** - Beautiful CLI with `@clack/prompts`

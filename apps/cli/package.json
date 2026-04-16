@@ -1,7 +1,7 @@
 {
   "name": "tasteui.dev",
-  "version": "0.0.1",
-  "description": "CLI for installing design system skills to coding agents (Claude, Cursor, etc.)",
+  "version": "0.0.3",
+  "description": "CLI for installing design system skills to coding agents",
   "type": "module",
   "bin": {
     "tasteui": "./dist/index.js"
@@ -36,12 +36,10 @@
     "design-system",
     "skills",
     "ai",
-    "claude",
-    "cursor",
     "agents",
-    "claude-code",
-    "windsurf",
-    "cline"
+    "agentic",
+    "design-tokens",
+    "ui-components"
   ],
   "repository": {
     "type": "git",

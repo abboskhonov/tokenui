@@ -6,7 +6,6 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Copy01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 
 interface CLICopyProps {
-  command?: string;
   className?: string;
 }
 
@@ -14,18 +13,12 @@ interface CLICopyProps {
  * CLICopy - Terminal-style input field for CLI commands
  * Matches the supermemory.ai hero style: defined border, rounded-lg, input-like
  * Width stays consistent between states - no flickering on theme change
- *
- * @example
- * <CLICopy command="npx tasteui.dev add button" />
- *
- * @example
- * <CLICopy command="npx tasteui.dev add button" />
  */
 export const CLICopy = memo(function CLICopy({
-  command = "npx tasteui.dev add <skill>",
   className
 }: CLICopyProps) {
   const [copied, setCopied] = useState(false);
+  const command = "npx tasteui.dev";
 
   const handleCopy = useCallback(async () => {
     try {
@@ -48,7 +41,6 @@ export const CLICopy = memo(function CLICopy({
         "px-4 py-3 font-mono text-sm",
         "hover:border-foreground/20 hover:bg-muted/30",
         "focus:outline-none",
-        "transition-colors duration-150",
         className
       )}
       aria-label={`Copy command: ${command}`}
@@ -56,7 +48,7 @@ export const CLICopy = memo(function CLICopy({
       {/* Default state */}
       <span 
         className={cn(
-          "flex items-center gap-2 transition-opacity duration-150",
+          "flex items-center gap-2",
           copied ? "opacity-0" : "opacity-100"
         )}
         aria-hidden={copied}
@@ -66,7 +58,7 @@ export const CLICopy = memo(function CLICopy({
         <span className="ml-2 flex items-center">
           <HugeiconsIcon
             icon={Copy01Icon}
-            className="size-4 text-muted-foreground/50 group-hover:text-muted-foreground transition-colors"
+            className="size-4 text-muted-foreground/50 group-hover:text-muted-foreground"
             aria-hidden="true"
           />
         </span>

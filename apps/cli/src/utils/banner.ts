@@ -1,4 +1,5 @@
 import c from 'picocolors';
+import { getVersion } from './version.js';
 
 export const banner = `${c.cyan(`
 ████████╗ █████╗ ███████╗████████╗███████╗██╗   ██╗██╗
@@ -8,7 +9,7 @@ export const banner = `${c.cyan(`
    ██║   ██║  ██║███████║   ██║   ███████╗╚██████╔╝██║
    ╚═╝   ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝ ╚═════╝ ╚═╝
 `)}
-${c.gray('Design system skills for coding agents')}
+${c.gray('Design system skills for coding agents')} ${c.dim('v' + getVersion())}
 `;
 
 export function printHelp(): void {

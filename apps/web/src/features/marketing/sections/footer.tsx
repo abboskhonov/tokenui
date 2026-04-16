@@ -1,4 +1,3 @@
-"use client"
 
 import { Link } from "@tanstack/react-router"
 import { Button } from "@/components/ui/button"
@@ -21,7 +20,7 @@ export function Footer() {
           </Button>
         </Link>
         <a 
-          href="https://x.com/tasteui" 
+          href="https://x.com/abboskhonovv" 
           target="_blank" 
           rel="noopener noreferrer"
         >
