@@ -16,6 +16,7 @@ Implemented several performance optimizations to improve Lighthouse scores:
 **Added manual code splitting** to reduce initial bundle size:
 - `vendor` chunk: react, react-dom, tanstack packages (cached longer)
 - `ui` chunk: radix-ui components (separate from main bundle)
+- `charts` chunk: recharts (only loaded on admin pages)
 - Enabled CSS code splitting for better caching
 
 **Impact**: ~50-100KB reduction in initial JS load
@@ -24,9 +25,21 @@ Implemented several performance optimizations to improve Lighthouse scores:
 build: {
   rollupOptions: {
     output: {
-      manualChunks: {
-        'vendor': ['react', 'react-dom', '@tanstack/react-router', '@tanstack/react-query'],
-        'ui': ['@radix-ui/react-dialog', ...],
+      manualChunks: (id) => {
+        if (id.includes('node_modules')) {
+          if (id.includes('react') || 
+              id.includes('@tanstack/react-router') || 
+              id.includes('@tanstack/react-query')) {
+            return 'vendor'
+          }
+          if (id.includes('@radix-ui') || 
+              id.includes('@base-ui')) {
+            return 'ui'
+          }
+          if (id.includes('recharts')) {
+            return 'charts'
+          }
+        }
       },
     },
   },

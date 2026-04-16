@@ -22,30 +22,31 @@ const config = defineConfig({
     // Optimize chunk splitting for better caching and smaller initial load
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Vendor chunk - large dependencies that change rarely
-          'vendor': [
-            'react',
-            'react-dom',
-            '@tanstack/react-router',
-            '@tanstack/react-query',
-          ],
-          // UI components chunk - shadcn/ui components
-          'ui': [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-avatar',
-            '@radix-ui/react-tooltip',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-select',
-            '@radix-ui/react-collapsible',
-          ],
+        manualChunks: (id) => {
+          // Vendor chunk - React ecosystem (rarely changes)
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || 
+                id.includes('@tanstack/react-router') || 
+                id.includes('@tanstack/react-query')) {
+              return 'vendor'
+            }
+            // UI library chunk
+            if (id.includes('@radix-ui') || 
+                id.includes('@base-ui')) {
+              return 'ui'
+            }
+            // Charts library (large, only needed on admin pages)
+            if (id.includes('recharts')) {
+              return 'charts'
+            }
+          }
         },
       },
     },
     // Split CSS into separate files for better caching
     cssCodeSplit: true,
-    // Minify for production (default terser settings)
+    // Minify for production
+    minify: true,
   },
   // Optimize dependency pre-bundling
   optimizeDeps: {
