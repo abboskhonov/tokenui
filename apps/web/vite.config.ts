@@ -19,34 +19,19 @@ const config = defineConfig({
     viteReact(),
   ],
   build: {
-    // Optimize chunk splitting for better caching and smaller initial load
-    rollupOptions: {
-      output: {
-        manualChunks: (id) => {
-          // Vendor chunk - React ecosystem (rarely changes)
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || 
-                id.includes('@tanstack/react-router') || 
-                id.includes('@tanstack/react-query')) {
-              return 'vendor'
-            }
-            // UI library chunk
-            if (id.includes('@radix-ui') || 
-                id.includes('@base-ui')) {
-              return 'ui'
-            }
-            // Charts library (large, only needed on admin pages)
-            if (id.includes('recharts')) {
-              return 'charts'
-            }
-          }
-        },
-      },
-    },
     // Split CSS into separate files for better caching
     cssCodeSplit: true,
     // Minify for production
     minify: true,
+    // Let Vite handle default chunking (safer than manualChunks which can cause circular dep issues)
+    rollupOptions: {
+      output: {
+        // Only split out large vendor libraries that are stable
+        manualChunks: {
+          'vendor': ['react', 'react-dom'],
+        },
+      },
+    },
   },
   // Optimize dependency pre-bundling
   optimizeDeps: {

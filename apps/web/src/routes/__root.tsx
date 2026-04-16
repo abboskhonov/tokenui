@@ -4,6 +4,8 @@ import {
   Scripts,
   createRootRoute,
 } from "@tanstack/react-router"
+import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
+import { TanStackDevtools } from "@tanstack/react-devtools"
 
 import appCss from "../styles.css?url"
 
@@ -14,74 +16,6 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { queryClient } from "@/router"
 import { useSession } from "@/lib/queries/auth"
-import { Suspense, lazy, useMemo } from "react"
-
-// Schema.org structured data for SEO
-const STRUCTURED_DATA = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": "https://tasteui.dev/#organization",
-      name: "TasteUI",
-      url: "https://tasteui.dev",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://tasteui.dev/logo512.png",
-        width: 512,
-        height: 512,
-      },
-      sameAs: [
-        "https://twitter.com/tasteui",
-        "https://github.com/tasteui",
-      ],
-      description:
-        "Drop-in design skills for your coding agent. Share and discover custom shadcn/ui components.",
-    },
-    {
-      "@type": "WebSite",
-      "@id": "https://tasteui.dev/#website",
-      url: "https://tasteui.dev",
-      name: "TasteUI",
-      publisher: {
-        "@id": "https://tasteui.dev/#organization",
-      },
-      potentialAction: {
-        "@type": "SearchAction",
-        target: {
-          "@type": "EntryPoint",
-          urlTemplate: "https://tasteui.dev/?q={search_term_string}",
-        },
-        "query-input": "required name=search_term_string",
-      },
-    },
-    {
-      "@type": "SoftwareApplication",
-      name: "TasteUI",
-      applicationCategory: "DeveloperApplication",
-      operatingSystem: "Any",
-      offers: {
-        "@type": "Offer",
-        price: "0",
-        priceCurrency: "USD",
-      },
-      description:
-        "CLI tool and platform for sharing drop-in design skills for AI coding agents",
-      url: "https://tasteui.dev",
-      author: {
-        "@id": "https://tasteui.dev/#organization",
-      },
-    },
-  ],
-}
-
-// Lazy load devtools only in development
-const TanStackRouterDevtoolsPanel = import.meta.env.DEV 
-  ? lazy(() => import("@tanstack/react-router-devtools").then(m => ({ default: m.TanStackRouterDevtoolsPanel })))
-  : () => null
-const TanStackDevtools = import.meta.env.DEV
-  ? lazy(() => import("@tanstack/react-devtools").then(m => ({ default: m.TanStackDevtools })))
-  : () => null
 
 export const Route = createRootRoute({
   head: () => ({
@@ -212,22 +146,10 @@ function SessionProvider({ children }: { children: React.ReactNode }) {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-  const structuredDataScript = useMemo(
-    () => JSON.stringify(STRUCTURED_DATA),
-    []
-  )
-
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
-        {/* Schema.org structured data for SEO */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: structuredDataScript,
-          }}
-        />
         {/* Theme script - runs before React to prevent flash */}
         <script
           dangerouslySetInnerHTML={{
@@ -242,42 +164,22 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             `,
           }}
         />
-        {/* Google Analytics 4 - for better SEO tool detection */}
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-TASTEUI"
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-TASTEUI');
-            `,
-          }}
-        />
         <Scripts />
       </head>
       <body>
         {children}
         <Toaster position="bottom-right" />
-        {/* Devtools - only loaded in development */}
-        {import.meta.env.DEV && (
-          <Suspense fallback={null}>
-            <TanStackDevtools
-              config={{
-                position: "bottom-right",
-              }}
-              plugins={[
-                {
-                  name: "Tanstack Router",
-                  render: <TanStackRouterDevtoolsPanel />,
-                },
-              ]}
-            />
-          </Suspense>
-        )}
+        <TanStackDevtools
+          config={{
+            position: "bottom-right",
+          }}
+          plugins={[
+            {
+              name: "Tanstack Router",
+              render: <TanStackRouterDevtoolsPanel />,
+            },
+          ]}
+        />
         {/* Cloudflare Web Analytics - placed before closing body tag as per CF docs */}
         <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "f8a26a6e1ffe4a04b8d5030717d0bf63"}' />
       </body>
