@@ -23,15 +23,8 @@ const config = defineConfig({
     cssCodeSplit: true,
     // Minify for production
     minify: true,
-    // Let Vite handle default chunking (safer than manualChunks which can cause circular dep issues)
-    rollupOptions: {
-      output: {
-        // Only split out large vendor libraries that are stable
-        manualChunks: {
-          'vendor': ['react', 'react-dom'],
-        },
-      },
-    },
+    // Note: React is externalized by Nitro for SSR, so we can't manualChunk it
+    // Let Vite's default chunking handle the rest
   },
   // Optimize dependency pre-bundling
   optimizeDeps: {

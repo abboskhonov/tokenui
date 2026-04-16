@@ -13,37 +13,16 @@ Implemented several performance optimizations to improve Lighthouse scores:
 
 ### 1. Vite Build Optimization (`apps/web/vite.config.ts`)
 
-**Added manual code splitting** to reduce initial bundle size:
-- `vendor` chunk: react, react-dom, tanstack packages (cached longer)
-- `ui` chunk: radix-ui components (separate from main bundle)
-- `charts` chunk: recharts (only loaded on admin pages)
-- Enabled CSS code splitting for better caching
+**Enabled CSS code splitting** for better caching:
+- CSS is split into separate files for better caching
+- Minification enabled for production
 
-**Impact**: ~50-100KB reduction in initial JS load
+**Note**: React/ReactDOM are externalized by Nitro for SSR, so they can't be manually chunked. The default Vite chunking is used for JS.
 
 ```typescript
 build: {
-  rollupOptions: {
-    output: {
-      manualChunks: (id) => {
-        if (id.includes('node_modules')) {
-          if (id.includes('react') || 
-              id.includes('@tanstack/react-router') || 
-              id.includes('@tanstack/react-query')) {
-            return 'vendor'
-          }
-          if (id.includes('@radix-ui') || 
-              id.includes('@base-ui')) {
-            return 'ui'
-          }
-          if (id.includes('recharts')) {
-            return 'charts'
-          }
-        }
-      },
-    },
-  },
   cssCodeSplit: true,
+  minify: true,
 }
 ```
 
@@ -72,18 +51,18 @@ function generateImagePreloadLinks(designs: Design[]) {
 
 ---
 
-### 3. Devtools Lazy Loading (`apps/web/src/routes/__root.tsx`)
+### 3. React Query Devtools Lazy Loading (`apps/web/src/lib/query-provider.tsx`)
 
-**Moved devtools to lazy-loaded chunks** only in development:
-- `@tanstack/react-router-devtools`
-- `@tanstack/react-devtools`
-- Production builds won't include devtool code
+**Lazy-loaded React Query Devtools** only in development:
+- Only loaded when `import.meta.env.DEV` is true
+- Reduces production bundle size
+- Wrapped in Suspense for clean loading
 
-**Impact**: ~30-50KB reduction in production bundle
+**Impact**: ~15-20KB reduction in production bundle
 
 ```typescript
-const TanStackRouterDevtoolsPanel = import.meta.env.DEV 
-  ? lazy(() => import("@tanstack/react-router-devtools").then(m => ({ default: m.TanStackRouterDevtoolsPanel })))
+const ReactQueryDevtools = import.meta.env.DEV
+  ? lazy(() => import("@tanstack/react-query-devtools").then(m => ({ default: m.ReactQueryDevtools })))
   : () => null
 ```
 
@@ -172,9 +151,9 @@ See `docs/r2-http2-optimization.md` for detailed setup instructions.
 
 ## Files Modified
 
-1. `apps/web/vite.config.ts` - Code splitting config
+1. `apps/web/vite.config.ts` - CSS code splitting
 2. `apps/web/src/routes/index.tsx` - Image preloading
-3. `apps/web/src/routes/__root.tsx` - Devtools lazy loading
+3. `apps/web/src/lib/query-provider.tsx` - React Query Devtools lazy loading
 4. `apps/web/src/features/marketing/components/design-card.tsx` - Skeleton loading
 5. `docs/r2-http2-optimization.md` - Documentation (new file)
 6. `docs/performance-optimization.md` - This file (new file)
