@@ -22,7 +22,7 @@ interface DesignCardProps {
 export const DesignCard = memo(function DesignCard({ design }: DesignCardProps) {
   const username = design.author?.username || "unknown";
   const { user } = useUser();
-  const { data: isBookmarked } = useBookmarkCheck(design.id);
+  const { data: isBookmarked } = useBookmarkCheck(design.id, false, !!user);
   const createBookmark = useCreateBookmark();
   const deleteBookmark = useDeleteBookmark();
   
@@ -99,6 +99,7 @@ export const DesignCard = memo(function DesignCard({ design }: DesignCardProps) 
               loading="lazy"
               decoding="async"
               fetchPriority="low"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
           ) : (
             <SkillCard variant="pattern" />
@@ -164,9 +165,9 @@ export const DesignCard = memo(function DesignCard({ design }: DesignCardProps) 
           {/* Card name with install count - inside wrapper below thumbnail */}
           <div className="mt-2 px-2 py-1.5 flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <h3 className="text-sm font-medium text-foreground truncate leading-tight">
+              <h2 className="text-sm font-medium text-foreground truncate leading-tight">
                 {design.name}
-              </h3>
+              </h2>
               <p className="text-xs text-muted-foreground truncate">
                 {username}
               </p>

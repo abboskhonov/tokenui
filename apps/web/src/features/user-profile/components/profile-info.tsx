@@ -1,10 +1,29 @@
-import type { UserProfile, UserStats } from "@/lib/queries/users"
+"use client"
+
 import { useState } from "react"
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  Copy01Icon,
+  Linkedin01Icon,
+  NewTwitterIcon,
+  RedditIcon,
+  Share08Icon,
+  TelegramIcon,
+} from "@hugeicons/core-free-icons"
+import { toast } from "sonner"
+import type { UserProfile, UserStats } from "@/lib/queries/users"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface ProfileInfoProps {
   user: UserProfile
@@ -22,6 +41,7 @@ export function ProfileInfo({ user, username, stats }: ProfileInfoProps) {
         <button
           onClick={() => user.image && setShowAvatarOverlay(true)}
           className="shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
+          aria-label={`View ${user.name || username}'s profile picture`}
         >
           {user.image ? (
             <img
@@ -65,6 +85,7 @@ export function ProfileInfo({ user, username, stats }: ProfileInfoProps) {
             <span className="block text-xl font-semibold">{stats.followers}</span>
             <span className="text-xs text-muted-foreground">followers</span>
           </div>
+          <ShareButton username={username} user={user} />
         </div>
       </div>
 
@@ -121,9 +142,9 @@ function GitHubLink({ handle }: { handle: string }) {
 
 function WebsiteLink({ url }: { url: string }) {
   const display = url.replace(/^https?:\/\//, '').replace(/^www\./, '')
-  
+
   return (
-    <a 
+    <a
       href={url}
       target="_blank"
       rel="noopener noreferrer"
@@ -136,5 +157,78 @@ function WebsiteLink({ url }: { url: string }) {
       </svg>
       <span>{display}</span>
     </a>
+  )
+}
+
+function ShareButton({ username, user }: { username: string; user: UserProfile }) {
+  const profileUrl = `https://tasteui.dev/u/${username}`
+  const displayName = user.name || username
+  const shareText = `Check out ${displayName}'s profile on tasteui`
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(profileUrl)
+      toast.success("Link copied to clipboard")
+    } catch {
+      toast.error("Failed to copy link")
+    }
+  }
+
+  const handleShareX = () => {
+    const text = encodeURIComponent(shareText)
+    const url = encodeURIComponent(profileUrl)
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'noopener,noreferrer')
+  }
+
+  const handleShareLinkedIn = () => {
+    const url = encodeURIComponent(profileUrl)
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank', 'noopener,noreferrer')
+  }
+
+  const handleShareTelegram = () => {
+    const text = encodeURIComponent(shareText)
+    const url = encodeURIComponent(profileUrl)
+    window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank', 'noopener,noreferrer')
+  }
+
+  const handleShareReddit = () => {
+    const title = encodeURIComponent(shareText)
+    const url = encodeURIComponent(profileUrl)
+    window.open(`https://www.reddit.com/submit?title=${title}&url=${url}`, '_blank', 'noopener,noreferrer')
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button variant="outline" size="sm" className="gap-1.5">
+            <HugeiconsIcon icon={Share08Icon} strokeWidth={2} className="size-4" />
+            <span>Share</span>
+          </Button>
+        }
+      />
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem onClick={handleCopyLink}>
+          <HugeiconsIcon icon={Copy01Icon} strokeWidth={2} className="size-4 mr-2" />
+          Copy Link
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleShareX}>
+          <HugeiconsIcon icon={NewTwitterIcon} strokeWidth={2} className="size-4 mr-2" />
+          Share on X
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleShareLinkedIn}>
+          <HugeiconsIcon icon={Linkedin01Icon} strokeWidth={2} className="size-4 mr-2" />
+          LinkedIn
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleShareTelegram}>
+          <HugeiconsIcon icon={TelegramIcon} strokeWidth={2} className="size-4 mr-2" />
+          Telegram
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleShareReddit}>
+          <HugeiconsIcon icon={RedditIcon} strokeWidth={2} className="size-4 mr-2" />
+          Reddit
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

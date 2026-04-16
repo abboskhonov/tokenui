@@ -19,13 +19,15 @@ export function useDesignActions(design: Design | undefined) {
   const prefetchedIsStarred = design?.isStarred ?? false
   const prefetchedIsBookmarked = design?.isBookmarked ?? false
   
-  // Bookmark state - pass initialData from prefetch
-  const { data: isBookmarked } = useBookmarkCheck(designId, prefetchedIsBookmarked)
+  const isAuthenticated = !!user
+  
+  // Bookmark state - pass initialData from prefetch (only for authenticated users)
+  const { data: isBookmarked } = useBookmarkCheck(designId, prefetchedIsBookmarked, isAuthenticated)
   const createBookmark = useCreateBookmark()
   const deleteBookmark = useDeleteBookmark()
   
-  // Star state - pass initialData from prefetch
-  const { data: isStarred } = useStarCheck(designId, prefetchedIsStarred)
+  // Star state - pass initialData from prefetch (only for authenticated users)
+  const { data: isStarred } = useStarCheck(designId, prefetchedIsStarred, isAuthenticated)
   const createStar = useCreateStar()
   const deleteStar = useDeleteStar()
   

@@ -1,22 +1,35 @@
+"use client"
+
 import { Link } from "@tanstack/react-router"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { 
-  Copy01Icon, 
-  Tick02Icon,
-  Download01Icon,
-  StarIcon,
+import {
   Bookmark01Icon,
+  Copy01Icon,
+  Download01Icon,
   EyeIcon,
+  Linkedin01Icon,
+  NewTwitterIcon,
+  RedditIcon,
+  Share08Icon,
+  StarIcon,
+  TelegramIcon,
+  Tick02Icon,
 } from "@hugeicons/core-free-icons"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import JSZip from "jszip"
+import { useEffect, useRef, useState } from "react"
+import { toast } from "sonner"
 import type { Design } from "@/lib/types/design"
 import type { FileNode } from "@/features/publish/components/file-tree"
 import type { User } from "@/lib/types/auth"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { useStarCount, useTrackDownload } from "@/lib/queries/designs"
-import JSZip from "jszip"
-import { useState, useEffect, useRef } from "react"
-import { toast } from "sonner"
 
 interface SkillDetailSidebarProps {
   design: Design
@@ -79,7 +92,7 @@ export function SkillDetailSidebar({
     const folderName = design.slug || design.name.replace(/\s+/g, "-").toLowerCase()
     
     if (design.files && design.files.length > 0) {
-      const addFilesToZip = (nodes: FileNode[], currentPath: string = "") => {
+      const addFilesToZip = (nodes: Array<FileNode>, currentPath: string = "") => {
         for (const node of nodes) {
           const filePath = currentPath ? `${currentPath}/${node.name}` : node.name
           
@@ -138,16 +151,52 @@ export function SkillDetailSidebar({
       toast.error("Please sign in to bookmark skills")
       return
     }
-    
+
     onBookmarkClick()
-    
+
     if (!isBookmarkedState) {
       toast.success("Saved to bookmarks", { duration: 1500 })
     } else {
       toast("Removed from bookmarks", { duration: 1500 })
     }
   }
-  
+
+  // Share functions
+  const designUrl = `https://tasteui.dev/s/${username}/${design.slug}`
+  const shareText = `Check out ${design.name} by ${username} on tasteui`
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(designUrl)
+      toast.success("Link copied to clipboard")
+    } catch {
+      toast.error("Failed to copy link")
+    }
+  }
+
+  const handleShareX = () => {
+    const text = encodeURIComponent(shareText)
+    const url = encodeURIComponent(designUrl)
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'noopener,noreferrer')
+  }
+
+  const handleShareLinkedIn = () => {
+    const url = encodeURIComponent(designUrl)
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank', 'noopener,noreferrer')
+  }
+
+  const handleShareTelegram = () => {
+    const text = encodeURIComponent(shareText)
+    const url = encodeURIComponent(designUrl)
+    window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank', 'noopener,noreferrer')
+  }
+
+  const handleShareReddit = () => {
+    const title = encodeURIComponent(shareText)
+    const url = encodeURIComponent(designUrl)
+    window.open(`https://www.reddit.com/submit?title=${title}&url=${url}`, '_blank', 'noopener,noreferrer')
+  }
+
   return (
     <aside className="w-[340px] h-[calc(100vh-56px)] border-r border-border bg-background hidden lg:block overflow-y-auto">
       <div className="p-6 space-y-8">
@@ -214,6 +263,39 @@ export function SkillDetailSidebar({
             <HugeiconsIcon icon={EyeIcon} className="size-3.5" />
             <span>{design.viewCount.toLocaleString()}</span>
           </div>
+
+          {/* Share */}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button variant="outline" size="icon-sm" className="h-9 w-9">
+                  <HugeiconsIcon icon={Share08Icon} className="size-3.5" />
+                </Button>
+              }
+            />
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={handleCopyLink}>
+                <HugeiconsIcon icon={Copy01Icon} className="size-4 mr-2" />
+                Copy Link
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleShareX}>
+                <HugeiconsIcon icon={NewTwitterIcon} className="size-4 mr-2" />
+                Share on X
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleShareLinkedIn}>
+                <HugeiconsIcon icon={Linkedin01Icon} className="size-4 mr-2" />
+                LinkedIn
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleShareTelegram}>
+                <HugeiconsIcon icon={TelegramIcon} className="size-4 mr-2" />
+                Telegram
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleShareReddit}>
+                <HugeiconsIcon icon={RedditIcon} className="size-4 mr-2" />
+                Reddit
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Created by */}

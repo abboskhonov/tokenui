@@ -226,15 +226,15 @@ export function useBookmarks() {
   })
 }
 
-// Check if a design is bookmarked
-export function useBookmarkCheck(designId: string, initialData?: boolean) {
+// Check if a design is bookmarked (only for authenticated users)
+export function useBookmarkCheck(designId: string, initialData?: boolean, isAuthenticated?: boolean) {
   return useQuery({
     queryKey: designKeys.bookmarkCheck(designId),
     queryFn: async () => {
       const response = await api.get<{ isBookmarked: boolean }>(`/api/bookmarks/check/${designId}`)
       return response.isBookmarked
     },
-    enabled: !!designId,
+    enabled: !!designId && isAuthenticated === true,
     initialData: initialData,
   })
 }
@@ -281,15 +281,15 @@ export function useStars() {
   })
 }
 
-// Check if a design is starred
-export function useStarCheck(designId: string, initialData?: boolean) {
+// Check if a design is starred (only for authenticated users)
+export function useStarCheck(designId: string, initialData?: boolean, isAuthenticated?: boolean) {
   return useQuery({
     queryKey: designKeys.starCheck(designId),
     queryFn: async () => {
       const response = await api.get<{ isStarred: boolean }>(`/api/stars/check/${designId}`)
       return response.isStarred
     },
-    enabled: !!designId,
+    enabled: !!designId && isAuthenticated === true,
     initialData: initialData,
   })
 }

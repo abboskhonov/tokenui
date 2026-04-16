@@ -91,7 +91,7 @@ export const Route = createRootRoute({
       },
       {
         rel: "manifest",
-        href: "/site.webmanifest",
+        href: "/manifest.json",
       },
     ],
   }),
