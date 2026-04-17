@@ -56,7 +56,7 @@ export function SkillDetailSidebar({
   onStarClick,
   onBookmarkClick,
 }: SkillDetailSidebarProps) {
-  const installationCommand = `tasteui.dev add ${design.author?.username || username}/${design.slug}`
+  
   
   const { data: serverStarCount } = useStarCount(design.id, design.starCount ?? 0)
   const [optimisticAdjustment, setOptimisticAdjustment] = useState<number>(0)
@@ -258,7 +258,9 @@ export function SkillDetailSidebar({
           >
             <code className="flex items-center gap-1.5 whitespace-nowrap overflow-x-auto scrollbar-hide pr-10">
               <span className="text-green-600 dark:text-green-400 shrink-0">npx</span>
-              <span className="text-foreground">{installationCommand}</span>
+              <span className="text-foreground">tasteui.dev</span>
+              <span className="text-orange-500 dark:text-orange-400 shrink-0">@latest</span>
+              <span className="text-foreground">add {design.author?.username || username}/{design.slug}</span>
             </code>
             <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-muted">
               <HugeiconsIcon 

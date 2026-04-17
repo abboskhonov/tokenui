@@ -13,7 +13,7 @@ export function validateBody<T>(schema: ZodSchema<T>) {
       await next()
     } catch (error) {
       if (error instanceof ZodError) {
-        const errors = error.errors.map((e) => ({
+        const errors = error.issues.map((e) => ({
           path: e.path.join("."),
           message: e.message,
         }))
@@ -40,7 +40,7 @@ export function validateQuery<T>(schema: ZodSchema<T>) {
       await next()
     } catch (error) {
       if (error instanceof ZodError) {
-        const errors = error.errors.map((e) => ({
+        const errors = error.issues.map((e) => ({
           path: e.path.join("."),
           message: e.message,
         }))
@@ -67,7 +67,7 @@ export function validateParams<T>(schema: ZodSchema<T>) {
       await next()
     } catch (error) {
       if (error instanceof ZodError) {
-        const errors = error.errors.map((e) => ({
+        const errors = error.issues.map((e) => ({
           path: e.path.join("."),
           message: e.message,
         }))

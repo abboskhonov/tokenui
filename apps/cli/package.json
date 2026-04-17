@@ -1,6 +1,6 @@
 {
   "name": "tasteui.dev",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "CLI for installing design system skills to coding agents",
   "type": "module",
   "bin": {

@@ -240,7 +240,7 @@ function SkillDetailPage() {
   }, [design?.id, isLoading, username, designSlug])
 
   const handleCopyInstall = useCallback(() => {
-    const command = displayDesign ? `npx tasteui.dev add ${displayDesign.author?.username || username}/${displayDesign.slug}` : ""
+    const command = displayDesign ? `npx tasteui.dev@latest add ${displayDesign.author?.username || username}/${displayDesign.slug}` : ""
     handleCopy(command, "install")
   }, [displayDesign, username, handleCopy])
 

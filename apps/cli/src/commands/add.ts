@@ -148,6 +148,21 @@ export async function addCommand(identifier: string) {
       throw new Error('Skill not found');
     }
 
+    // Fetch files separately if using the /designs/:owner/:slug endpoint
+    // The API excludes files from the main endpoint for performance (lazy loading)
+    if (owner && !skill.files) {
+      try {
+        const filesResponse = await makeApiRequest(
+          `${apiUrl}/api/designs/${owner}/${slug}/files`,
+          config.token
+        ) as { files: FileNode[] | null };
+        skill.files = filesResponse.files;
+      } catch {
+        // If files fetch fails, continue with empty files
+        skill.files = null;
+      }
+    }
+
     // Extract author info (could be string or object from different endpoints)
     const authorDisplay = typeof skill.author === 'string' 
       ? skill.author 
