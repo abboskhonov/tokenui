@@ -6,7 +6,7 @@ import { NewTwitterIcon } from "@hugeicons/core-free-icons"
 
 export function Footer() {
   return (
-    <footer className="border-t border-border/50">
+    <footer className="w-full border-t border-border">
       <div className="max-w-7xl mx-auto px-6 py-8 flex items-center justify-between">
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
         <span>© 2026</span>
