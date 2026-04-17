@@ -24,6 +24,7 @@ export function Footer() {
           href="https://x.com/abboskhonovv" 
           target="_blank" 
           rel="noopener noreferrer"
+          aria-label="Follow on X"
         >
           <Button variant="ghost" size="icon-sm" className="h-8 w-8">
             <HugeiconsIcon icon={NewTwitterIcon} className="size-4" />

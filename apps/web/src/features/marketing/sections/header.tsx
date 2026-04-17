@@ -83,6 +83,7 @@ function UserMenu() {
             <Button
               variant="ghost"
               className="h-8 px-2 gap-2 justify-start hover:bg-muted/20"
+              aria-label={`Open user menu for ${user.name || "User"}`}
             >
               <Avatar className="h-7 w-7 rounded-full">
                 <AvatarImage
