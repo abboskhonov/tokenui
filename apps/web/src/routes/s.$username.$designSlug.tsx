@@ -271,10 +271,8 @@ function SkillDetailPage() {
       <SkillDetailHeader
         username={username}
         designSlug={designSlug}
-        previewTheme={previewTheme}
         isShowingFiles={activeTab === "code"}
         onToggleFiles={() => setActiveTab(activeTab === "preview" ? "code" : "preview")}
-        onToggleTheme={togglePreviewTheme}
       />
 
       <div className="flex">

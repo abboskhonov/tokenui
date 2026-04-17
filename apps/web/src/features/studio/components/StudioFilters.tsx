@@ -46,7 +46,7 @@ export function StudioFilters({
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             className={cn(
-              "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+              "h-9 rounded-md px-3 text-sm font-medium transition-colors",
               activeTab === tab.id
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -72,7 +72,7 @@ export function StudioFilters({
           />
         </div>
         <Link to="/publish">
-          <Button className="gap-2">
+          <Button size="lg" className="gap-2">
             <HugeiconsIcon icon={PlusSignIcon} className="size-4" />
             Create New
           </Button>

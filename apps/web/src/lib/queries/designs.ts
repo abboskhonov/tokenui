@@ -198,6 +198,21 @@ export function useDesignFiles(username: string, slug: string, enabled: boolean 
   })
 }
 
+// Check if skill name exists for current user
+export function useCheckDesignName(name: string, excludeId?: string) {
+  return useQuery({
+    queryKey: [...designKeys.all, "check-name", name, excludeId],
+    queryFn: async () => {
+      const params = new URLSearchParams({ name })
+      if (excludeId) params.append("excludeId", excludeId)
+      const response = await api.get<{ exists: boolean; name?: string }>(`/api/designs/check-name?${params}`)
+      return response
+    },
+    enabled: name.length > 0,
+    staleTime: 1000 * 30, // 30 seconds
+  })
+}
+
 // Create design mutation
 export function useCreateDesign() {
   const queryClient = useQueryClient()

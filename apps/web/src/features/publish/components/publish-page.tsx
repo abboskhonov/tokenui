@@ -2,24 +2,30 @@
 
 import { useState, useMemo, useEffect, useRef } from "react"
 import { useNavigate, useSearch } from "@tanstack/react-router"
+import { useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { 
   ArrowLeft01Icon, 
   ArrowRight01Icon,
-  Add01Icon,
-  File01Icon,
-  Tick02Icon,
+  Cancel01Icon,
   SaveIcon,
+  Tick02Icon,
 } from "@hugeicons/core-free-icons"
-import { useCreateDesign, uploadImage } from "@/lib/queries/designs"
+import { useCreateDesign, uploadImage, designKeys, useCheckDesignName } from "@/lib/queries/designs"
 import { compressImage, type CompressionResult } from "@/lib/image-compression"
 import { useStudioDesign, useUpdateStudioDesign } from "@/features/studio"
 import type { CreateDesignData } from "@/lib/types/design"
 import { FileTree } from "./file-tree-component"
 import { CodeEditor, getLanguageFromFilename } from "./code-editor"
 import { ComponentInfoSidebar } from "./component-info-sidebar"
-import { PreviewArea } from "./preview-area"
 import { DemoCodeEditor } from "./demo-code-editor"
 import { SyntaxHighlightStyles } from "./syntax-highlight-styles"
 import { getFileContent, updateFileContent, type FileNode } from "./file-tree"
@@ -65,6 +71,7 @@ const DEFAULT_DEMO_HTML = `<!DOCTYPE html>
 
 export function PublishPage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const search = useSearch({ from: "/publish" }) as { edit?: string }
   const editId = search.edit
   
@@ -83,21 +90,30 @@ export function PublishPage() {
   ])
   const [activeFile, setActiveFile] = useState("SKILL.md")
   
-  // Step 2: Component info
+  // Step 2: Skill info
   const [name, setName] = useState("")
-  const [slug, setSlug] = useState("")
   const [description, setDescription] = useState("")
   const [category, setCategory] = useState("")
   const [thumbnailUrl, setThumbnailUrl] = useState("")
   const [demoCode, setDemoCode] = useState(DEFAULT_DEMO_HTML)
   const [showDemoEditor, setShowDemoEditor] = useState(false)
-  
-  // Preview state
-  const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop")
-  const [previewTheme, setPreviewTheme] = useState<"light" | "dark">("light")
-  const [isCopied, setIsCopied] = useState(false)
   const [compressionInfo, setCompressionInfo] = useState<CompressionResult | null>(null)
   const [isCompressing, setIsCompressing] = useState(false)
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false)
+  const [errorDialog, setErrorDialog] = useState<{ open: boolean; title: string; message: string }>({
+    open: false,
+    title: "",
+    message: "",
+  })
+  
+  // Helper to show error dialog
+  const showError = (title: string, message: string) => {
+    setErrorDialog({ open: true, title, message })
+  }
+
+  // Check if skill name already exists
+  const { data: nameCheck } = useCheckDesignName(name, isEditing ? editId : undefined)
+  const nameExists = nameCheck?.exists ?? false
   
   // Derived values
   const activeContent = useMemo(() => getFileContent(files, activeFile), [files, activeFile])
@@ -124,7 +140,6 @@ export function PublishPage() {
   useEffect(() => {
     if (isEditing && existingDesign) {
       setName(existingDesign.name)
-      setSlug(existingDesign.slug)
       setDescription(existingDesign.description || "")
       setCategory(existingDesign.category)
       setThumbnailUrl(existingDesign.thumbnailUrl || "")
@@ -170,7 +185,7 @@ export function PublishPage() {
     
     const maxSize = 5 * 1024 * 1024
     if (file.size > maxSize) {
-      alert("File too large. Max 5MB.")
+      showError("File Too Large", "Maximum file size is 5MB. Please choose a smaller image.")
       return
     }
     
@@ -208,16 +223,6 @@ export function PublishPage() {
     }
   }
 
-  const handleCopyDemo = async () => {
-    try {
-      await navigator.clipboard.writeText(demoCode)
-      setIsCopied(true)
-      setTimeout(() => setIsCopied(false), 2000)
-    } catch (err) {
-      console.error("Failed to copy:", err)
-    }
-  }
-
   const saveDraft = async () => {
     const skillContent = getFileContent(files, "SKILL.md")
     
@@ -248,7 +253,7 @@ export function PublishPage() {
         search: { edit: newDesign.id } 
       })
     } catch {
-      alert("Failed to save draft. Please try again.")
+      showError("Save Failed", "Failed to save draft. Please try again.")
     } finally {
       setIsDraftSaving(false)
     }
@@ -266,7 +271,6 @@ export function PublishPage() {
     
     const data: Partial<CreateDesignData> = {
       name: name || "Untitled",
-      slug: slug || "untitled",
       description: description || undefined,
       category: category || "uncategorized",
       content: skillContent || DEFAULT_SKILL_MD,
@@ -279,37 +283,45 @@ export function PublishPage() {
     try {
       await updateDesign.mutateAsync({ id: editId, data })
     } catch {
-      alert("Failed to update draft. Please try again.")
+      showError("Update Failed", "Failed to update draft. Please try again.")
     }
   }
 
   const handleSubmit = async () => {
     const skillContent = getFileContent(files, "SKILL.md")
-    
+
     if (!skillContent.trim()) {
-      alert("SKILL.md content is required")
+      showError("Missing Content", "SKILL.md content is required.")
       return
     }
-    
-    if (!name.trim() || !slug.trim() || !category) {
-      alert("Please fill in all required fields")
+
+    if (!name.trim() || !category) {
+      showError("Missing Fields", "Please fill in all required fields (Name and Category).")
+      return
+    }
+
+    if (nameExists && !isEditing) {
+      showError("Name Already Exists", `You already have a skill named "${name}". Please choose a different name.`)
       return
     }
 
     // Include demo HTML if provided and not default
-    const demoHtml = demoCode.trim() && demoCode !== DEFAULT_DEMO_HTML 
-      ? demoCode.trim() 
+    const demoHtml = demoCode.trim() && demoCode !== DEFAULT_DEMO_HTML
+      ? demoCode.trim()
       : undefined
+
+    // When editing an already-approved design, preserve the approved status
+    // so it doesn't require re-review by admins
+    const isAlreadyApproved = isEditing && existingDesign?.status === "approved"
 
     const data: CreateDesignData = {
       name: name.trim(),
-      slug: slug.trim(),
       description: description.trim() || undefined,
       category,
       content: skillContent,
       demoHtml,
       thumbnailUrl: thumbnailUrl || undefined,
-      status: "pending",
+      status: isAlreadyApproved ? "approved" : "pending",
       files,
     }
 
@@ -319,9 +331,14 @@ export function PublishPage() {
       } else {
         await createDesign.mutateAsync(data)
       }
-      navigate({ to: "/studio" })
+      
+      // Invalidate and refetch designs query to ensure studio shows fresh data
+      await queryClient.invalidateQueries({ queryKey: designKeys.my() })
+      await queryClient.refetchQueries({ queryKey: designKeys.my() })
+      
+      setShowSuccessDialog(true)
     } catch {
-      alert("Failed to publish. Please try again.")
+      showError("Publish Failed", "Failed to publish. Please try again.")
     }
   }
 
@@ -338,22 +355,21 @@ export function PublishPage() {
       {/* Header */}
       <header className="sticky top-0 z-50 h-12 border-b border-border bg-background/95 backdrop-blur-xl">
         <div className="mx-auto h-full max-w-full px-4 flex items-center justify-between">
-          {/* Left: Back button and title */}
-          <div className="flex items-center gap-3">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-8 gap-1.5 px-2 -ml-1"
-              onClick={() => step === 1 ? navigate({ to: "/studio" }) : setStep(1)}
-            >
-              <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-              <span className="text-sm">Back</span>
-            </Button>
-            <span className="text-sm font-medium">
-              {isEditing ? "Edit Draft" : "New Skill"}
-              {step === 2 && " - Info"}
-            </span>
-          </div>
+          {/* Left: Back button only */}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-8 gap-1.5 px-2 -ml-1"
+            onClick={() => step === 1 ? navigate({ to: "/studio" }) : setStep(1)}
+          >
+            <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+            <span className="text-sm">Back</span>
+          </Button>
+
+          {/* Center: Title */}
+          <span className="text-sm font-medium absolute left-1/2 -translate-x-1/2">
+            {isEditing ? "Edit Skill" : "New Skill"}
+          </span>
 
           {/* Right: Actions */}
           <div className="flex items-center gap-2">
@@ -393,28 +409,17 @@ export function PublishPage() {
                 </Button>
               </>
             ) : (
-              <>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  className="h-8 text-xs"
-                  onClick={() => setStep(1)}
-                >
-                  Back
-                </Button>
-                <Button 
-                  size="sm"
-                  className="h-8 gap-1.5 text-xs"
-                  onClick={handleSubmit}
-                  disabled={createDesign.isPending || updateDesign.isPending}
-                >
-                  <HugeiconsIcon icon={isEditing ? Tick02Icon : Add01Icon} className="size-3.5" />
-                  {createDesign.isPending || updateDesign.isPending 
-                    ? "Publishing..." 
-                    : "Publish"
-                  }
-                </Button>
-              </>
+              <Button 
+                size="sm"
+                className="h-8 text-xs px-6"
+                onClick={handleSubmit}
+                disabled={createDesign.isPending || updateDesign.isPending || (!isEditing && nameExists)}
+              >
+                {createDesign.isPending || updateDesign.isPending 
+                  ? "Publishing..." 
+                  : "Publish"
+                }
+              </Button>
             )}
           </div>
         </div>
@@ -423,8 +428,8 @@ export function PublishPage() {
       {/* Step 1: Code Editor */}
       {step === 1 && (
         <div className="flex-1 flex overflow-hidden bg-background">
-          {/* File Tree Sidebar */}
-          <div className="w-60 border-r border-border bg-muted/30 flex flex-col overflow-hidden">
+          {/* File Tree Sidebar - matches component-info-sidebar width and style */}
+          <div className="w-[260px] min-h-0 border-r border-border bg-card/30 flex flex-col overflow-hidden">
             <FileTree
               files={files}
               activePath={activeFile}
@@ -434,11 +439,10 @@ export function PublishPage() {
           </div>
 
           {/* Code Editor */}
-          <div className="flex-1 flex flex-col overflow-hidden">
-            {/* File path header - matches FileTree header height */}
-            <div className="p-3 border-b border-border bg-muted/50 flex items-center shrink-0">
-              <HugeiconsIcon icon={File01Icon} className="size-3.5 text-muted-foreground mr-2" />
-              <span className="text-xs font-medium text-muted-foreground font-mono">{activeFile}</span>
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            {/* File path header - matches Files header style */}
+            <div className="h-12 border-b border-border bg-background flex items-center px-4 shrink-0">
+              <span className="text-sm font-medium text-foreground">{activeFile}</span>
             </div>
             
             {/* Editor content */}
@@ -457,14 +461,12 @@ export function PublishPage() {
         </div>
       )}
 
-      {/* Step 2: Component Info + Preview */}
+      {/* Step 2: Skill Info + Preview */}
       {step === 2 && (
         <div className="flex-1 flex overflow-hidden">
           <ComponentInfoSidebar
             name={name}
             setName={setName}
-            slug={slug}
-            setSlug={setSlug}
             description={description}
             setDescription={setDescription}
             category={category}
@@ -474,33 +476,120 @@ export function PublishPage() {
             files={files}
             isCompressing={isCompressing}
             compressionInfo={compressionInfo}
+            nameExists={nameExists}
+            isEditing={isEditing}
           />
 
-          <div className="flex-1 flex flex-col min-h-0 relative">
-            <PreviewArea
-              previewUrl={previewUrl}
-              previewMode={previewMode}
-              setPreviewMode={setPreviewMode}
-              previewTheme={previewTheme}
-              setPreviewTheme={setPreviewTheme}
-              onToggleEditor={() => setShowDemoEditor(!showDemoEditor)}
-              isEditorOpen={showDemoEditor}
-            />
+          <div className="flex-1 flex flex-col min-h-0">
+            {/* Tabs header */}
+            <div className="h-12 border-b flex items-center px-4 bg-background/50">
+              <div className="flex items-center bg-muted rounded-lg p-0.5">
+                <button
+                  onClick={() => setShowDemoEditor(false)}
+                  className={`px-4 py-1.5 rounded text-xs font-medium transition-all flex items-center gap-1.5 ${
+                    !showDemoEditor
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Preview
+                </button>
+                <button
+                  onClick={() => setShowDemoEditor(true)}
+                  className={`px-4 py-1.5 rounded text-xs font-medium transition-all flex items-center gap-1.5 ${
+                    showDemoEditor
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Code
+                </button>
+              </div>
+            </div>
 
-            {showDemoEditor && (
+            {/* Content area - both mounted, visibility toggled for instant switch */}
+            <div className={`flex-1 overflow-hidden bg-background ${showDemoEditor ? 'hidden' : 'block'}`}>
+              {previewUrl ? (
+                <iframe
+                  key={previewUrl}
+                  src={previewUrl}
+                  className="w-full h-full border-0"
+                  sandbox="allow-same-origin allow-scripts"
+                  title="Skill preview"
+                />
+              ) : (
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-center space-y-2 text-muted-foreground">
+                    <p>No preview available</p>
+                    <p className="text-sm">Edit the demo code to create a preview</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className={`flex-1 overflow-hidden ${showDemoEditor ? 'block' : 'hidden'}`}>
               <DemoCodeEditor
                 demoCode={demoCode}
                 setDemoCode={setDemoCode}
-                isCopied={isCopied}
-                onCopy={handleCopyDemo}
-                onClose={() => setShowDemoEditor(false)}
               />
-            )}
+            </div>
           </div>
         </div>
       )}
 
       <SyntaxHighlightStyles />
+
+      {/* Success Dialog */}
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <HugeiconsIcon icon={Tick02Icon} className="size-5 text-green-500" />
+              Skill Submitted for Review
+            </DialogTitle>
+            <DialogDescription className="pt-2 space-y-3">
+              <p>
+                Your skill has been submitted and will be reviewed very soon.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                We have a review system in place to prevent abuse and ensure quality. 
+                Once approved, your skill will be publicly available for the community to use.
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end pt-4">
+            <Button 
+              onClick={() => navigate({ to: "/studio" })}
+              className="px-6"
+            >
+              Go to Studio
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Error Dialog */}
+      <Dialog open={errorDialog.open} onOpenChange={(open) => setErrorDialog({ ...errorDialog, open })}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <HugeiconsIcon icon={Cancel01Icon} className="size-5 text-red-500" />
+              {errorDialog.title}
+            </DialogTitle>
+            <DialogDescription className="pt-2">
+              {errorDialog.message}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end pt-4">
+            <Button 
+              variant="outline"
+              onClick={() => setErrorDialog({ ...errorDialog, open: false })}
+            >
+              OK
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

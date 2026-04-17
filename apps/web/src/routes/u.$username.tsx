@@ -6,8 +6,8 @@ import {
   DesignsGrid,
   ProfileError,
   ProfileHeader,
-  ProfileInfo,
   ProfileNotFound,
+  ProfileSidebar,
   ProfileSkeleton,
   ProfileTabs,
   SearchInput,
@@ -155,39 +155,52 @@ function UserProfilePage() {
     <div className="min-h-screen bg-background text-foreground">
       <ProfileHeader username={username} />
 
-      <main className="mx-auto max-w-[1600px] px-6 md:px-12 lg:px-16 xl:px-20 py-4">
-        <ProfileInfo user={user} username={username} stats={stats} />
+      <main className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 py-6">
+        {/* GitHub-style 2-column layout */}
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-10">
+          {/* Left Sidebar - Profile Info */}
+          <ProfileSidebar user={user} username={username} stats={stats} />
 
-        {/* Tabs & Search */}
-        <div className="flex items-center justify-between mb-6">
-          <ProfileTabs
-            activeTab={activeTab}
-            skillsCount={stats.components}
-            bookmarksCount={bookmarks.length}
-            starsCount={stars.length}
-            onTabChange={setActiveTab}
-          />
-          {activeTab === "skills" && (
-            <SearchInput
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder="Search skills..."
-            />
-          )}
+          {/* Main Content - Tabs & Content */}
+          <div className="flex-1 min-w-0">
+            {/* Tabs & Search */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 border-b border-border pb-4">
+              <ProfileTabs
+                activeTab={activeTab}
+                skillsCount={stats.components}
+                bookmarksCount={bookmarks.length}
+                starsCount={stars.length}
+                onTabChange={setActiveTab}
+              />
+              {activeTab === "skills" && (
+                <SearchInput
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder="Search skills..."
+                />
+              )}
+            </div>
+
+            {/* Content */}
+            {activeTab === "skills" && (
+              <div className="overflow-x-hidden">
+                <DesignsGrid designs={filteredDesigns} username={username} user={user} />
+              </div>
+            )}
+
+            {activeTab === "bookmarks" && (
+              <div className="overflow-x-hidden">
+                <BookmarksGrid bookmarks={bookmarks} />
+              </div>
+            )}
+
+            {activeTab === "stars" && (
+              <div className="overflow-x-hidden">
+                <StarsGrid stars={stars} />
+              </div>
+            )}
+          </div>
         </div>
-
-        {/* Content */}
-        {activeTab === "skills" && (
-          <DesignsGrid designs={filteredDesigns} username={username} />
-        )}
-        
-        {activeTab === "bookmarks" && (
-          <BookmarksGrid bookmarks={bookmarks} />
-        )}
-        
-        {activeTab === "stars" && (
-          <StarsGrid stars={stars} />
-        )}
       </main>
     </div>
   )
@@ -203,7 +216,7 @@ function BookmarksGrid({ bookmarks }: { bookmarks: Array<Bookmark> }) {
   }
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 pb-12">
+    <div className="grid gap-6 grid-cols-2 pb-12">
       {bookmarks.map((bookmark) => (
         <BookmarkCard key={bookmark.id} bookmark={bookmark} />
       ))}
@@ -221,7 +234,7 @@ function StarsGrid({ stars }: { stars: Array<Star> }) {
   }
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 pb-12">
+    <div className="grid gap-6 grid-cols-2 pb-12">
       {stars.map((star) => (
         <StarCard key={star.id} star={star} />
       ))}

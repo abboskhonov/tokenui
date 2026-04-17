@@ -13,7 +13,7 @@ export function ProfileSkeleton({}: ProfileSkeletonProps) {
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
       <header className="sticky top-0 z-50 h-14 border-b border-border bg-background/95 backdrop-blur-xl">
-        <div className="mx-auto h-full max-w-[1600px] px-6 md:px-12 lg:px-16 xl:px-20 flex items-center">
+        <div className="mx-auto h-full max-w-[1280px] px-4 sm:px-6 lg:px-8 flex items-center">
           <Link to="/" preload="intent">
             <Button variant="ghost" size="sm" className="h-8 gap-1.5 px-2 -ml-2">
               <HugeiconsIcon icon={ArrowLeftIcon} className="size-4" />
@@ -23,57 +23,81 @@ export function ProfileSkeleton({}: ProfileSkeletonProps) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1600px] px-6 md:px-12 lg:px-16 xl:px-20 py-4">
-        {/* Profile Info Skeleton */}
-        <div className="flex items-start gap-6 py-6">
-          {/* Avatar Skeleton */}
-          <div className="relative">
-            <div className="h-24 w-24 rounded-full bg-muted animate-pulse" />
-          </div>
-          
-          {/* Info Skeleton */}
-          <div className="flex-1 space-y-4">
-            <div className="space-y-2">
-              <div className="h-7 w-48 bg-muted animate-pulse rounded" />
-              <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+      <main className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 py-6">
+        {/* GitHub-style 2-column layout skeleton */}
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-10">
+          {/* Left Sidebar Skeleton */}
+          <aside className="w-full lg:w-[296px] shrink-0">
+            {/* Avatar Skeleton - Large circular */}
+            <div className="mb-4">
+              <div className="h-[296px] w-[296px] rounded-full bg-muted animate-pulse" />
             </div>
-            
-            {/* Stats Skeleton */}
-            <div className="flex items-center gap-6">
-              <div className="h-5 w-20 bg-muted animate-pulse rounded" />
-              <div className="h-5 w-20 bg-muted animate-pulse rounded" />
-              <div className="h-5 w-20 bg-muted animate-pulse rounded" />
+
+            {/* Name & Username Skeleton */}
+            <div className="mb-4 space-y-2">
+              <div className="h-8 w-48 bg-muted animate-pulse rounded" />
+              <div className="h-5 w-32 bg-muted animate-pulse rounded" />
             </div>
-            
+
             {/* Bio Skeleton */}
-            <div className="space-y-2 max-w-lg">
+            <div className="mb-6 space-y-2">
               <div className="h-4 w-full bg-muted animate-pulse rounded" />
               <div className="h-4 w-3/4 bg-muted animate-pulse rounded" />
             </div>
-          </div>
-        </div>
 
-        {/* Tabs Skeleton */}
-        <div className="flex items-center justify-between mb-6 pt-4">
-          <div className="flex items-center gap-1">
-            <div className="h-9 w-24 bg-muted animate-pulse rounded" />
-            <div className="h-9 w-24 bg-muted animate-pulse rounded" />
-            <div className="h-9 w-24 bg-muted animate-pulse rounded" />
-          </div>
-          <div className="h-9 w-48 bg-muted animate-pulse rounded" />
-        </div>
-
-        {/* Skills Grid Skeleton */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 pb-12">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="space-y-3">
-              <div className="aspect-[4/3] rounded-xl bg-muted animate-pulse" />
-              <div className="flex items-center gap-3">
-                <div className="h-6 w-6 rounded-full bg-muted animate-pulse" />
-                <div className="h-4 w-32 bg-muted animate-pulse rounded" />
-              </div>
+            {/* Share Button Skeleton */}
+            <div className="mb-6">
+              <div className="h-9 w-full bg-muted animate-pulse rounded-md" />
             </div>
-          ))}
+
+            {/* Social Links Skeleton */}
+            <div className="mb-6 space-y-2">
+              <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+              <div className="h-4 w-36 bg-muted animate-pulse rounded" />
+              <div className="h-4 w-40 bg-muted animate-pulse rounded" />
+            </div>
+
+            {/* Stats Skeleton */}
+            <div className="flex items-center gap-3">
+              <div className="h-4 w-20 bg-muted animate-pulse rounded" />
+              <div className="h-4 w-1 bg-muted animate-pulse rounded" />
+              <div className="h-4 w-20 bg-muted animate-pulse rounded" />
+            </div>
+          </aside>
+
+          {/* Main Content Skeleton */}
+          <div className="flex-1 min-w-0">
+            {/* Tabs & Search Skeleton */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-4">
+              <div className="flex items-center gap-1">
+                <div className="h-9 w-24 bg-muted animate-pulse rounded-md" />
+                <div className="h-9 w-28 bg-muted animate-pulse rounded-md" />
+                <div className="h-9 w-24 bg-muted animate-pulse rounded-md" />
+              </div>
+              <div className="h-9 w-56 bg-muted animate-pulse rounded-lg" />
+            </div>
+
+            {/* Skills Grid Skeleton */}
+            <div className="grid gap-6 grid-cols-2 pb-12">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="space-y-3">
+                  {/* Device frame wrapper skeleton */}
+                  <div className="p-1.5 md:p-2 rounded-xl md:rounded-2xl bg-muted/30">
+                    {/* Thumbnail skeleton - aspect-video */}
+                    <div className="aspect-video rounded-md md:rounded-lg bg-muted animate-pulse" />
+                    {/* Metadata skeleton */}
+                    <div className="mt-2 px-2 py-1.5 flex items-center justify-between">
+                      <div className="space-y-1">
+                        <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+                        <div className="h-3 w-20 bg-muted animate-pulse rounded" />
+                      </div>
+                      <div className="h-4 w-10 bg-muted animate-pulse rounded" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </main>
     </div>

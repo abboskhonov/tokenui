@@ -4,27 +4,21 @@ import {
   ArrowLeft01Icon,
   Folder01Icon,
   FolderOpenIcon,
-  Sun01Icon,
-  Moon02Icon,
 } from "@hugeicons/core-free-icons"
 import { Button } from "@/components/ui/button"
 
 interface SkillDetailHeaderProps {
   username: string
   designSlug: string
-  previewTheme: "light" | "dark"
   isShowingFiles: boolean
   onToggleFiles: () => void
-  onToggleTheme: () => void
 }
 
 export function SkillDetailHeader({
   username,
   designSlug,
-  previewTheme,
   isShowingFiles,
   onToggleFiles,
-  onToggleTheme,
 }: SkillDetailHeaderProps) {
   return (
     <header className="sticky top-0 z-50 h-12 border-b border-border bg-background/95 backdrop-blur-xl">
@@ -66,19 +60,6 @@ export function SkillDetailHeader({
               className="size-3.5" 
             />
             {isShowingFiles ? "Hide files" : "Show files"}
-          </Button>
-
-          {/* Theme toggle */}
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="h-8 w-8"
-            onClick={onToggleTheme}
-          >
-            <HugeiconsIcon 
-              icon={previewTheme === "dark" ? Sun01Icon : Moon02Icon} 
-              className="size-4" 
-            />
           </Button>
         </div>
       </div>

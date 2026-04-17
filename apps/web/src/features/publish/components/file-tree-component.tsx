@@ -1,15 +1,17 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { HugeiconsIcon } from "@hugeicons/react"
 import {
-  CaretRight,
-  File,
-  FilePlus,
-  Folder,
-  FolderPlus,
-  PencilSimple,
-  Trash,
-} from "@phosphor-icons/react"
+  Folder01Icon,
+  File01Icon,
+  FileAddIcon,
+  FolderAddIcon,
+  PencilEdit01Icon,
+  Delete01Icon,
+  ArrowDown01Icon,
+  ArrowRight01Icon,
+} from "@hugeicons/core-free-icons"
 import {
   addFileToFolder,
   addFolderToFolder,
@@ -21,6 +23,13 @@ import {
 import type { FileNode } from "./file-tree"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu"
 
 interface FileTreeProps {
   files: Array<FileNode>
@@ -40,6 +49,8 @@ interface FileTreeItemProps {
   onRename: (path: string, newName: string) => void
   onStartRename: (path: string) => void
   onCancelEdit: () => void
+  onAddFile: (folderPath: string | null) => void
+  onAddFolder: (folderPath: string | null) => void
 }
 
 function FileTreeItem({
@@ -53,6 +64,8 @@ function FileTreeItem({
   onRename,
   onStartRename,
   onCancelEdit,
+  onAddFile,
+  onAddFolder,
 }: FileTreeItemProps) {
   const isActive = node.path === activePath
   const isFolder = node.type === "folder"
@@ -83,80 +96,113 @@ function FileTreeItem({
     }
   }
 
+  const handleContextMenuAction = (action: string) => {
+    switch (action) {
+      case "rename":
+        onStartRename(node.path)
+        break
+      case "delete":
+        onDelete(node.path)
+        break
+      case "addFile":
+        onAddFile(isFolder ? node.path : null)
+        break
+      case "addFolder":
+        onAddFolder(isFolder ? node.path : null)
+        break
+    }
+  }
+
+  const menuContent = (
+    <>
+      {isFolder && (
+        <>
+          <ContextMenuItem onClick={() => handleContextMenuAction("addFile")}>
+            <HugeiconsIcon icon={FileAddIcon} className="size-4 mr-2" />
+            New File
+          </ContextMenuItem>
+          <ContextMenuItem onClick={() => handleContextMenuAction("addFolder")}>
+            <HugeiconsIcon icon={FolderAddIcon} className="size-4 mr-2" />
+            New Folder
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+        </>
+      )}
+      <ContextMenuItem onClick={() => handleContextMenuAction("rename")}>
+        <HugeiconsIcon icon={PencilEdit01Icon} className="size-4 mr-2" />
+        Rename
+      </ContextMenuItem>
+      <ContextMenuItem 
+        onClick={() => handleContextMenuAction("delete")}
+        className="text-destructive focus:text-destructive"
+      >
+        <HugeiconsIcon icon={Delete01Icon} className="size-4 mr-2" />
+        Delete
+      </ContextMenuItem>
+    </>
+  )
+
+  const fileItem = (
+    <div
+      className={cn(
+        "flex items-center gap-2 py-2 px-4 cursor-pointer select-none text-sm",
+        isActive && !isEditing && "bg-muted font-medium text-foreground",
+        !isActive && !isEditing && "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+      )}
+      style={{ paddingLeft: `${depth * 12 + 16}px` }}
+      onClick={() => {
+        if (!isEditing) {
+          isFolder ? onToggle(node.path) : onSelect(node.path)
+        }
+      }}
+      onDoubleClick={() => {
+        if (!isEditing) {
+          onStartRename(node.path)
+        }
+      }}
+    >
+      {isFolder && (
+        <HugeiconsIcon
+          icon={node.isOpen ? ArrowDown01Icon : ArrowRight01Icon}
+          className="size-3.5 text-muted-foreground shrink-0"
+        />
+      )}
+      {isFolder ? (
+        <HugeiconsIcon icon={Folder01Icon} className="size-4 text-muted-foreground shrink-0" />
+      ) : (
+        <HugeiconsIcon icon={File01Icon} className="size-4 text-muted-foreground shrink-0" />
+      )}
+      
+      {isEditing ? (
+        <Input
+          ref={inputRef}
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onBlur={handleSubmit}
+          onKeyDown={handleKeyDown}
+          className="h-6 py-0 px-1 text-sm flex-1 bg-background"
+          onClick={(e) => e.stopPropagation()}
+        />
+      ) : (
+        <span className="flex-1 truncate">{node.name}</span>
+      )}
+    </div>
+  )
+
   return (
     <div>
-      <div
-        className={cn(
-          "flex items-center gap-2 py-1.5 px-2 cursor-pointer group",
-          isActive && !isEditing && "bg-accent text-accent-foreground",
-          !isActive && !isEditing && "hover:bg-muted/50"
-        )}
-        style={{ paddingLeft: `${depth * 12 + 8}px` }}
-        onClick={() => {
-          if (!isEditing) {
-            isFolder ? onToggle(node.path) : onSelect(node.path)
-          }
-        }}
-        onDoubleClick={() => {
-          if (!isEditing) {
-            onStartRename(node.path)
-          }
-        }}
-      >
-        {isFolder && (
-          <CaretRight
-            weight="bold"
-            className={cn(
-              "size-3.5 text-muted-foreground transition-transform",
-              node.isOpen && "rotate-90"
-            )}
-          />
-        )}
-        {isFolder ? (
-          <Folder weight="fill" className="size-4 text-blue-500" />
-        ) : (
-          <File weight="fill" className="size-4 text-slate-400" />
-        )}
-        
-        {isEditing ? (
-          <Input
-            ref={inputRef}
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onBlur={handleSubmit}
-            onKeyDown={handleKeyDown}
-            className="h-5 py-0 px-1 text-sm flex-1"
-            onClick={(e) => e.stopPropagation()}
-          />
-        ) : (
-          <span className="flex-1 text-sm truncate">{node.name}</span>
-        )}
-
-        {!isEditing && (
-          <div className="flex items-center gap-0.5">
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onStartRename(node.path)
-              }}
-              className="opacity-0 group-hover:opacity-100 p-1 hover:bg-primary/10 rounded"
-              title="Rename"
-            >
-              <PencilSimple weight="bold" className="size-3.5 text-muted-foreground" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onDelete(node.path)
-              }}
-              className="opacity-0 group-hover:opacity-100 p-1 hover:bg-destructive/10 rounded"
-              title="Delete"
-            >
-              <Trash weight="bold" className="size-3.5 text-destructive" />
-            </button>
-          </div>
-        )}
-      </div>
+      {isEditing ? (
+        fileItem
+      ) : (
+        <ContextMenu>
+          <ContextMenuTrigger asChild>
+            {fileItem}
+          </ContextMenuTrigger>
+          <ContextMenuContent>
+            {menuContent}
+          </ContextMenuContent>
+        </ContextMenu>
+      )}
 
       {isFolder && node.isOpen && node.children?.map((child) => (
         <FileTreeItem
@@ -171,6 +217,8 @@ function FileTreeItem({
           onRename={onRename}
           onStartRename={onStartRename}
           onCancelEdit={onCancelEdit}
+          onAddFile={onAddFile}
+          onAddFolder={onAddFolder}
         />
       ))}
     </div>
@@ -217,29 +265,24 @@ export function FileTree({ files, activePath, onSelect, onFilesChange }: FileTre
   }
 
   const handleRename = (oldPath: string, newName: string) => {
-    // Build new path
     const parentPath = oldPath.includes("/") 
       ? oldPath.substring(0, oldPath.lastIndexOf("/")) 
       : ""
     const newPath = parentPath ? `${parentPath}/${newName}` : newName
 
-    // Check for conflicts
     if (pathExists(files, newPath) && oldPath !== newPath) {
       setEditingPath(null)
       return
     }
 
-    // Update the node
     const updateNodeRecursive = (nodes: Array<FileNode>): Array<FileNode> => {
       return nodes.map((node) => {
         if (node.path === oldPath) {
-          // Update this node
           const updated: FileNode = {
             ...node,
             name: newName,
             path: newPath,
           }
-          // Update children paths if folder
           if (node.children) {
             updated.children = node.children.map((child) => ({
               ...child,
@@ -262,34 +305,33 @@ export function FileTree({ files, activePath, onSelect, onFilesChange }: FileTre
     setEditingPath(null)
   }
 
-  const handleAdd = (isFolder: boolean) => {
-    // Find which folder is currently selected or expanded, or use root
-    let targetFolder: string | null = null
+  const handleAdd = (isFolder: boolean, targetFolder: string | null = null) => {
+    let finalTargetFolder = targetFolder
     
-    // Check if active file's parent is a good target
-    if (activePath.includes("/")) {
-      targetFolder = activePath.substring(0, activePath.lastIndexOf("/"))
-    }
-    
-    // Find first open folder as fallback
-    if (!targetFolder) {
-      const findOpenFolder = (nodes: Array<FileNode>): string | null => {
-        for (const node of nodes) {
-          if (node.type === "folder" && node.isOpen) {
-            return node.path
-          }
-          if (node.children) {
-            const found = findOpenFolder(node.children)
-            if (found) return found
-          }
-        }
-        return null
+    if (!finalTargetFolder) {
+      if (activePath.includes("/")) {
+        finalTargetFolder = activePath.substring(0, activePath.lastIndexOf("/"))
       }
-      targetFolder = findOpenFolder(files)
+      
+      if (!finalTargetFolder) {
+        const findOpenFolder = (nodes: Array<FileNode>): string | null => {
+          for (const node of nodes) {
+            if (node.type === "folder" && node.isOpen) {
+              return node.path
+            }
+            if (node.children) {
+              const found = findOpenFolder(node.children)
+              if (found) return found
+            }
+          }
+          return null
+        }
+        finalTargetFolder = findOpenFolder(files)
+      }
     }
 
-    const name = generateUniqueName(files, targetFolder, isFolder)
-    const fullPath = targetFolder ? `${targetFolder}/${name}` : name
+    const name = generateUniqueName(files, finalTargetFolder, isFolder)
+    const fullPath = finalTargetFolder ? `${finalTargetFolder}/${name}` : name
 
     if (isFolder) {
       const newFolder: FileNode = {
@@ -301,7 +343,7 @@ export function FileTree({ files, activePath, onSelect, onFilesChange }: FileTre
         isOpen: true,
         children: [],
       }
-      onFilesChange(addFolderToFolder(files, targetFolder, newFolder))
+      onFilesChange(addFolderToFolder(files, finalTargetFolder, newFolder))
     } else {
       const newFile: FileNode = {
         id: crypto.randomUUID(),
@@ -310,39 +352,53 @@ export function FileTree({ files, activePath, onSelect, onFilesChange }: FileTre
         content: "",
         type: "file",
       }
-      onFilesChange(addFileToFolder(files, targetFolder, newFile))
+      onFilesChange(addFileToFolder(files, finalTargetFolder, newFile))
       onSelect(fullPath)
     }
 
-    // Start editing the new item
     setEditingPath(fullPath)
   }
 
+  const handleRootContextMenuAction = (action: string) => {
+    switch (action) {
+      case "addFile":
+        handleAdd(false, null)
+        break
+      case "addFolder":
+        handleAdd(true, null)
+        break
+    }
+  }
+
   return (
-    <div className="flex flex-col h-full">
-      {/* Header - matches code-view header styling */}
-      <div className="flex items-center justify-between p-3 border-b border-border">
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Files</span>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => handleAdd(false)}
-            className="p-1.5 hover:bg-muted rounded transition-colors"
-            title="New file"
-          >
-            <FilePlus weight="bold" className="size-4" />
-          </button>
-          <button
-            onClick={() => handleAdd(true)}
-            className="p-1.5 hover:bg-muted rounded transition-colors"
-            title="New folder"
-          >
-            <FolderPlus weight="bold" className="size-4" />
-          </button>
-        </div>
+    <div className="flex flex-col h-full bg-card/30">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border h-12">
+        <span className="text-sm font-medium text-foreground">Files</span>
+        <ContextMenu>
+          <ContextMenuTrigger asChild>
+            <button
+              className="p-1.5 hover:bg-muted rounded-md transition-colors"
+              title="Add new"
+            >
+              <HugeiconsIcon icon={FileAddIcon} className="size-4" />
+            </button>
+          </ContextMenuTrigger>
+          <ContextMenuContent>
+            <ContextMenuItem onClick={() => handleRootContextMenuAction("addFile")}>
+              <HugeiconsIcon icon={FileAddIcon} className="size-4 mr-2" />
+              New File
+            </ContextMenuItem>
+            <ContextMenuItem onClick={() => handleRootContextMenuAction("addFolder")}>
+              <HugeiconsIcon icon={FolderAddIcon} className="size-4 mr-2" />
+              New Folder
+            </ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
       </div>
 
       {/* File Tree */}
-      <div className="flex-1 overflow-y-auto py-2">
+      <div className="flex-1 overflow-y-auto py-3">
         {files.map((node) => (
           <FileTreeItem
             key={node.path}
@@ -356,6 +412,8 @@ export function FileTree({ files, activePath, onSelect, onFilesChange }: FileTre
             onRename={handleRename}
             onStartRename={handleStartRename}
             onCancelEdit={() => setEditingPath(null)}
+            onAddFile={(folderPath) => handleAdd(false, folderPath)}
+            onAddFolder={(folderPath) => handleAdd(true, folderPath)}
           />
         ))}
       </div>

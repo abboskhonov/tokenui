@@ -107,6 +107,48 @@ app.post("/", validateBody(createDesignSchema), async (c) => {
   }
 })
 
+// Check if skill name already exists for current user
+app.get("/check-name", async (c) => {
+  const session = c.get("session")
+
+  if (!session) {
+    return unauthorized(c)
+  }
+
+  const name = c.req.query("name")?.trim()
+  const excludeId = c.req.query("excludeId") // Optional: exclude current design when editing
+
+  if (!name) {
+    return badRequest(c, "Name parameter is required")
+  }
+
+  try {
+    // Case-insensitive comparison using LOWER()
+    const conditions = [
+      eq(design.userId, session.user.id),
+      sql`LOWER(${design.name}) = LOWER(${name})`
+    ]
+
+    if (excludeId) {
+      conditions.push(sql`${design.id} != ${excludeId}`)
+    }
+
+    const [existing] = await db
+      .select({ id: design.id, name: design.name })
+      .from(design)
+      .where(and(...conditions))
+      .limit(1)
+
+    return success(c, { 
+      exists: !!existing,
+      name: existing?.name 
+    })
+  } catch (error) {
+    logError("CheckDesignName", error)
+    return internalError(c, "Failed to check name")
+  }
+})
+
 // Get user's designs
 app.get("/my", async (c) => {
   const session = c.get("session")
