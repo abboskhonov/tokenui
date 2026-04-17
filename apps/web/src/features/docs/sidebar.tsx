@@ -7,6 +7,7 @@ const navItems = [
   { label: "Introduction", to: "/docs" },
   { label: "Installing Skills", to: "/docs/installing" },
   { label: "Publishing Skills", to: "/docs/publishing" },
+  { label: "FAQ", to: "/docs/faq" },
 ]
 
 export function DocsSidebar() {

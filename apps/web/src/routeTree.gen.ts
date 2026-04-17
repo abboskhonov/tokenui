@@ -22,6 +22,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as DocsPublishingRouteImport } from './routes/docs.publishing'
 import { Route as DocsInstallingRouteImport } from './routes/docs.installing'
+import { Route as DocsFaqRouteImport } from './routes/docs.faq'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminReviewRouteImport } from './routes/admin.review'
@@ -94,6 +95,11 @@ const DocsInstallingRoute = DocsInstallingRouteImport.update({
   path: '/installing',
   getParentRoute: () => DocsRoute,
 } as any)
+const DocsFaqRoute = DocsFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => DocsRoute,
+} as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -139,6 +145,7 @@ export interface FileRoutesByFullPath {
   '/admin/review': typeof AdminReviewRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/docs/faq': typeof DocsFaqRoute
   '/docs/installing': typeof DocsInstallingRoute
   '/docs/publishing': typeof DocsPublishingRoute
   '/u/$username': typeof UUsernameRoute
@@ -158,6 +165,7 @@ export interface FileRoutesByTo {
   '/admin/review': typeof AdminReviewRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/docs/faq': typeof DocsFaqRoute
   '/docs/installing': typeof DocsInstallingRoute
   '/docs/publishing': typeof DocsPublishingRoute
   '/u/$username': typeof UUsernameRoute
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   '/admin/review': typeof AdminReviewRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/docs/faq': typeof DocsFaqRoute
   '/docs/installing': typeof DocsInstallingRoute
   '/docs/publishing': typeof DocsPublishingRoute
   '/u/$username': typeof UUsernameRoute
@@ -203,6 +212,7 @@ export interface FileRouteTypes {
     | '/admin/review'
     | '/admin/settings'
     | '/admin/users'
+    | '/docs/faq'
     | '/docs/installing'
     | '/docs/publishing'
     | '/u/$username'
@@ -222,6 +232,7 @@ export interface FileRouteTypes {
     | '/admin/review'
     | '/admin/settings'
     | '/admin/users'
+    | '/docs/faq'
     | '/docs/installing'
     | '/docs/publishing'
     | '/u/$username'
@@ -243,6 +254,7 @@ export interface FileRouteTypes {
     | '/admin/review'
     | '/admin/settings'
     | '/admin/users'
+    | '/docs/faq'
     | '/docs/installing'
     | '/docs/publishing'
     | '/u/$username'
@@ -357,6 +369,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsInstallingRouteImport
       parentRoute: typeof DocsRoute
     }
+    '/docs/faq': {
+      id: '/docs/faq'
+      path: '/faq'
+      fullPath: '/docs/faq'
+      preLoaderRoute: typeof DocsFaqRouteImport
+      parentRoute: typeof DocsRoute
+    }
     '/admin/users': {
       id: '/admin/users'
       path: '/users'
@@ -423,12 +442,14 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface DocsRouteChildren {
+  DocsFaqRoute: typeof DocsFaqRoute
   DocsInstallingRoute: typeof DocsInstallingRoute
   DocsPublishingRoute: typeof DocsPublishingRoute
   DocsIndexRoute: typeof DocsIndexRoute
 }
 
 const DocsRouteChildren: DocsRouteChildren = {
+  DocsFaqRoute: DocsFaqRoute,
   DocsInstallingRoute: DocsInstallingRoute,
   DocsPublishingRoute: DocsPublishingRoute,
   DocsIndexRoute: DocsIndexRoute,
