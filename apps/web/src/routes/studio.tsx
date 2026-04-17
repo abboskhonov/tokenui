@@ -30,6 +30,7 @@ export const Route = createFileRoute("/studio")({
     meta: [
       { title: "Studio - tasteui" },
       { name: "description", content: "Manage your design skills" },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: LazyStudioPage,

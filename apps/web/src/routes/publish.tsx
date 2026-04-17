@@ -7,6 +7,10 @@ export const Route = createFileRoute("/publish")({
       {
         title: "Publish - tasteui",
       },
+      {
+        name: "robots",
+        content: "noindex, nofollow",
+      },
     ],
   }),
   component: PublishRoute,

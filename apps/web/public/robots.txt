@@ -1,5 +1,9 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Disallow: /login
+Disallow: /admin
+Disallow: /bookmarks
+Disallow: /publish
+Disallow: /studio
 
 Sitemap: https://api.tasteui.dev/sitemap.xml

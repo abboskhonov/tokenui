@@ -3,6 +3,14 @@ import { AdminLayout } from "@/features/admin/components/admin-layout";
 import { useUser } from "@/lib/user-context";
 
 export const Route = createFileRoute("/admin")({
+  head: () => ({
+    meta: [
+      {
+        name: "robots",
+        content: "noindex, nofollow",
+      },
+    ],
+  }),
   component: AdminRoute,
 });
 

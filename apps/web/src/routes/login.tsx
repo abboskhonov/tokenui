@@ -7,6 +7,10 @@ export const Route = createFileRoute("/login")({
       {
         title: "Login - tasteui",
       },
+      {
+        name: "robots",
+        content: "noindex, nofollow",
+      },
     ],
   }),
   component: LoginRoute,
