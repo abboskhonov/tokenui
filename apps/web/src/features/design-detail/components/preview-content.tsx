@@ -9,6 +9,43 @@ interface PreviewContentProps {
   previewTheme: "light" | "dark"
 }
 
+// Scale factor - smaller = more zoomed out
+const SCALE_FACTOR = 0.9
+
+function injectZoomStyles(html: string): string {
+  const zoomStyles = `
+<style data-preview-zoom="true">
+  body {
+    zoom: ${SCALE_FACTOR};
+    -moz-transform: scale(${SCALE_FACTOR});
+    -moz-transform-origin: 0 0;
+    transform: scale(${SCALE_FACTOR});
+    transform-origin: 0 0;
+    width: ${100 / SCALE_FACTOR}% !important;
+    min-width: ${100 / SCALE_FACTOR}% !important;
+  }
+  html {
+    overflow-x: hidden;
+  }
+</style>`
+  
+  // Insert before closing </head>
+  if (html.includes('</head>')) {
+    return html.replace('</head>', `${zoomStyles}</head>`)
+  }
+  
+  // If no head, insert after <body> or at start
+  if (html.includes('<body')) {
+    const bodyMatch = html.match(/<body[^>]*>/i)
+    if (bodyMatch) {
+      return html.replace(bodyMatch[0], `${bodyMatch[0]}${zoomStyles}`)
+    }
+  }
+  
+  // Fallback: prepend
+  return zoomStyles + html
+}
+
 export function PreviewContent({
   design,
   previewTheme,
@@ -16,10 +53,11 @@ export function PreviewContent({
   const [isLoading, setIsLoading] = useState(true)
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
-  // Create blob URL from demoHtml content (NEW: use demoHtml directly)
+  // Create blob URL from demoHtml content with zoom styles injected
   const demoUrl = useMemo(() => {
     if (design.demoHtml) {
-      const blob = new Blob([design.demoHtml], { type: "text/html" })
+      const modifiedHtml = injectZoomStyles(design.demoHtml)
+      const blob = new Blob([modifiedHtml], { type: "text/html" })
       return URL.createObjectURL(blob)
     }
     // Fallback: use old demoUrl for backward compatibility
@@ -40,7 +78,6 @@ export function PreviewContent({
 
   return (
     <div className="h-full relative overflow-hidden bg-muted/30">
-      {/* Full-size preview container - no padding */}
       <div className="h-full w-full">
         {demoUrl ? (
           <div className="w-full h-full relative">

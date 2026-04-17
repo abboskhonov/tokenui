@@ -13,6 +13,8 @@ export const user = pgTable("user", {
   github: text("github"),
   x: text("x"),
   telegram: text("telegram"),
+  youtube: text("youtube"),
+  instagram: text("instagram"),
   role: text("role").notNull().default("user"), // "user" | "admin"
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -82,6 +84,7 @@ export const design = pgTable("design", {
   files: text("files"), // JSON array of additional files [{path, content, type}]
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  publishedAt: timestamp("published_at"), // When design was approved/published (null if draft)
 }, (table) => [
   index("design_userId_idx").on(table.userId),
   index("design_category_idx").on(table.category),

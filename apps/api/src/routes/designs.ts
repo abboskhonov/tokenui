@@ -502,6 +502,7 @@ app.get("/:username/:slug", async (c) => {
         d.view_count as "viewCount",
         d.created_at as "createdAt",
         d.updated_at as "updatedAt",
+        d.published_at as "publishedAt",
         d.user_id as "userId",
         u.name as "authorName",
         u.username as "authorUsername",

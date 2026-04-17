@@ -23,6 +23,7 @@ export interface Design {
   files?: FileNode[] | null // Lazy-loaded for Code tab (not in initial response)
   createdAt: string
   updatedAt: string
+  publishedAt: string | null // When design was approved/published
   author?: {
     name: string | null
     username: string | null

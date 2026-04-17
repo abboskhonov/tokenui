@@ -43,11 +43,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/abboskhonov/tokenui.git",
+    "url": "git+https://github.com/abboskhonov/tasteui.git",
     "directory": "apps/cli"
   },
   "bugs": {
-    "url": "https://github.com/abboskhonov/tokenui/issues"
+    "url": "https://github.com/abboskhonov/tasteui/issues"
   },
   "homepage": "https://tasteui.dev"
 }

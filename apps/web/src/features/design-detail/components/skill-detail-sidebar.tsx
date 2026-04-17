@@ -14,6 +14,9 @@ import {
   StarIcon,
   TelegramIcon,
   Tick02Icon,
+  Calendar03Icon,
+  Clock01Icon,
+  Tag01Icon,
 } from "@hugeicons/core-free-icons"
 import JSZip from "jszip"
 import { useEffect, useRef, useState } from "react"
@@ -56,36 +59,23 @@ export function SkillDetailSidebar({
 }: SkillDetailSidebarProps) {
   const installationCommand = `tasteui.dev add ${design.author?.username || username}/${design.slug}`
   
-  // Use prefetched starCount from design object as initial data
-  // This allows instant display while still being able to refetch after mutations
   const { data: serverStarCount } = useStarCount(design.id, design.starCount ?? 0)
-  
-  // Local optimistic state for star count (relative adjustment)
   const [optimisticAdjustment, setOptimisticAdjustment] = useState<number>(0)
-  
-  // Download tracking
   const trackDownload = useTrackDownload()
-  
-  // Track previous server count to detect when it actually changes
   const prevServerCountRef = useRef(serverStarCount)
   
-  // Reset optimistic adjustment when server data updates (mutation completed)
   useEffect(() => {
     if (serverStarCount !== prevServerCountRef.current) {
-      // Server count changed, reset our optimistic adjustment
       setOptimisticAdjustment(0)
       prevServerCountRef.current = serverStarCount
     }
   }, [serverStarCount])
   
-  // Display count: server count + optimistic adjustment
   const displayStarCount = (serverStarCount ?? 0) + optimisticAdjustment
 
   const handleDownload = async () => {
-    // Guard for SSR
     if (typeof window === "undefined" || !document) return
     
-    // Track the download
     trackDownload.mutate(design.id)
     
     const zip = new JSZip()
@@ -131,14 +121,10 @@ export function SkillDetailSidebar({
       return
     }
     
-    // Optimistic update: adjust the count locally based on current state
     const adjustment = isStarredState ? -1 : +1
     setOptimisticAdjustment(prev => prev + adjustment)
-    
-    // Call the actual mutation
     onStarClick()
     
-    // Show feedback
     if (!isStarredState) {
       toast.success("Starred!", { duration: 1500 })
     } else {
@@ -161,7 +147,6 @@ export function SkillDetailSidebar({
     }
   }
 
-  // Share functions
   const designUrl = `https://tasteui.dev/s/${username}/${design.slug}`
   const shareText = `Check out ${design.name} by ${username} on tasteui`
 
@@ -197,11 +182,25 @@ export function SkillDetailSidebar({
     window.open(`https://www.reddit.com/submit?title=${title}&url=${url}`, '_blank', 'noopener,noreferrer')
   }
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      year: 'numeric'
+    })
+  }
+
   return (
-    <aside className="w-[340px] h-[calc(100vh-56px)] border-r border-border bg-background hidden lg:block overflow-y-auto">
-      <div className="p-6 space-y-8">
-        {/* Title Section */}
-        <div className="space-y-2">
+    <aside className="w-[320px] h-[calc(100vh-56px)] border-r border-border bg-background hidden lg:block overflow-y-auto shrink-0">
+      <div className="p-6 space-y-6">
+        {/* Title + Category */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-[10px] font-medium text-muted-foreground border border-border/50 uppercase tracking-wide">
+              <HugeiconsIcon icon={Tag01Icon} className="size-3" />
+              {design.category}
+            </span>
+          </div>
           <h1 className="text-xl font-semibold tracking-tight">
             {design.name}
           </h1>
@@ -212,135 +211,158 @@ export function SkillDetailSidebar({
           )}
         </div>
 
-        {/* Action buttons row */}
-        <div className="flex items-center gap-2">
-          {/* Download */}
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 h-9 text-xs gap-1.5"
-            onClick={handleDownload}
-          >
-            <HugeiconsIcon icon={Download01Icon} className="size-3.5" />
-            Download
-          </Button>
-
-          {/* Star with optimistic count */}
-          <Button
-            variant="outline"
-            size="sm"
-            className={cn(
-              "h-9 px-2.5 text-xs gap-1.5",
-              isStarredState && "text-yellow-500 border-yellow-500/50"
-            )}
-            onClick={handleStarClick}
-          >
-            <HugeiconsIcon 
-              icon={StarIcon} 
-              className={cn("size-3.5", isStarredState && "fill-current")} 
+        {/* Author Card */}
+        <Link 
+          to="/u/$username" 
+          params={{ username }} 
+          className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border/50 group cursor-pointer hover:bg-muted/70 transition-colors"
+        >
+          {design.author?.image ? (
+            <img
+              src={design.author.image}
+              alt={design.author.name || "Author"}
+              className="h-10 w-10 rounded-full object-cover ring-2 ring-background"
             />
-            <span>{displayStarCount}</span>
-          </Button>
-
-          {/* Bookmark */}
-          <Button
-            variant="outline"
-            size="icon-sm"
-            className={cn(
-              "h-9 w-9",
-              isBookmarkedState && "text-primary border-primary/50"
-            )}
-            onClick={handleBookmarkClick}
-          >
-            <HugeiconsIcon 
-              icon={Bookmark01Icon} 
-              className={cn("size-3.5", isBookmarkedState && "fill-current")} 
-            />
-          </Button>
-
-          {/* Views */}
-          <div className="flex items-center gap-1 px-2 h-9 rounded-md border border-border bg-muted/30 text-xs text-muted-foreground">
-            <HugeiconsIcon icon={EyeIcon} className="size-3.5" />
-            <span>{design.viewCount.toLocaleString()}</span>
-          </div>
-
-          {/* Share */}
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button variant="outline" size="icon-sm" className="h-9 w-9">
-                  <HugeiconsIcon icon={Share08Icon} className="size-3.5" />
-                </Button>
-              }
-            />
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={handleCopyLink}>
-                <HugeiconsIcon icon={Copy01Icon} className="size-4 mr-2" />
-                Copy Link
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleShareX}>
-                <HugeiconsIcon icon={NewTwitterIcon} className="size-4 mr-2" />
-                Share on X
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleShareLinkedIn}>
-                <HugeiconsIcon icon={Linkedin01Icon} className="size-4 mr-2" />
-                LinkedIn
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleShareTelegram}>
-                <HugeiconsIcon icon={TelegramIcon} className="size-4 mr-2" />
-                Telegram
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleShareReddit}>
-                <HugeiconsIcon icon={RedditIcon} className="size-4 mr-2" />
-                Reddit
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* Created by */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium">Created by</h3>
-          <Link 
-            to="/u/$username" 
-            params={{ username }} 
-            className="flex items-center gap-3 group cursor-pointer"
-          >
-            {design.author?.image ? (
-              <img
-                src={design.author.image}
-                alt={design.author.name || "Author"}
-                className="h-10 w-10 rounded-xl object-cover ring-1 ring-border group-hover:ring-primary/50 transition-all"
-              />
-            ) : (
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-brand to-brand/70 flex items-center justify-center text-primary-foreground font-medium">
-                {(design.author?.name || design.name).charAt(0).toUpperCase()}
-              </div>
-            )}
-            <div>
-              <p className="font-medium group-hover:text-primary transition-colors">
-                {design.author?.name || username}
-              </p>
-              <p className="text-xs text-muted-foreground">@{username}</p>
+          ) : (
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand to-brand/70 flex items-center justify-center text-primary-foreground font-medium ring-2 ring-background">
+              {(design.author?.name || design.name).charAt(0).toUpperCase()}
             </div>
-          </Link>
+          )}
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-sm group-hover:text-primary transition-colors truncate">
+              {design.author?.name || username}
+            </p>
+            <p className="text-xs text-muted-foreground truncate">@{username}</p>
+          </div>
+        </Link>
+
+        {/* Stats - Minimal Inline */}
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <HugeiconsIcon icon={StarIcon} className="size-4" />
+            <span className="tabular-nums font-medium text-foreground">{displayStarCount}</span>
+            <span className="text-xs">stars</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <HugeiconsIcon icon={EyeIcon} className="size-4" />
+            <span className="tabular-nums font-medium text-foreground">{design.viewCount.toLocaleString()}</span>
+            <span className="text-xs">views</span>
+          </span>
         </div>
 
-        {/* Installation */}
+        {/* Primary CTA - Installation */}
         <div className="space-y-3">
-          <h3 className="text-sm font-medium">Installation</h3>
           <div 
-            className="group relative rounded-lg bg-muted/50 px-3 py-2.5 font-mono text-xs cursor-pointer hover:bg-muted transition-colors border border-border/50"
+            className="group relative rounded-xl bg-muted border border-border px-4 py-4 font-mono text-sm cursor-pointer hover:bg-muted/80 transition-colors"
             onClick={onCopyInstall}
           >
-            <span className="text-green-600 dark:text-green-400">npx</span>{" "}
-            <span className="text-foreground">{installationCommand}</span>
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-background rounded p-1 shadow-sm">
+            <code className="flex items-center gap-2 pr-8">
+              <span className="text-green-600 dark:text-green-400 font-semibold">npx</span>
+              <span className="text-foreground">{installationCommand}</span>
+            </code>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 transition-opacity bg-background rounded-md p-1.5 shadow-sm border border-border">
               <HugeiconsIcon 
                 icon={isCopied === "install" ? Tick02Icon : Copy01Icon} 
-                className={cn("size-3.5", isCopied === "install" && "text-green-500")}
+                className={cn("size-4", isCopied === "install" && "text-green-500")}
               />
             </div>
+          </div>
+          <p className="text-xs text-muted-foreground text-center">
+            Click to copy installation command
+          </p>
+        </div>
+
+        {/* Minimal Actions Row */}
+        <div className="flex items-center justify-between pt-2">
+          {/* Left: Star & Bookmark */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleStarClick}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors",
+                "hover:bg-muted",
+                isStarredState ? "text-yellow-500" : "text-muted-foreground"
+              )}
+            >
+              <HugeiconsIcon 
+                icon={StarIcon} 
+                className={cn("size-4", isStarredState && "fill-current")} 
+              />
+              <span>Star</span>
+            </button>
+
+            <button
+              onClick={handleBookmarkClick}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors",
+                "hover:bg-muted",
+                isBookmarkedState ? "text-primary" : "text-muted-foreground"
+              )}
+            >
+              <HugeiconsIcon 
+                icon={Bookmark01Icon} 
+                className={cn("size-4", isBookmarkedState && "fill-current")} 
+              />
+              <span>Save</span>
+            </button>
+          </div>
+
+          {/* Right: Download & Share */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleDownload}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:bg-muted transition-colors"
+            >
+              <HugeiconsIcon icon={Download01Icon} className="size-4" />
+              <span>ZIP</span>
+            </button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:bg-muted transition-colors">
+                    <HugeiconsIcon icon={Share08Icon} className="size-4" />
+                    <span>Share</span>
+                  </button>
+                }
+              />
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={handleCopyLink}>
+                  <HugeiconsIcon icon={Copy01Icon} className="size-4 mr-2" />
+                  Copy Link
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleShareX}>
+                  <HugeiconsIcon icon={NewTwitterIcon} className="size-4 mr-2" />
+                  Share on X
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleShareLinkedIn}>
+                  <HugeiconsIcon icon={Linkedin01Icon} className="size-4 mr-2" />
+                  LinkedIn
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleShareTelegram}>
+                  <HugeiconsIcon icon={TelegramIcon} className="size-4 mr-2" />
+                  Telegram
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleShareReddit}>
+                  <HugeiconsIcon icon={RedditIcon} className="size-4 mr-2" />
+                  Reddit
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        {/* Dates */}
+        <div className="space-y-2 pt-4 border-t border-border/50">
+          {design.publishedAt && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <HugeiconsIcon icon={Calendar03Icon} className="size-3.5" />
+              <span>Published on {formatDate(design.publishedAt)}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <HugeiconsIcon icon={Clock01Icon} className="size-3.5" />
+            <span>Updated {formatDate(design.updatedAt)}</span>
           </div>
         </div>
       </div>

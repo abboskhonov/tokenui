@@ -220,6 +220,7 @@ adminRoutes.post(
           status: "approved",
           reviewMessage: message || null,
           updatedAt: new Date(),
+          publishedAt: new Date(), // Set published date when approved
         })
         .where(eq(design.id, id))
 

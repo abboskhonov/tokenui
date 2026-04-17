@@ -1,0 +1,1 @@
+ALTER TABLE "design" ADD COLUMN "published_at" timestamp;
