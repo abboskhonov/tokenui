@@ -45,7 +45,7 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<TabType>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<SortOption>("newest");
+  const [sortBy, setSortBy] = useState<SortOption>("trending");
   
   // Debounce search query to avoid too many requests
   const debouncedSearch = useDebounce(searchQuery, 300);
@@ -238,17 +238,6 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
             <div className="relative w-screen left-1/2 -translate-x-1/2 mt-4 border-b border-border">
               <div className="mx-auto max-w-[1600px] flex items-center gap-6 text-sm overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-6 md:px-12 lg:px-16 xl:px-20">
               <button
-                onClick={() => setSortBy("newest")}
-                className={cn(
-                  "flex items-center gap-2 pb-3 transition-colors whitespace-nowrap",
-                  sortBy === "newest"
-                    ? "border-b-2 border-foreground font-medium text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <span>Newest</span>
-              </button>
-              <button
                 onClick={() => setSortBy("trending")}
                 className={cn(
                   "flex items-center gap-2 pb-3 transition-colors whitespace-nowrap",
@@ -258,6 +247,17 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
                 )}
               >
                 <span>Trending</span>
+              </button>
+              <button
+                onClick={() => setSortBy("newest")}
+                className={cn(
+                  "flex items-center gap-2 pb-3 transition-colors whitespace-nowrap",
+                  sortBy === "newest"
+                    ? "border-b-2 border-foreground font-medium text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <span>Newest</span>
               </button>
               <button
                 onClick={() => setSortBy("mostStarred")}

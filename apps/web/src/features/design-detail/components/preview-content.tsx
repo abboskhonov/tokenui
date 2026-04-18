@@ -15,7 +15,13 @@ const SCALE_FACTOR = 0.9
 function injectZoomStyles(html: string): string {
   const zoomStyles = `
 <style data-preview-zoom="true">
+  html {
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 100%;
+  }
   body {
+    margin: 0 !important;
     zoom: ${SCALE_FACTOR};
     -moz-transform: scale(${SCALE_FACTOR});
     -moz-transform-origin: 0 0;
@@ -23,17 +29,17 @@ function injectZoomStyles(html: string): string {
     transform-origin: 0 0;
     width: ${100 / SCALE_FACTOR}% !important;
     min-width: ${100 / SCALE_FACTOR}% !important;
-  }
-  html {
     overflow-x: hidden;
+    /* Compensate for zoom by reducing min-height proportionally */
+    min-height: ${100 / SCALE_FACTOR}vh;
   }
 </style>`
-  
+
   // Insert before closing </head>
   if (html.includes('</head>')) {
     return html.replace('</head>', `${zoomStyles}</head>`)
   }
-  
+
   // If no head, insert after <body> or at start
   if (html.includes('<body')) {
     const bodyMatch = html.match(/<body[^>]*>/i)
@@ -41,7 +47,7 @@ function injectZoomStyles(html: string): string {
       return html.replace(bodyMatch[0], `${bodyMatch[0]}${zoomStyles}`)
     }
   }
-  
+
   // Fallback: prepend
   return zoomStyles + html
 }
