@@ -3,6 +3,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { DocsPage } from "@/features/docs/components/doc-page"
 import { CodeBlock } from "@/features/docs/components/code-block"
+import { VideoEmbed } from "@/features/docs/components/video-embed"
 import { Section, Heading, Paragraph, Step, List } from "@/features/docs/components/typography"
 import type { TOCItem } from "@/features/docs/components/table-of-contents"
 
@@ -24,6 +25,8 @@ function IntroductionPage() {
       ]}
       tocItems={tocItems}
     >
+      <VideoEmbed videoUrl="https://pub-760132b719d849e3aea8daf679b700b7.r2.dev/design-previews/demos/tasteui-demo.mp4" title="TasteUI Demo" className="my-6" />
+
       <Section id="the-problem">
         <Heading id="the-problem">The Problem: AI builds "nice" but not "yours"</Heading>
         <Paragraph>
