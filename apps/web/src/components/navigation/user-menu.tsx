@@ -179,19 +179,20 @@ export const UserMenu = memo(function UserMenu() {
           
           {/* Menu Items */}
           <DropdownMenuItem 
-            className="gap-2 px-3 py-1.5 text-sm cursor-pointer"
+            className="gap-2 px-3 py-1.5 text-sm cursor-pointer mt-1"
             onClick={handleProfileClick}
           >
             <HugeiconsIcon icon={UserIcon} className="size-4" />
             Profile
           </DropdownMenuItem>
           
-          <Link to="/bookmarks">
-            <DropdownMenuItem className="gap-2 px-3 py-1.5 text-sm cursor-pointer">
-              <HugeiconsIcon icon={Bookmark01Icon} className="size-4" />
-              Saved
-            </DropdownMenuItem>
-          </Link>
+          <DropdownMenuItem 
+            className="gap-2 px-3 py-1.5 text-sm cursor-pointer"
+            onClick={() => navigate({ to: "/bookmarks" })}
+          >
+            <HugeiconsIcon icon={Bookmark01Icon} className="size-4" />
+            Saved
+          </DropdownMenuItem>
           
           <DropdownMenuItem
             className="gap-2 px-3 py-1.5 text-sm cursor-pointer"
@@ -201,27 +202,30 @@ export const UserMenu = memo(function UserMenu() {
             Settings
           </DropdownMenuItem>
 
-          <Link to="/studio">
-            <DropdownMenuItem className="gap-2 px-3 py-1.5 text-sm cursor-pointer">
-              <HugeiconsIcon icon={PenTool01Icon} className="size-4" />
-              Studio
-            </DropdownMenuItem>
-          </Link>
+          <DropdownMenuItem 
+            className="gap-2 px-3 py-1.5 text-sm cursor-pointer"
+            onClick={() => navigate({ to: "/studio" })}
+          >
+            <HugeiconsIcon icon={PenTool01Icon} className="size-4" />
+            Studio
+          </DropdownMenuItem>
 
-          <Link to="/publish">
-            <DropdownMenuItem className="gap-2 px-3 py-1.5 text-sm cursor-pointer">
-              <HugeiconsIcon icon={Upload04Icon} className="size-4" />
-              Publish
-            </DropdownMenuItem>
-          </Link>
+          <DropdownMenuItem 
+            className="gap-2 px-3 py-1.5 text-sm cursor-pointer"
+            onClick={() => navigate({ to: "/publish" })}
+          >
+            <HugeiconsIcon icon={Upload04Icon} className="size-4" />
+            Publish
+          </DropdownMenuItem>
           
           {user?.role === "admin" && (
-            <Link to="/admin">
-              <DropdownMenuItem className="gap-2 px-3 py-1.5 text-sm cursor-pointer text-primary">
-                <HugeiconsIcon icon={Shield02Icon} className="size-4" />
-                Admin
-              </DropdownMenuItem>
-            </Link>
+            <DropdownMenuItem 
+              className="gap-2 px-3 py-1.5 text-sm cursor-pointer text-primary"
+              onClick={() => navigate({ to: "/admin" })}
+            >
+              <HugeiconsIcon icon={Shield02Icon} className="size-4" />
+              Admin
+            </DropdownMenuItem>
           )}
           
           <DropdownMenuSeparator />
