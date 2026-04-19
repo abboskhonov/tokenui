@@ -53,6 +53,9 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
   // We need all designs to show category tabs
   const searchParam = debouncedSearch.trim() || undefined;
 
+  // Ensure initialDesigns is always an array
+  const safeInitialDesigns = Array.isArray(initialDesigns) ? initialDesigns : [];
+
   const {
     data,
     isLoading,
@@ -63,16 +66,16 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
   } = usePublicDesignsInfinite(undefined, searchParam, {
     // Use initial designs as placeholder data
     // This ensures the first render uses SSR data immediately
-    placeholderData: initialDesigns 
-      ? { pages: [{ designs: initialDesigns, pagination: { limit: 20, offset: 0, hasMore: true } }], pageParams: [0] }
+    placeholderData: safeInitialDesigns.length > 0
+      ? { pages: [{ designs: safeInitialDesigns, pagination: { limit: 20, offset: 0, hasMore: true } }], pageParams: [0] }
       : undefined,
   });
 
   // Flatten all pages into single array
   const allDesigns = useMemo(() => {
-    if (!data) return initialDesigns || [];
+    if (!data) return safeInitialDesigns;
     return data.pages.flatMap((page) => page.designs);
-  }, [data, initialDesigns]);
+  }, [data, safeInitialDesigns]);
 
   // Debug logging removed for production
 

@@ -161,7 +161,7 @@ export function sanitizeHtmlForDisplay(html: string): string {
 }
 
 /**
- * Upload a file to Cloudflare R2
+ * Upload a file to R2 (S3-compatible object storage)
  */
 export async function uploadFile(
   buffer: Buffer,

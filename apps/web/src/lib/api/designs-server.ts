@@ -25,5 +25,11 @@ export const getPublicDesignsServerFn = createServerFn({ method: "GET" })
     }
     
     const data = await response.json() as PublicDesignsResponse
-    return data
+    
+    // Ensure we always return an object with designs array and pagination
+    return {
+      designs: Array.isArray(data.designs) ? data.designs : [],
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      pagination: data.pagination || { limit: 20, offset: 0, hasMore: false }
+    }
   })

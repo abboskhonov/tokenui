@@ -1,5 +1,6 @@
 export { SkillDetailHeader } from "./skill-detail-header"
 export { SkillDetailSidebar } from "./skill-detail-sidebar"
+export { SkillDetailMobileSheet } from "./skill-detail-mobile-sheet"
 export { PreviewContent } from "./preview-content"
 export { CodeView } from "./code-view"
 export { FileTree } from "./file-tree-readonly"

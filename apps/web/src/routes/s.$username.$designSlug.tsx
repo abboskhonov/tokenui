@@ -10,6 +10,7 @@ import {
   SkillDetailError,
   SkillDetailHeader,
   SkillDetailSidebar,
+  SkillDetailMobileSheet,
   SkillDetailSkeleton,
   SkillNotFound,
 } from "@/features/design-detail/components"
@@ -199,7 +200,6 @@ function SkillDetailPage() {
   const trackView = useTrackView()
   
   const [activeTab, setActiveTab] = useState<TabType>("preview")
-  const [previewTheme, setPreviewTheme] = useState<"light" | "dark">("light")
   
   // Extract thumbnail and name for skeleton before displayDesign is narrowed
   const skeletonThumbnail = thumbnailFromState || previewFromStorage.thumbnailUrl || cachedDesign?.thumbnailUrl || null
@@ -244,10 +244,8 @@ function SkillDetailPage() {
     handleCopy(command, "install")
   }, [displayDesign, username, handleCopy])
 
-  // Preview handlers
-  const togglePreviewTheme = useCallback(() => {
-    setPreviewTheme(prev => prev === "light" ? "dark" : "light")
-  }, [])
+  // Mobile sidebar state
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
 
   if (error) {
     console.error("Route error:", error)
@@ -273,10 +271,27 @@ function SkillDetailPage() {
         designSlug={designSlug}
         isShowingFiles={activeTab === "code"}
         onToggleFiles={() => setActiveTab(activeTab === "preview" ? "code" : "preview")}
+        onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
       />
 
-      <div className="flex">
-        <SkillDetailSidebar
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-48px)] lg:h-[calc(100vh-48px)]">
+        {/* Desktop Sidebar - hidden on mobile */}
+        <div className="hidden lg:block">
+          <SkillDetailSidebar
+            design={displayDesign}
+            username={username}
+            user={user}
+            isCopied={isCopied}
+            isStarredState={!!isStarredState}
+            isBookmarkedState={!!isBookmarkedState}
+            onCopyInstall={handleCopyInstall}
+            onStarClick={handleStarClick}
+            onBookmarkClick={handleBookmarkClick}
+          />
+        </div>
+
+        {/* Mobile Sidebar Sheet */}
+        <SkillDetailMobileSheet
           design={displayDesign}
           username={username}
           user={user}
@@ -286,13 +301,15 @@ function SkillDetailPage() {
           onCopyInstall={handleCopyInstall}
           onStarClick={handleStarClick}
           onBookmarkClick={handleBookmarkClick}
+          isOpen={isMobileSidebarOpen}
+          onClose={() => setIsMobileSidebarOpen(false)}
         />
 
-        <main className="flex-1 h-[calc(100vh-56px)] overflow-hidden">
+        <main className="flex-1 min-h-0 overflow-hidden">
           {activeTab === "preview" ? (
             <PreviewContent
               design={displayDesign}
-              previewTheme={previewTheme}
+              previewTheme="light"
             />
           ) : isFilesLoading ? (
             <CodeViewSkeleton />

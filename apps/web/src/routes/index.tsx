@@ -24,8 +24,11 @@ function generateImagePreloadLinks(designs: Array<Design>): Array<{ rel: string;
 
 export const Route = createFileRoute("/")({
   head: ({ loaderData }) => {
+    // Safely get designs array - ensure it's always an array
+    const rawDesigns = loaderData?.designs
+    const designs = Array.isArray(rawDesigns) ? rawDesigns : []
+    
     // Generate preload links for first 4 images to improve LCP
-    const designs = loaderData?.designs || []
     const imagePreloads = generateImagePreloadLinks(designs)
     
     return {
@@ -89,31 +92,37 @@ export const Route = createFileRoute("/")({
     }
   },
   loader: async () => {
-    // Fetch designs on the server - this runs server-side during SSR
-    const { designs, pagination } = await getPublicDesignsServerFn()
-    
-    // Create a QueryClient and hydrate the cache with infinite query format
-    const queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          staleTime: 1000 * 60 * 5, // 5 minutes
+    try {
+      // Fetch designs on the server - this runs server-side during SSR
+      const { designs, pagination } = await getPublicDesignsServerFn()
+      
+      // Create a QueryClient and hydrate the cache with infinite query format
+      const queryClient = new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 1000 * 60 * 5, // 5 minutes
+          },
         },
-      },
-    })
-    
-    // Pre-populate the infinite query cache with SSR data
-    queryClient.setQueryData(
-      [...designKeys.public(undefined), "infinite", undefined],
-      {
-        pages: [{ designs, pagination }],
-        pageParams: [0],
-      }
-    )
-    
-    // Dehydrate the query client for hydration on the client
-    const dehydratedState = dehydrate(queryClient)
-    
-    return { designs, dehydratedState }
+      })
+      
+      // Pre-populate the infinite query cache with SSR data
+      queryClient.setQueryData(
+        [...designKeys.public(undefined), "infinite", undefined],
+        {
+          pages: [{ designs, pagination }],
+          pageParams: [0],
+        }
+      )
+      
+      // Dehydrate the query client for hydration on the client
+      const dehydratedState = dehydrate(queryClient)
+      
+      return { designs, dehydratedState }
+    } catch (error) {
+      console.error("Failed to load designs in loader:", error)
+      // Return empty state on error so page still renders
+      return { designs: [], dehydratedState: { queries: [], mutations: [] } }
+    }
   },
   component: App,
 })
@@ -122,5 +131,8 @@ function App() {
   // Get the server-fetched designs and dehydrated state from the route loader
   const { designs, dehydratedState } = Route.useLoaderData()
   
-  return <MarketingPage initialDesigns={designs} dehydratedState={dehydratedState} />
+  // Ensure designs is always an array
+  const safeDesigns = Array.isArray(designs) ? designs : []
+  
+  return <MarketingPage initialDesigns={safeDesigns} dehydratedState={dehydratedState} />
 }

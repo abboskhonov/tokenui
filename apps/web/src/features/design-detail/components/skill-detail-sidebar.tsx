@@ -189,15 +189,16 @@ export function SkillDetailSidebar({
     })
   }
 
+  // Desktop sidebar
   return (
-    <aside className="w-[340px] h-[calc(100vh-56px)] border-r border-border bg-background hidden lg:block overflow-y-auto shrink-0">
-      <div className="p-6 space-y-8">
+    <aside className="w-full lg:w-[340px] lg:h-full lg:border-r border-border bg-background lg:overflow-y-auto lg:shrink-0">
+      <div className="p-4 lg:p-6 space-y-6 lg:space-y-8">
         {/* Title + Description */}
-        <div className="space-y-3">
+        <div className="space-y-2 lg:space-y-3">
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
             {design.category}
           </span>
-          <h1 className="text-xl font-semibold tracking-tight">
+          <h1 className="text-lg lg:text-xl font-semibold tracking-tight">
             {design.name}
           </h1>
           {design.description && (
@@ -222,7 +223,7 @@ export function SkillDetailSidebar({
         </div>
 
         {/* Created by */}
-        <div className="space-y-3">
+        <div className="space-y-2 lg:space-y-3">
           <h3 className="text-sm font-semibold">Created by</h3>
           <Link 
             to="/u/$username" 
@@ -250,10 +251,10 @@ export function SkillDetailSidebar({
         </div>
 
         {/* Installation */}
-        <div className="space-y-3">
+        <div className="space-y-2 lg:space-y-3">
           <h3 className="text-sm font-semibold">Installation</h3>
           <div 
-            className="group relative rounded-lg bg-muted px-4 py-3 font-mono text-xs cursor-pointer hover:bg-muted/80 transition-colors overflow-hidden"
+            className="group relative rounded-lg bg-muted px-3 lg:px-4 py-2.5 lg:py-3 font-mono text-xs cursor-pointer hover:bg-muted/80 transition-colors overflow-hidden"
             onClick={onCopyInstall}
           >
             <code className="flex items-center gap-1.5 whitespace-nowrap overflow-x-auto scrollbar-hide pr-10">

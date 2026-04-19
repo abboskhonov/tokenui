@@ -71,22 +71,31 @@ export function SkillDetailSkeleton({ username, designSlug, thumbnailUrl, name }
     <div className="min-h-screen bg-background text-foreground">
       {/* Header - Matches SkillDetailHeader layout exactly */}
       <header className="sticky top-0 z-50 h-12 border-b border-border bg-background/95 backdrop-blur-xl">
-        <div className="mx-auto h-full max-w-full px-4 flex items-center justify-between">
-          {/* Left: Back button */}
-          <div className="flex items-center">
+        <div className="mx-auto h-full max-w-full px-3 sm:px-4 flex items-center justify-between">
+          {/* Left: Back button + Menu placeholder */}
+          <div className="flex items-center gap-1">
             <Link to="/" preload="intent">
               <Button variant="ghost" size="sm" className="h-8 gap-1.5 px-2 -ml-1">
                 <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-                <span className="text-sm">Back</span>
+                <span className="text-sm hidden sm:inline">Back</span>
               </Button>
             </Link>
+            {/* Mobile menu button placeholder */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2 lg:hidden"
+              disabled
+            >
+              <div className="h-4 w-4 bg-muted animate-pulse rounded" />
+            </Button>
           </div>
 
           {/* Center: Breadcrumb - matches actual header exactly */}
-          <div className="flex items-center gap-2 text-sm absolute left-1/2 -translate-x-1/2">
-            <span className="text-muted-foreground">{username}</span>
-            <span className="text-muted-foreground/50">/</span>
-            <span className="font-medium truncate max-w-[200px]">{displayName}</span>
+          <div className="flex items-center gap-1 sm:gap-2 text-sm absolute left-1/2 -translate-x-1/2 max-w-[50%] sm:max-w-none">
+            <span className="text-muted-foreground truncate max-w-[80px] sm:max-w-[120px]">{username}</span>
+            <span className="text-muted-foreground/50 shrink-0">/</span>
+            <span className="font-medium truncate max-w-[100px] sm:max-w-[150px] md:max-w-[200px]">{displayName}</span>
           </div>
 
           {/* Right: Action buttons (skeleton version) */}
@@ -99,14 +108,14 @@ export function SkillDetailSkeleton({ username, designSlug, thumbnailUrl, name }
               disabled
             >
               <HugeiconsIcon icon={Folder01Icon} className="size-3.5" />
-              <span className="bg-muted animate-pulse rounded w-12 h-3 inline-block" />
+              <span className="hidden sm:inline bg-muted animate-pulse rounded w-12 h-3 inline-block" />
             </Button>
 
             {/* Theme toggle */}
             <Button
               variant="ghost"
               size="icon-sm"
-              className="h-8 w-8"
+              className="h-8 w-8 hidden sm:flex"
               disabled
             >
               <HugeiconsIcon icon={Moon02Icon} className="size-4" />
@@ -116,9 +125,9 @@ export function SkillDetailSkeleton({ username, designSlug, thumbnailUrl, name }
       </header>
 
       {/* Main Content */}
-      <div className="flex">
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-48px)]">
         {/* Left Sidebar Skeleton */}
-        <aside className="w-[320px] min-h-[calc(100vh-48px)] border-r border-border bg-card/30 hidden lg:block">
+        <aside className="hidden lg:block w-[320px] lg:h-full border-r border-border bg-card/30">
           <div className="p-6 space-y-6">
             {/* Title - Show actual name if available */}
             <div className="space-y-2">
@@ -151,7 +160,7 @@ export function SkillDetailSkeleton({ username, designSlug, thumbnailUrl, name }
         </aside>
 
         {/* Main Preview - Show thumbnail as placeholder while loading */}
-        <main className="flex-1 min-h-[calc(100vh-48px)] h-[calc(100vh-48px)] bg-muted/30 flex items-center justify-center relative overflow-hidden">
+        <main className="flex-1 min-h-0 h-full bg-muted/30 flex items-center justify-center relative overflow-hidden">
           {thumbnailUrl ? (
             <>
               {/* Blurred thumbnail as background placeholder */}
