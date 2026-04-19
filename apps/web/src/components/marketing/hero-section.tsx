@@ -1,17 +1,16 @@
 "use client";
 
-import { useRef, useEffect, useState, useMemo, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Search01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
-import { usePublicDesignsInfinite, useTopContributors } from "@/lib/queries/designs";
-import type { Design } from "@/lib/types/design";
-import { cn } from "@/lib/utils";
+import { ArrowRight01Icon, Search01Icon } from "@hugeicons/core-free-icons";
 import { useNavigate } from "@tanstack/react-router";
-
+import type { Design } from "@/lib/types/design";
+import { usePublicDesignsInfinite, useTopContributors } from "@/lib/queries/designs";
+import { cn } from "@/lib/utils";
 import { Navigation } from "@/components/navigation/main-navigation";
 import { CLICopy } from "@/components/marketing/cli-copy";
 import { DesignCard } from "@/components/marketing/design-card";
-import { LoadingState, ErrorState, EmptyState } from "@/components/marketing/state-components";
+import { EmptyState, ErrorState, LoadingState } from "@/components/marketing/state-components";
 import { categories as designCategories } from "@/features/marketing/data";
 import {
   DropdownMenu,
@@ -25,7 +24,7 @@ type TabType = "all" | string;
 type SortOption = "newest" | "trending" | "mostStarred" | "mostViewed" | "contributors";
 
 interface HeroSectionProps {
-  initialDesigns?: Design[];
+  initialDesigns?: Array<Design>;
 }
 
 // Debounce hook
@@ -61,7 +60,13 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = usePublicDesignsInfinite(undefined, searchParam);
+  } = usePublicDesignsInfinite(undefined, searchParam, {
+    // Use initial designs as placeholder data
+    // This ensures the first render uses SSR data immediately
+    placeholderData: initialDesigns 
+      ? { pages: [{ designs: initialDesigns, pagination: { limit: 20, offset: 0, hasMore: true } }], pageParams: [0] }
+      : undefined,
+  });
 
   // Flatten all pages into single array
   const allDesigns = useMemo(() => {
@@ -135,7 +140,7 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
     return allDesigns.filter(d => d.category === cat).length;
   }, [allDesigns]);
 
-  const isLoadingDesigns = isLoading && !data && !initialDesigns;
+  const isLoadingDesigns = isLoading && !data;
 
   return (
     <div className="relative min-h-screen bg-background">

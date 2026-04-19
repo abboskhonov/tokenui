@@ -18,7 +18,7 @@ const tocItems: TOCItem[] = [
 function IntroductionPage() {
   return (
     <DocsPage
-      title="Documentation"
+      title="Introduction"
       description="TasteUI is a collection of design system inspirations from popular websites. Drop one in, let AI agents build matching UI."
       breadcrumbItems={[
         { label: "Docs" }

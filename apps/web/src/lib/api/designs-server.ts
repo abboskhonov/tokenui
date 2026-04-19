@@ -3,9 +3,18 @@ import type { Design } from "@/lib/types/design"
 
 const API_BASE_URL = process.env.VITE_API_URL || "http://localhost:3001"
 
+interface PublicDesignsResponse {
+  designs: Array<Design>
+  pagination: {
+    limit: number
+    offset: number
+    hasMore: boolean
+  }
+}
+
 export const getPublicDesignsServerFn = createServerFn({ method: "GET" })
   .handler(async () => {
-    const response = await fetch(`${API_BASE_URL}/api/designs`, {
+    const response = await fetch(`${API_BASE_URL}/api/designs?limit=20&offset=0`, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -15,6 +24,6 @@ export const getPublicDesignsServerFn = createServerFn({ method: "GET" })
       throw new Error("Failed to fetch designs")
     }
     
-    const data = await response.json()
-    return data.designs as Design[]
+    const data = await response.json() as PublicDesignsResponse
+    return data
   })

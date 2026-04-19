@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router"
+import { QueryClient, dehydrate } from "@tanstack/react-query"
+import type { Design } from "@/lib/types/design"
 import { MarketingPage } from "@/features/marketing"
 import { getPublicDesignsServerFn } from "@/lib/api/designs-server"
-import type { Design } from "@/lib/types/design"
+import { designKeys } from "@/lib/queries/designs"
 
 // Generate preload links for first N design images (LCP optimization)
-function generateImagePreloadLinks(designs: Design[]): Array<{ rel: string; href: string; as?: string; fetchpriority?: string; type?: string; crossOrigin?: "anonymous" | "use-credentials" | "" }> {
+function generateImagePreloadLinks(designs: Array<Design>): Array<{ rel: string; href: string; as?: string; fetchpriority?: string; type?: string; crossOrigin?: "anonymous" | "use-credentials" | "" }> {
   const LCP_IMAGE_COUNT = 4 // First 4 images are most likely to be LCP
   
   return designs
@@ -88,15 +90,37 @@ export const Route = createFileRoute("/")({
   },
   loader: async () => {
     // Fetch designs on the server - this runs server-side during SSR
-    const designs = await getPublicDesignsServerFn()
-    return { designs }
+    const { designs, pagination } = await getPublicDesignsServerFn()
+    
+    // Create a QueryClient and hydrate the cache with infinite query format
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          staleTime: 1000 * 60 * 5, // 5 minutes
+        },
+      },
+    })
+    
+    // Pre-populate the infinite query cache with SSR data
+    queryClient.setQueryData(
+      [...designKeys.public(undefined), "infinite", undefined],
+      {
+        pages: [{ designs, pagination }],
+        pageParams: [0],
+      }
+    )
+    
+    // Dehydrate the query client for hydration on the client
+    const dehydratedState = dehydrate(queryClient)
+    
+    return { designs, dehydratedState }
   },
   component: App,
 })
 
 function App() {
-  // Get the server-fetched designs from the route loader
-  const { designs } = Route.useLoaderData()
+  // Get the server-fetched designs and dehydrated state from the route loader
+  const { designs, dehydratedState } = Route.useLoaderData()
   
-  return <MarketingPage initialDesigns={designs} />
+  return <MarketingPage initialDesigns={designs} dehydratedState={dehydratedState} />
 }

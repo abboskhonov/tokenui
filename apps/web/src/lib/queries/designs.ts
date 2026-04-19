@@ -101,7 +101,18 @@ interface PublicDesignsPage {
   }
 }
 
-export function usePublicDesignsInfinite(category?: string, search?: string) {
+interface UsePublicDesignsInfiniteOptions {
+  placeholderData?: {
+    pages: PublicDesignsPage[]
+    pageParams: number[]
+  }
+}
+
+export function usePublicDesignsInfinite(
+  category?: string, 
+  search?: string,
+  options?: UsePublicDesignsInfiniteOptions
+) {
   return useInfiniteQuery({
     queryKey: [...designKeys.public(category), "infinite", search],
     queryFn: async ({ pageParam = 0 }) => {
@@ -120,6 +131,7 @@ export function usePublicDesignsInfinite(category?: string, search?: string) {
     },
     initialPageParam: 0,
     staleTime: 1000 * 60 * 5, // 5 minutes - match router staleTime for instant navigation
+    placeholderData: options?.placeholderData,
   })
 }
 
