@@ -14,7 +14,8 @@ interface PublicDesignsResponse {
 
 export const getPublicDesignsServerFn = createServerFn({ method: "GET" })
   .handler(async () => {
-    const response = await fetch(`${API_BASE_URL}/api/designs?limit=20&offset=0`, {
+    // Default to "trending" sort for SSR to match the default UI state
+    const response = await fetch(`${API_BASE_URL}/api/designs?limit=20&offset=0&sort=trending`, {
       headers: {
         "Content-Type": "application/json",
       },

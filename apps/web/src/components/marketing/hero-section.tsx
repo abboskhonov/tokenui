@@ -49,8 +49,20 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
   // Debounce search query to avoid too many requests
   const debouncedSearch = useDebounce(searchQuery, 300);
   
-  // Always fetch ALL designs - don't filter by category at API level
-  // We need all designs to show category tabs
+  // Map sort option to API sort parameter
+  const apiSortParam = useMemo((): "newest" | "trending" | "mostViewed" | "mostStarred" => {
+    switch (sortBy) {
+      case "trending": return "trending";
+      case "mostStarred": return "mostStarred";
+      case "mostViewed": return "mostViewed";
+      case "newest":
+      default: return "newest";
+    }
+  }, [sortBy]);
+  
+  // Server-side filtering: only pass category when not "all"
+  // This prevents fetching unnecessary data when viewing a specific category
+  const categoryParam = activeTab === "all" ? undefined : activeTab;
   const searchParam = debouncedSearch.trim() || undefined;
 
   // Ensure initialDesigns is always an array
@@ -63,47 +75,27 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = usePublicDesignsInfinite(undefined, searchParam, {
-    // Use initial designs as placeholder data
-    // This ensures the first render uses SSR data immediately
-    placeholderData: safeInitialDesigns.length > 0
-      ? { pages: [{ designs: safeInitialDesigns, pagination: { limit: 20, offset: 0, hasMore: true } }], pageParams: [0] }
-      : undefined,
-  });
+  } = usePublicDesignsInfinite(
+    categoryParam, 
+    searchParam,
+    apiSortParam,
+    {
+      // Use initial designs as placeholder data only when viewing "all" without search
+      // This ensures SSR data matches the initial query parameters
+      placeholderData: (safeInitialDesigns.length > 0 && activeTab === "all" && !searchParam)
+        ? { pages: [{ designs: safeInitialDesigns, pagination: { limit: 20, offset: 0, hasMore: true } }], pageParams: [0] }
+        : undefined,
+    }
+  );
 
-  // Flatten all pages into single array
+  // Flatten all pages into single array - no client-side sorting needed (server handles it)
   const allDesigns = useMemo(() => {
     if (!data) return safeInitialDesigns;
     return data.pages.flatMap((page) => page.designs);
   }, [data, safeInitialDesigns]);
 
-  // Debug logging removed for production
-
-  // Filter designs client-side based on selected category
-  const filteredDesigns = useMemo(() => {
-    let designs = activeTab === "all" ? allDesigns : allDesigns.filter(d => d.category === activeTab);
-    
-    // Apply sorting
-    switch (sortBy) {
-      case "trending":
-        // Trending: combination of views and recency (using viewCount as proxy)
-        designs = [...designs].sort((a, b) => b.viewCount - a.viewCount);
-        break;
-      case "mostStarred":
-        // Most starred - using viewCount as a proxy for popularity until starCount is available
-        designs = [...designs].sort((a, b) => b.viewCount - a.viewCount);
-        break;
-      case "mostViewed":
-        designs = [...designs].sort((a, b) => b.viewCount - a.viewCount);
-        break;
-      case "newest":
-      default:
-        // Default is newest - already sorted by the API
-        break;
-    }
-    
-    return designs;
-  }, [allDesigns, activeTab, sortBy]);
+  // Server returns pre-sorted designs - no client-side sorting needed
+  const filteredDesigns = allDesigns;
 
   // Intersection observer for infinite scroll
   useEffect(() => {
@@ -135,13 +127,27 @@ export function HeroSection({ initialDesigns }: HeroSectionProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Get count for each category
-  const getCategoryCount = useCallback((cat: string) => {
-    if (cat === "all") {
-      return allDesigns.length;
+  // Category counts - only accurate when viewing "all" tab
+  // When viewing a specific category, we show "—" since we don't have full data
+  const categoryCounts = useMemo(() => {
+    // Only compute accurate counts when we have all designs (activeTab === "all" without search)
+    if (activeTab !== "all" || searchParam) {
+      return null; // Indicates counts are not available
     }
-    return allDesigns.filter(d => d.category === cat).length;
-  }, [allDesigns]);
+    
+    const counts: Record<string, number> = { all: allDesigns.length };
+    for (const design of allDesigns) {
+      const cat = design.category || "uncategorized";
+      counts[cat] = (counts[cat] || 0) + 1;
+    }
+    return counts;
+  }, [allDesigns, activeTab, searchParam]);
+
+  // Get count for each category - returns "—" when counts aren't available
+  const getCategoryCount = useCallback((cat: string) => {
+    if (!categoryCounts) return "—";
+    return categoryCounts[cat] || 0;
+  }, [categoryCounts]);
 
   const isLoadingDesigns = isLoading && !data;
 

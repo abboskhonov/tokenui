@@ -42,6 +42,7 @@ export const paginationSchema = z.object({
 export const designQuerySchema = z.object({
   category: z.string().max(50).optional(),
   search: z.string().max(100).optional(),
+  sort: z.enum(["newest", "trending", "mostViewed", "mostStarred"]).default("newest"),
 }).merge(paginationSchema)
 
 // Search sanitization - remove dangerous characters

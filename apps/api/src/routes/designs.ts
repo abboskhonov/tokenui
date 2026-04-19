@@ -175,7 +175,7 @@ app.get("/my", async (c) => {
 // Cached at edge: 30s max-age, 5min stale-while-revalidate for fast SSR
 app.get("/", validateQuery(designQuerySchema), async (c) => {
   const query = getValidatedQuery<typeof designQuerySchema._type>(c)
-  const { category, search, limit, offset } = query
+  const { category, search, sort, limit, offset } = query
 
   try {
     const conditions: ReturnType<typeof eq>[] = [eq(design.status, "approved")]
@@ -209,7 +209,8 @@ app.get("/", validateQuery(designQuerySchema), async (c) => {
       .groupBy(designInstall.designId)
       .as("install_counts")
 
-    const designs = await db
+    // Build the base query
+    let designsQuery = db
       .select({
         id: design.id,
         name: design.name,
@@ -233,12 +234,33 @@ app.get("/", validateQuery(designQuerySchema), async (c) => {
       .leftJoin(user, eq(design.userId, user.id))
       .leftJoin(installCountSubquery, eq(installCountSubquery.designId, design.id))
       .where(and(...conditions))
-      .orderBy(desc(design.createdAt))
-      .limit(limit)
-      .offset(offset)
+
+    // Apply server-side sorting based on the sort parameter
+    switch (sort) {
+      case "trending":
+        // Trending: highest view count (views indicate popularity/trending)
+        designsQuery = designsQuery.orderBy(desc(design.viewCount), desc(design.createdAt))
+        break
+      case "mostViewed":
+        // Most viewed: strictly by view count
+        designsQuery = designsQuery.orderBy(desc(design.viewCount))
+        break
+      case "mostStarred":
+        // Most starred: using viewCount as proxy until proper star aggregation is added
+        designsQuery = designsQuery.orderBy(desc(design.viewCount))
+        break
+      case "newest":
+      default:
+        // Default: newest first
+        designsQuery = designsQuery.orderBy(desc(design.createdAt))
+        break
+    }
+
+    // Apply pagination
+    const designs = await designsQuery.limit(limit).offset(offset)
 
     // Cache public designs at edge - 30s fresh, 5min stale acceptable
-    // Search/category queries bypass cache via query params naturally
+    // Search/category/sort queries bypass cache via query params naturally
     c.header("Cache-Control", "public, max-age=30, stale-while-revalidate=300")
     
     return success(c, {

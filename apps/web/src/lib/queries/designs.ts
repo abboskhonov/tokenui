@@ -111,14 +111,16 @@ interface UsePublicDesignsInfiniteOptions {
 export function usePublicDesignsInfinite(
   category?: string, 
   search?: string,
+  sort: "newest" | "trending" | "mostViewed" | "mostStarred" = "newest",
   options?: UsePublicDesignsInfiniteOptions
 ) {
   return useInfiniteQuery({
-    queryKey: [...designKeys.public(category), "infinite", search],
+    queryKey: [...designKeys.public(category), "infinite", search, sort],
     queryFn: async ({ pageParam = 0 }) => {
       const params = new URLSearchParams()
       params.append("limit", "20")
       params.append("offset", pageParam.toString())
+      params.append("sort", sort)
       if (category) params.append("category", category)
       if (search) params.append("search", search)
       
