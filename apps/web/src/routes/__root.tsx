@@ -76,6 +76,13 @@ export const Route = createRootRoute({
         rel: "stylesheet",
         href: appCss,
       },
+      // Preload logo for instant navigation and caching
+      {
+        rel: "preload",
+        href: "/logo.webp",
+        as: "image",
+        type: "image/webp",
+      },
       // Preconnect to critical domains - establishes early connection
       {
         rel: "preconnect",

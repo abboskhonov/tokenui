@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useCallback, memo } from "react";
+import { useState, useCallback, memo, useRef, useEffect } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +24,87 @@ import {
   PenTool01Icon,
   Upload04Icon,
 } from "@hugeicons/core-free-icons";
+import { cn } from "@/lib/utils";
+
+// Module-level cache for avatar images to persist across route changes
+const imageCache = new Map<string, string>();
+
+/**
+ * CachedAvatar - Avatar component that prevents image refetching on navigation
+ * Uses a cached image element that persists across React re-mounts
+ */
+const CachedAvatar = memo(function CachedAvatar({
+  src,
+  alt,
+  fallback,
+}: {
+  src: string | null | undefined;
+  alt: string;
+  fallback: React.ReactNode;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isLoaded, setIsLoaded] = useState(() => !!src && imageCache.has(src));
+  const currentSrc = src || "";
+
+  useEffect(() => {
+    if (!containerRef.current || !currentSrc) return;
+    
+    // Check if we already have a cached image for this URL
+    const cachedImage = imageCache.get(currentSrc);
+    
+    if (cachedImage) {
+      // If cached, set it immediately
+      containerRef.current.innerHTML = cachedImage;
+      setIsLoaded(true);
+    } else {
+      // Create new image element
+      const img = document.createElement("img");
+      img.src = currentSrc;
+      img.alt = alt;
+      img.className = "aspect-square size-full rounded-full object-cover";
+      img.loading = "eager";
+      img.decoding = "async";
+      
+      img.onload = () => {
+        if (containerRef.current) {
+          // Store the image HTML in cache
+          const wrapper = document.createElement("div");
+          wrapper.appendChild(img.cloneNode(true));
+          imageCache.set(currentSrc, wrapper.innerHTML);
+          setIsLoaded(true);
+        }
+      };
+      
+      img.onerror = () => {
+        setIsLoaded(false);
+      };
+      
+      // Clear and append
+      if (containerRef.current) {
+        containerRef.current.innerHTML = "";
+        containerRef.current.appendChild(img);
+      }
+    }
+  }, [currentSrc, alt]);
+
+  if (!currentSrc) {
+    return <>{fallback}</>;
+  }
+
+  return (
+    <>
+      <div 
+        ref={containerRef}
+        className={cn(
+          "aspect-square size-full rounded-full object-cover transition-opacity duration-150",
+          isLoaded ? "opacity-100" : "opacity-0"
+        )}
+        aria-label={alt}
+      />
+      {!isLoaded && fallback}
+    </>
+  );
+});
 
 /**
  * UserMenu - Displays user avatar dropdown with profile, settings, logout
@@ -74,10 +155,15 @@ export const UserMenu = memo(function UserMenu() {
               className="h-8 w-8 rounded-full p-0 hover:bg-muted/50"
             >
               <Avatar className="h-7 w-7">
-                <AvatarImage src={user.image || ""} alt={user.name || "User"} />
-                <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                  {user.name?.charAt(0).toUpperCase() || "U"}
-                </AvatarFallback>
+                <CachedAvatar 
+                  src={user.image} 
+                  alt={user.name || "User"}
+                  fallback={
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                      {user.name?.charAt(0).toUpperCase() || "U"}
+                    </AvatarFallback>
+                  }
+                />
               </Avatar>
             </Button>
           }

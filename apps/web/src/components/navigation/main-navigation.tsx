@@ -19,9 +19,12 @@ export const Navigation = memo(function Navigation() {
           <div className="flex items-center gap-6">
             <Link to="/" className="flex items-center gap-2">
               <img
+                key="logo-static"
                 src="/logo.webp"
                 alt="TasteUI"
                 className="h-7 w-7 rounded-lg object-cover"
+                loading="eager"
+                decoding="async"
               />
               <span className="text-lg font-semibold tracking-tight text-foreground">
                 tasteui
