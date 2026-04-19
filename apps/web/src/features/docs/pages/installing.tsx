@@ -1,7 +1,7 @@
 "use client"
 
 import { DocsPage } from "../components/doc-page"
-import { CodeBlock } from "../components/code-block"
+import { CommandBlock } from "../components/code-block"
 import { Section, Heading, Paragraph, Step } from "../components/typography"
 import type { TOCItem } from "../components/table-of-contents"
 
@@ -27,10 +27,7 @@ export function DocsInstallingPage() {
         <Paragraph>
           The CLI downloads design system skills to your local project. No global installation needed — use npx directly.
         </Paragraph>
-        <CodeBlock 
-          code="npx tasteui.dev add username/skill-name"
-          filename="Install a design system skill"
-        />
+        <CommandBlock command="npx tasteui.dev add username/skill-name" />
         <Paragraph>
           Skills are saved to <code className="px-1.5 py-0.5 rounded bg-muted text-sm font-mono">./.agents/skills/{'{username}'}/{'{skill-name}'}/SKILL.md</code>.
         </Paragraph>
@@ -42,16 +39,13 @@ export function DocsInstallingPage() {
           <Step number={1} title="Install by author/skill">
             Use the author username and skill slug:
             <div className="mt-3">
-              <CodeBlock code="npx tasteui.dev add jane/vercel-precision" />
+              <CommandBlock command="npx tasteui.dev add jane/vercel-precision" />
             </div>
           </Step>
           <Step number={2} title="Reference in your prompts">
             Once installed, tell your AI to use the skill:
             <div className="mt-3">
-              <CodeBlock 
-                code='"Use the jane/vercel-precision skill for this landing page — black and white, Geist font, ultra-minimal."' 
-                filename="Example prompt"
-              />
+              <CommandBlock command="Use the jane/vercel-precision skill for this landing page — black and white, Geist font, ultra-minimal." />
             </div>
           </Step>
         </div>

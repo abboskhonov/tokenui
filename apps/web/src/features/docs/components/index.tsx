@@ -1,4 +1,4 @@
-export { CodeBlock } from "./code-block"
+export { CodeBlock, CommandBlock } from "./code-block"
 export { Section, Heading, SubHeading, Paragraph, List, Step } from "./typography"
 export { Breadcrumb, PageHeader } from "./page-header"
 export { TableOfContents, useTableOfContents } from "./table-of-contents"

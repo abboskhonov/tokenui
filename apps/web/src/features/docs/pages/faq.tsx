@@ -1,6 +1,7 @@
 "use client"
 
 import { DocsPage } from "../components/doc-page"
+import { CommandBlock } from "../components/code-block"
 import { Section, Paragraph, List } from "../components/typography"
 import type { TOCItem } from "../components/table-of-contents"
 import {
@@ -95,9 +96,7 @@ export function DocsFaqPage() {
                 <Paragraph className="text-muted-foreground">
                   No. Use npx directly without any global installation:
                 </Paragraph>
-                <code className="block px-3 py-2 rounded bg-muted text-sm font-mono">
-                  npx tasteui.dev add username/skill-name
-                </code>
+                <CommandBlock command="npx tasteui.dev add username/skill-name" />
               </div>
             </FaqItem>
 
@@ -118,12 +117,10 @@ export function DocsFaqPage() {
             <FaqItem question="How do I update a skill?">
               <div className="text-muted-foreground space-y-3">
                 <Paragraph className="text-muted-foreground">
-                  Re-run the install command with the <code className="px-1.5 py-0.5 rounded bg-muted text-sm font-mono">--force</code> flag 
+                  Re-run the install command with the <code className="px-1.5 py-0.5 rounded bg-muted text-sm font-mono">--force</code> flag
                   to overwrite the existing files:
                 </Paragraph>
-                <code className="block px-3 py-2 rounded bg-muted text-sm font-mono">
-                  npx tasteui.dev add username/skill-name --force
-                </code>
+                <CommandBlock command="npx tasteui.dev add username/skill-name --force" />
               </div>
             </FaqItem>
           </div>

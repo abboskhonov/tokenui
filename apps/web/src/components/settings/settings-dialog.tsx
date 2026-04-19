@@ -183,9 +183,9 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   if (isLoading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[900px] p-0 overflow-hidden bg-background">
-          <div className="flex h-[600px]">
-            <div className="w-[240px] bg-muted/30 border-r p-6">
+        <DialogContent className="sm:max-w-[900px] p-0 overflow-hidden bg-background max-h-[100dvh] h-[100dvh] sm:h-auto sm:max-h-[90vh]">
+          <div className="flex flex-col sm:flex-row h-full sm:h-[600px]">
+            <div className="hidden sm:block w-[240px] bg-muted/30 border-r p-6">
               <div className="h-6 w-24 bg-muted rounded animate-pulse" />
             </div>
             <div className="flex-1 flex items-center justify-center">
@@ -202,12 +202,12 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[900px] p-0 overflow-hidden bg-background">
+      <DialogContent className="sm:max-w-[900px] p-0 overflow-hidden bg-background max-h-[100dvh] h-[100dvh] sm:h-auto sm:max-h-[90vh]">
         <DialogTitle className="sr-only">Settings</DialogTitle>
         
-        <div className="flex h-[600px]">
-          {/* Sidebar */}
-          <div className="w-[240px] bg-muted/30 border-r flex flex-col">
+        <div className="flex flex-col sm:flex-row h-full sm:h-[600px]">
+          {/* Sidebar - Desktop: Left sidebar, Mobile: Horizontal tab bar */}
+          <div className="hidden sm:flex w-[240px] bg-muted/30 border-r flex-col">
             <div className="p-6">
               <h2 className="text-lg font-semibold">Settings</h2>
             </div>
@@ -247,10 +247,40 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
             </nav>
           </div>
 
+          {/* Mobile Tab Bar */}
+          <div className="sm:hidden border-b bg-muted/30 px-4 py-3">
+            <div className="flex gap-2">
+              <button
+                onClick={() => setActiveTab("profile")}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                  activeTab === "profile"
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}
+              >
+                <HugeiconsIcon icon={UserIcon} className="size-4" />
+                Profile
+              </button>
+              <button
+                onClick={() => setActiveTab("appearance")}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                  activeTab === "appearance"
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}
+              >
+                <HugeiconsIcon icon={Moon02Icon} className="size-4" />
+                Appearance
+              </button>
+            </div>
+          </div>
+
           {/* Main Content */}
           <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted-foreground/20 [&::-webkit-scrollbar-thumb]:rounded-full">
             {activeTab === "profile" ? (
-              <div className="p-8 space-y-10">
+              <div className="p-6 sm:p-8 space-y-8 sm:space-y-10">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold tracking-tight">Account</h3>
@@ -314,7 +344,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
                 {/* Identity Fields */}
                 <div className="space-y-5">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Display name</label>
                       <Input
@@ -387,43 +417,74 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 <div className="space-y-4">
                   <label className="text-sm font-medium text-muted-foreground uppercase tracking-wide text-xs">Links</label>
                   
-                  <div className="space-y-3">
-                    <div className="relative">
-                      <HugeiconsIcon icon={GlobeIcon} className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input
-                        placeholder="Website URL"
-                        value={formData.website || ""}
-                        onChange={(e) => handleChange("website", e.target.value)}
-                        className="pl-9"
-                      />
+                  <div className="space-y-4">
+                    {/* Website URL */}
+                    <div className="space-y-2">
+                      <label className="text-sm text-muted-foreground">Website</label>
+                      <div className="relative">
+                        <div className="absolute left-0 top-0 bottom-0 flex items-center gap-2 px-3 bg-muted/50 border-r border-input rounded-l-md">
+                          <HugeiconsIcon icon={GlobeIcon} className="size-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">https://</span>
+                        </div>
+                        <Input
+                          placeholder="yourwebsite.com"
+                          value={formData.website || ""}
+                          onChange={(e) => handleChange("website", e.target.value)}
+                          className="pl-[118px] focus-visible:ring-0 focus-visible:ring-offset-0"
+                        />
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-5 gap-3">
-                      <div className="relative">
-                        <HugeiconsIcon icon={GithubIcon} className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                          placeholder="GitHub"
-                          value={formData.github || ""}
-                          onChange={(e) => handleChange("github", e.target.value)}
-                          className="pl-9"
-                        />
+                    {/* Social Links - 2 columns on desktop */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* GitHub */}
+                      <div className="space-y-2">
+                        <label className="text-sm text-muted-foreground">GitHub</label>
+                        <div className="relative">
+                          <div className="absolute left-0 top-0 bottom-0 flex items-center gap-2 px-3 bg-muted/50 border-r border-input rounded-l-md">
+                            <HugeiconsIcon icon={GithubIcon} className="size-4 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">github.com/</span>
+                          </div>
+                          <Input
+                            placeholder="username"
+                            value={formData.github || ""}
+                            onChange={(e) => handleChange("github", e.target.value)}
+                            className="pl-[138px] focus-visible:ring-0 focus-visible:ring-offset-0"
+                          />
+                        </div>
                       </div>
-                      <div className="relative">
-                        <HugeiconsIcon icon={TwitterIcon} className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                          placeholder="X / Twitter"
-                          value={formData.x || ""}
-                          onChange={(e) => handleChange("x", e.target.value)}
-                          className="pl-9"
-                        />
+
+                      {/* Twitter / X */}
+                      <div className="space-y-2">
+                        <label className="text-sm text-muted-foreground">Twitter / X</label>
+                        <div className="relative">
+                          <div className="absolute left-0 top-0 bottom-0 flex items-center gap-2 px-3 bg-muted/50 border-r border-input rounded-l-md">
+                            <HugeiconsIcon icon={TwitterIcon} className="size-4 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">x.com/</span>
+                          </div>
+                          <Input
+                            placeholder="username"
+                            value={formData.x || ""}
+                            onChange={(e) => handleChange("x", e.target.value)}
+                            className="pl-[102px] focus-visible:ring-0 focus-visible:ring-offset-0"
+                          />
+                        </div>
                       </div>
+                    </div>
+
+                    {/* Telegram - Full width */}
+                    <div className="space-y-2">
+                      <label className="text-sm text-muted-foreground">Telegram</label>
                       <div className="relative">
-                        <HugeiconsIcon icon={TelegramIcon} className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <div className="absolute left-0 top-0 bottom-0 flex items-center gap-2 px-3 bg-muted/50 border-r border-input rounded-l-md">
+                          <HugeiconsIcon icon={TelegramIcon} className="size-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">t.me/</span>
+                        </div>
                         <Input
-                          placeholder="Telegram"
+                          placeholder="username"
                           value={formData.telegram || ""}
                           onChange={(e) => handleChange("telegram", e.target.value)}
-                          className="pl-9"
+                          className="pl-[92px] focus-visible:ring-0 focus-visible:ring-offset-0"
                         />
                       </div>
                     </div>
@@ -471,7 +532,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 </div>
               </div>
             ) : (
-              <div className="p-8">
+              <div className="p-6 sm:p-8">
                 {/* Theme Section */}
                 <div className="space-y-6">
                   <div>
@@ -482,7 +543,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                   </div>
                   
                   {/* Theme Preview Cards */}
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {/* Light Theme */}
                     <button
                       onClick={() => setTheme("light")}
