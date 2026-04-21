@@ -17,11 +17,9 @@ import {
   Calendar03Icon,
   Clock01Icon,
 } from "@hugeicons/core-free-icons"
-import JSZip from "jszip"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import type { Design } from "@/lib/types/design"
-import type { FileNode } from "@/features/publish/components/file-tree"
 import type { User } from "@/lib/types/auth"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -77,41 +75,25 @@ export function SkillDetailSidebar({
     
     trackDownload.mutate(design.id)
     
-    const zip = new JSZip()
-    const folderName = design.slug || design.name.replace(/\s+/g, "-").toLowerCase()
-    
-    if (design.files && design.files.length > 0) {
-      const addFilesToZip = (nodes: Array<FileNode>, currentPath: string = "") => {
-        for (const node of nodes) {
-          const filePath = currentPath ? `${currentPath}/${node.name}` : node.name
-          
-          if (node.type === "file" && node.content) {
-            zip.file(filePath, node.content)
-          } else if (node.type === "folder" && node.children) {
-            const folder = zip.folder(filePath)
-            if (folder) {
-              addFilesToZip(node.children, filePath)
-            }
-          }
-        }
-      }
-      addFilesToZip(design.files)
-    } else {
-      zip.file("SKILL.md", design.content)
+    if (!design.content) {
+      toast.error("No content to download")
+      return
     }
-
-    const blob = await zip.generateAsync({ type: "blob" })
     
+    // Download as SKILL.md
+    const filename = "SKILL.md"
+    
+    const blob = new Blob([design.content], { type: "text/markdown" })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = `${folderName}.zip`
+    a.download = filename
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     window.URL.revokeObjectURL(url)
     
-    toast.success("Downloaded skill", { duration: 2000 })
+    toast.success(`Downloaded ${filename}`, { duration: 2000 })
   }
 
   const handleStarClick = () => {
@@ -344,7 +326,7 @@ export function SkillDetailSidebar({
           className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
           <HugeiconsIcon icon={Download01Icon} className="size-3.5" />
-          <span>Download as ZIP</span>
+          <span>Download SKILL.md</span>
         </button>
 
         {/* Dates */}

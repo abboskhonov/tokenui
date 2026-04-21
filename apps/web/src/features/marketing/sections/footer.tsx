@@ -2,7 +2,7 @@
 import { Link } from "@tanstack/react-router"
 import { Button } from "@/components/ui/button"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { NewTwitterIcon } from "@hugeicons/core-free-icons"
+import { NewTwitterIcon, DiscordIcon } from "@hugeicons/core-free-icons"
 
 export function Footer() {
   return (
@@ -28,6 +28,16 @@ export function Footer() {
           >
             <Button variant="ghost" size="icon-sm" className="h-8 w-8">
               <HugeiconsIcon icon={NewTwitterIcon} className="size-4" />
+            </Button>
+          </a>
+          <a 
+            href="https://discord.gg/bQ4ChzVW" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            aria-label="Join on Discord"
+          >
+            <Button variant="ghost" size="icon-sm" className="h-8 w-8">
+              <HugeiconsIcon icon={DiscordIcon} className="size-4" />
             </Button>
           </a>
         </div>
