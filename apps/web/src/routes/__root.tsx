@@ -171,6 +171,50 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        {/* Structured data to help Google generate sitelinks */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "WebSite",
+                  "@id": "https://tasteui.dev/#website",
+                  url: "https://tasteui.dev",
+                  name: "tasteui",
+                  description:
+                    "Drop-in design skills for your coding agent. No setup, no configuration — just describe what you need and ship production-ready components in seconds.",
+                  publisher: {
+                    "@type": "Organization",
+                    name: "tasteui",
+                    url: "https://tasteui.dev",
+                  },
+                },
+                {
+                  "@type": "SiteNavigationElement",
+                  name: "Docs",
+                  url: "https://tasteui.dev/docs",
+                },
+                {
+                  "@type": "SiteNavigationElement",
+                  name: "Installing Skills",
+                  url: "https://tasteui.dev/docs/installing",
+                },
+                {
+                  "@type": "SiteNavigationElement",
+                  name: "Publishing Skills",
+                  url: "https://tasteui.dev/docs/publishing",
+                },
+                {
+                  "@type": "SiteNavigationElement",
+                  name: "FAQ",
+                  url: "https://tasteui.dev/docs/faq",
+                },
+              ],
+            }),
+          }}
+        />
         {/* Theme script - runs before React to prevent flash */}
         <script
           dangerouslySetInnerHTML={{

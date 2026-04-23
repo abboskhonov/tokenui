@@ -146,5 +146,36 @@ function IntroductionPage() {
 }
 
 export const Route = createFileRoute("/docs/")({
+  head: () => ({
+    meta: [
+      { title: "Introduction - TasteUI Docs" },
+      {
+        name: "description",
+        content:
+          "TasteUI is a collection of design system inspirations from popular websites. Drop one in, let AI agents build matching UI.",
+      },
+      {
+        name: "og:title",
+        content: "Introduction - TasteUI Docs",
+      },
+      {
+        name: "og:description",
+        content:
+          "TasteUI is a collection of design system inspirations from popular websites. Drop one in, let AI agents build matching UI.",
+      },
+      { name: "og:url", content: "https://tasteui.dev/docs" },
+      { name: "og:type", content: "article" },
+      {
+        name: "twitter:title",
+        content: "Introduction - TasteUI Docs",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "TasteUI is a collection of design system inspirations from popular websites. Drop one in, let AI agents build matching UI.",
+      },
+    ],
+    links: [{ rel: "canonical", href: "https://tasteui.dev/docs" }],
+  }),
   component: IntroductionPage,
 })

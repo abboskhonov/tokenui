@@ -7,3 +7,4 @@ Disallow: /publish
 Disallow: /studio
 
 Sitemap: https://api.tasteui.dev/sitemap.xml
+Sitemap: https://tasteui.dev/sitemap.xml
